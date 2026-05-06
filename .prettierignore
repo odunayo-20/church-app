@@ -1,0 +1,12 @@
+.env
+.env.local
+.env.production
+*.log
+node_modules/
+.next/
+out/
+build/
+pnpm-lock.yaml
+AGENTS.md
+CLAUDE.md
+lib/generated/
