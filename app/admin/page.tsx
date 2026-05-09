@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { formatDate } from "@/lib/utils";
 import { DashboardCharts } from "@/components/admin/dashboard-charts";
 import { useDashboardData, useAuth } from "@/hooks";
-import { Users, CreditCard, Calendar, FileText, ArrowRight, TrendingUp } from "lucide-react";
+import { Users, CreditCard, Calendar, FileText, ArrowRight, TrendingUp, Globe } from "lucide-react";
 
 export default function AdminDashboardPage() {
   const { role, loading: authLoading } = useAuth();
@@ -72,15 +72,14 @@ export default function AdminDashboardPage() {
         </div>
       </motion.div>
 
-      {/* ── Stat Cards ── */}
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {!isMedia && (
           <StatCard
             title="Total Members"
             value={memberCount}
             href="/admin/members"
-            icon={<Users className="h-5 w-5 text-white" />}
-            gradient="from-blue-500 to-cyan-400"
+            icon={<Users className="h-5 w-5" />}
+            color="blue"
             delay={0.1}
           />
         )}
@@ -89,8 +88,8 @@ export default function AdminDashboardPage() {
             title="Total Donations"
             value={donationCount}
             href="/admin/donations"
-            icon={<CreditCard className="h-5 w-5 text-white" />}
-            gradient="from-emerald-500 to-teal-400"
+            icon={<CreditCard className="h-5 w-5" />}
+            color="emerald"
             delay={0.15}
           />
         )}
@@ -98,17 +97,25 @@ export default function AdminDashboardPage() {
           title="Upcoming Events"
           value={eventCount}
           href="/admin/events"
-          icon={<Calendar className="h-5 w-5 text-white" />}
-          gradient="from-amber-500 to-orange-400"
+          icon={<Calendar className="h-5 w-5" />}
+          color="amber"
           delay={0.2}
         />
         <StatCard
           title="Published Posts"
           value={postCount}
           href="/admin/blog"
-          icon={<FileText className="h-5 w-5 text-white" />}
-          gradient="from-rose-500 to-pink-400"
+          icon={<FileText className="h-5 w-5" />}
+          color="rose"
           delay={0.25}
+        />
+        <StatCard
+          title="Total RSVPs"
+          value={data.rsvpCount || 0}
+          href="/admin/rsvps"
+          icon={<Globe className="h-5 w-5" />}
+          color="indigo"
+          delay={0.3}
         />
       </div>
 
@@ -160,16 +167,26 @@ function StatCard({
   value,
   href,
   icon,
-  gradient,
+  color,
   delay,
 }: {
   title: string;
   value: number;
   href: string;
   icon: React.ReactNode;
-  gradient: string;
+  color: string;
   delay: number;
 }) {
+  const colorConfigs: Record<string, string> = {
+    blue: "text-blue-600 bg-blue-50 border-blue-100",
+    emerald: "text-emerald-600 bg-emerald-50 border-emerald-100",
+    amber: "text-amber-600 bg-amber-50 border-amber-100",
+    rose: "text-rose-600 bg-rose-50 border-rose-100",
+    indigo: "text-indigo-600 bg-indigo-50 border-indigo-100",
+  };
+
+  const config = colorConfigs[color] || colorConfigs.blue;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -178,17 +195,17 @@ function StatCard({
     >
       <Link
         href={href}
-        className="group relative flex flex-col overflow-hidden rounded-2xl border border-border/40 bg-card p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
+        className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:border-muted-foreground/20 hover:shadow-md"
       >
         <div className="mb-4 flex items-center justify-between">
-          <div className={`flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${gradient} shadow-md`}>
+          <div className={`flex h-12 w-12 items-center justify-center rounded-xl border ${config} shadow-sm`}>
             {icon}
           </div>
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted/50 text-muted-foreground transition-colors group-hover:bg-amber-500/10 group-hover:text-amber-500">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-muted-foreground transition-colors group-hover:bg-foreground group-hover:text-background">
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
           </div>
         </div>
-        <p className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+        <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
           {title}
         </p>
         <p className="mt-1 text-3xl font-bold tracking-tight text-foreground">

@@ -59,3 +59,10 @@ export {
   useDeletePrayerRequest,
   prayerKeys,
 } from "./use-prayer-requests";
+export {
+  useRsvps,
+  useCreateRsvp,
+  useUpdateRsvpStatus,
+  useDeleteRsvp,
+  rsvpKeys,
+} from "./use-rsvps";

@@ -17,6 +17,7 @@ const NAV_ITEMS = [
   { label: "Sermons", href: "/admin/sermons", roles: ["admin", "media"], icon: Video },
   { label: "Donations", href: "/admin/donations", roles: ["admin"], icon: CreditCard },
   { label: "Events", href: "/admin/events", roles: ["admin", "media"], icon: Calendar },
+  { label: "RSVPs", href: "/admin/rsvps", roles: ["admin", "media"], icon: Globe },
   { label: "Blog Posts", href: "/admin/blog", roles: ["admin", "media"], icon: FileText },
   { label: "Notifications", href: "/admin/notifications", roles: ["admin", "media"], icon: Bell },
 ];

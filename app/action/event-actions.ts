@@ -172,3 +172,72 @@ export async function submitRsvpAction(eventId: string, data: RsvpInput): Promis
     throw error;
   }
 }
+
+export async function getRsvpsAction(params: PaginationParams & { eventId?: string }): Promise<PaginatedResult<Rsvp & { event: { title: string } }>> {
+  try {
+    const supabase = await createAdminClient();
+    return await paginate<Rsvp & { event: { title: string } }>("rsvps", params, {
+      supabase,
+      select: "*, event:events(title)",
+      filters: (query) => {
+        if (params.eventId) {
+          return query.eq("eventId", params.eventId);
+        }
+        return query;
+      },
+      orderBy: { column: "createdAt", ascending: false },
+    });
+  } catch (error) {
+    console.error("Error fetching RSVPs:", error);
+    throw new Error("Failed to fetch RSVPs");
+  }
+}
+
+export async function updateRsvpStatusAction(id: string, status: Rsvp["status"]): Promise<Rsvp> {
+  try {
+    const supabase = await createAdminClient();
+    const { data, error } = await supabase
+      .from("rsvps")
+      .update({ status, updatedAt: new Date().toISOString() })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    
+    // Get eventId to revalidate
+    if (data?.eventId) {
+      revalidatePath(`/events/${data.eventId}`);
+      revalidatePath("/admin/events");
+    }
+    revalidatePath("/admin/rsvps");
+    
+    return data;
+  } catch (error) {
+    console.error(`Error updating RSVP ${id}:`, error);
+    throw new Error("Failed to update RSVP status");
+  }
+}
+
+export async function deleteRsvpAction(id: string): Promise<boolean> {
+  try {
+    const supabase = await createAdminClient();
+    
+    // Get info before deleting for revalidation
+    const { data: rsvp } = await supabase.from("rsvps").select("eventId").eq("id", id).single();
+    
+    const { error } = await supabase.from("rsvps").delete().eq("id", id);
+    if (error) throw error;
+
+    if (rsvp?.eventId) {
+      revalidatePath(`/events/${rsvp.eventId}`);
+      revalidatePath("/admin/events");
+    }
+    revalidatePath("/admin/rsvps");
+    
+    return true;
+  } catch (error) {
+    console.error(`Error deleting RSVP ${id}:`, error);
+    throw new Error("Failed to delete RSVP");
+  }
+}

@@ -73,7 +73,7 @@ export default function AdminEventsPage() {
         </div>
         <Link
           href="/admin/events/new"
-          className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 px-5 text-sm font-semibold text-white shadow-lg shadow-amber-500/25 transition-all hover:opacity-90 hover:shadow-amber-500/40"
+          className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-amber-600 px-5 text-sm font-semibold text-white transition-all hover:bg-amber-700 active:scale-95 shadow-sm"
         >
           <Plus className="h-4 w-4" />
           New Event
@@ -86,13 +86,13 @@ export default function AdminEventsPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
       >
-        <div className="overflow-hidden rounded-2xl border border-border-/40 bg-card shadow-sm">
+        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
           {/* Table Header area */}
-          <div className="flex items-center justify-between border-b border-border-/40 bg-muted/20 px-6 py-4">
-            <div className="flex items-center gap-2 text-amber-500">
+          <div className="flex items-center justify-between border-b border-border bg-muted/30 px-6 py-4">
+            <div className="flex items-center gap-2 text-amber-600">
               <Calendar className="h-5 w-5" />
               <h2 className="font-semibold text-foreground">All Events</h2>
-              <span className="ml-2 rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs font-bold text-amber-500">
+              <span className="ml-2 rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs font-bold text-amber-700 border border-amber-500/20">
                 {events.length}
               </span>
             </div>
@@ -117,33 +117,33 @@ export default function AdminEventsPage() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
-                <thead className="bg-muted/30 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                <thead className="bg-muted/50 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                   <tr>
-                    <th className="px-6 py-4">Event Details</th>
-                    <th className="hidden px-6 py-4 md:table-cell">
+                    <th className="px-6 py-4 font-bold">Event Details</th>
+                    <th className="hidden px-6 py-4 md:table-cell font-bold">
                       Date & Time
                     </th>
-                    <th className="hidden px-6 py-4 lg:table-cell">Location</th>
-                    <th className="px-6 py-4 text-center">RSVPs</th>
-                    <th className="px-6 py-4 text-right">Actions</th>
+                    <th className="hidden px-6 py-4 lg:table-cell font-bold">Location</th>
+                    <th className="px-6 py-4 text-center font-bold">RSVPs</th>
+                    <th className="px-6 py-4 text-right font-bold">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border-/40">
+                <tbody className="divide-y divide-border">
                   {events.map((event) => {
                     const isPast = new Date(event.date) < new Date();
                     return (
                       <tr
                         key={event.id}
-                        className="group transition-colors hover:bg-muted/20"
+                        className="group transition-colors hover:bg-muted/30"
                       >
                         <td className="px-6 py-4">
                           <p
-                            className={`font-semibold transition-colors group-hover:text-amber-500 ${isPast ? "text-muted-foreground line-through decoration-muted-foreground/40" : "text-foreground"}`}
+                            className={`font-semibold transition-colors group-hover:text-amber-600 ${isPast ? "text-muted-foreground line-through decoration-muted-foreground/40" : "text-foreground"}`}
                           >
                             {event.title}
                           </p>
                           {event.rsvpEnabled && !isPast && (
-                            <span className="mt-1.5 inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                            <span className="mt-1.5 inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-700">
                               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                               RSVP Open
                             </span>
@@ -177,30 +177,33 @@ export default function AdminEventsPage() {
                           </div>
                         </td>
                         <td className="px-6 py-4 text-center">
-                          <div className="inline-flex flex-col items-center justify-center">
+                          <Link 
+                            href={`/admin/rsvps?eventId=${event.id}`}
+                            className="inline-flex flex-col items-center justify-center group/rsvp"
+                          >
                             <span
-                              className={`text-lg font-bold leading-none ${event._count?.rsvps > 0 ? "text-amber-500" : "text-muted-foreground"}`}
+                              className={`text-lg font-bold leading-none transition-colors ${event._count?.rsvps > 0 ? "text-amber-600 group-hover/rsvp:text-amber-700" : "text-muted-foreground group-hover/rsvp:text-foreground"}`}
                             >
                               {event._count?.rsvps || 0}
                             </span>
-                            <span className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
+                            <span className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground group-hover/rsvp:text-foreground transition-colors">
                               Guests
                             </span>
-                          </div>
+                          </Link>
                         </td>
                         <td className="px-6 py-4 text-right">
                           <div className="flex items-center justify-end gap-2">
                             <Link
                               href={`/events/${event.id}`}
                               target="_blank"
-                              className="inline-flex h-8 items-center justify-center rounded-lg border border-border-/40 bg-background px-3 text-xs font-medium text-muted-foreground transition-colors hover:border-blue-500/30 hover:bg-blue-500/10 hover:text-blue-500"
+                              className="inline-flex h-8 items-center justify-center rounded-lg border border-border bg-background px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                               title="View Live"
                             >
                               <Eye className="h-3.5 w-3.5" />
                             </Link>
                             <Link
                               href={`/admin/events/${event.id}/edit`}
-                              className="inline-flex h-8 items-center justify-center rounded-lg border border-border-/40 bg-background px-3 text-xs font-medium text-muted-foreground transition-colors hover:border-amber-500/30 hover:bg-amber-500/10 hover:text-amber-500"
+                              className="inline-flex h-8 items-center justify-center rounded-lg border border-border bg-background px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                               title="Edit"
                             >
                               <Pencil className="h-3.5 w-3.5" />

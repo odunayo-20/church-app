@@ -109,13 +109,13 @@ export default function AdminPrayerRequestsPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
       >
-        <div className="overflow-hidden rounded-2xl border border-border/40 bg-card shadow-sm">
+        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
           {/* Table Header area */}
-          <div className="flex flex-col gap-4 border-b border-border/40 bg-muted/20 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-2 text-rose-500">
+          <div className="flex flex-col gap-4 border-b border-border bg-muted/30 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-2 text-rose-600">
               <Heart className="h-5 w-5" />
               <h2 className="font-semibold text-foreground">All Requests</h2>
-              <span className="ml-2 rounded-full bg-rose-500/10 px-2.5 py-0.5 text-xs font-bold text-rose-500">
+              <span className="ml-2 rounded-full bg-rose-500/10 px-2.5 py-0.5 text-xs font-bold text-rose-700 border border-rose-500/20">
                 {filteredRequests.length}
               </span>
             </div>
@@ -126,7 +126,7 @@ export default function AdminPrayerRequestsPage() {
                 placeholder="Search requests..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full rounded-xl border border-input bg-background/50 py-2 pl-9 pr-4 text-sm outline-none transition-all focus:border-rose-500 focus:ring-1 focus:ring-rose-500 sm:w-64"
+                className="w-full rounded-xl border border-input bg-background py-2 pl-9 pr-4 text-sm text-foreground outline-none transition-all focus:border-rose-500 focus:ring-1 focus:ring-rose-500/20 sm:w-64"
               />
             </div>
           </div>
@@ -146,28 +146,27 @@ export default function AdminPrayerRequestsPage() {
           ) : (
             <div className="overflow-x-auto pb-32">
               <table className="w-full text-left text-sm">
-                <thead className="bg-muted/30 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                <thead className="bg-muted/50 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                   <tr>
-                    <th className="px-6 py-4">Requester</th>
-                    {/* <th className="hidden px-6 py-4 md:table-cell">Request Preview</th> */}
-                    <th className="hidden px-6 py-4 md:table-cell">Status</th>
-                    <th className="hidden px-6 py-4 lg:table-cell">Submitted</th>
-                    <th className="sticky right-0 z-10 bg-muted/30 px-6 py-4 text-right backdrop-blur-sm">Actions</th>
+                    <th className="px-6 py-4 font-bold">Requester</th>
+                    <th className="hidden px-6 py-4 md:table-cell font-bold">Status</th>
+                    <th className="hidden px-6 py-4 lg:table-cell font-bold">Submitted</th>
+                    <th className="sticky right-0 z-10 bg-muted/50 px-6 py-4 text-right font-bold">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border/40">
+                <tbody className="divide-y divide-border">
                   {filteredRequests.map((req: PrayerRequest, index: number) => (
                     <tr
                       key={req.id}
-                      className="group transition-colors hover:bg-muted/20"
+                      className="group transition-colors hover:bg-muted/30"
                     >
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold ${req.isAnonymous ? 'bg-slate-500/10 text-slate-500' : 'bg-rose-500/10 text-rose-500'}`}>
+                          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold border ${req.isAnonymous ? 'bg-slate-50 border-slate-100 text-slate-600' : 'bg-rose-50 border-rose-100 text-rose-700'}`}>
                             {req.isAnonymous ? '?' : (req.name?.charAt(0).toUpperCase() || 'U')}
                           </div>
                           <div>
-                            <p className="font-semibold text-foreground transition-colors group-hover:text-rose-500">
+                            <p className="font-semibold text-foreground transition-colors group-hover:text-rose-600">
                               {req.isAnonymous ? 'Anonymous' : (req.name || 'Unknown')}
                             </p>
                             {!req.isAnonymous && req.email && (
@@ -178,11 +177,6 @@ export default function AdminPrayerRequestsPage() {
                           </div>
                         </div>
                       </td>
-                      {/* <td className="hidden px-6 py-4 md:table-cell">
-                        <p className="line-clamp-1 max-w-[200px] text-muted-foreground lg:max-w-md">
-                          {req.request}
-                        </p>
-                      </td> */}
                       <td className="hidden px-6 py-4 md:table-cell">
                         <div className="flex items-center">
                            <StatusBadge status={req.status} />
@@ -194,7 +188,7 @@ export default function AdminPrayerRequestsPage() {
                           <span>{formatDate(req.createdAt)}</span>
                         </div>
                       </td>
-                      <td className={`sticky right-0 px-6 py-4 text-right transition-colors bg-card group-hover:bg-muted/20 ${activeMenuId === req.id ? 'z-30' : 'z-10'}`}>
+                      <td className={`sticky right-0 px-6 py-4 text-right transition-colors bg-card group-hover:bg-muted/30 ${activeMenuId === req.id ? 'z-30' : 'z-10'}`}>
                         <div className="flex items-center justify-end gap-2">
                            <div className="relative">
                               <button 
@@ -202,9 +196,9 @@ export default function AdminPrayerRequestsPage() {
                                   e.stopPropagation();
                                   setActiveMenuId(activeMenuId === req.id ? null : req.id);
                                 }}
-                                className={`p-2 rounded-lg transition-colors ${activeMenuId === req.id ? 'bg-muted' : 'hover:bg-muted'}`}
+                                className={`p-2 rounded-lg transition-colors ${activeMenuId === req.id ? 'bg-muted text-foreground' : 'hover:bg-muted text-muted-foreground hover:text-foreground'}`}
                               >
-                                <MoreVertical className="h-4 w-4 text-muted-foreground" />
+                                <MoreVertical className="h-4 w-4" />
                               </button>
                               
                               {activeMenuId === req.id && (
@@ -213,7 +207,7 @@ export default function AdminPrayerRequestsPage() {
                                     className="fixed inset-0 z-10" 
                                     onClick={() => setActiveMenuId(null)}
                                   />
-                                  <div className={`absolute right-0 z-20 w-40 overflow-hidden rounded-xl border border-border/40 bg-card shadow-lg ring-1 ring-black/5 animate-in fade-in zoom-in-95 duration-100 ${
+                                  <div className={`absolute right-0 z-20 w-40 overflow-hidden rounded-xl border border-border bg-card shadow-lg ring-1 ring-black/5 animate-in fade-in zoom-in-95 duration-100 ${
                                     index > filteredRequests.length - 4 && filteredRequests.length > 4 ? 'bottom-full mb-1' : 'top-full mt-1'
                                   }`}>
                                     <button 
@@ -221,16 +215,17 @@ export default function AdminPrayerRequestsPage() {
                                         setSelectedRequest(req);
                                         setActiveMenuId(null);
                                       }}
-                                      className="flex w-full items-center gap-2 px-4 py-2 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+                                      className="flex w-full items-center gap-2 px-4 py-2.5 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
                                     >
                                       <Eye className="h-3.5 w-3.5" /> View Details
                                     </button>
+                                    <div className="h-px bg-border my-1" />
                                     <button 
                                       onClick={() => {
                                         handleStatusUpdate(req.id, 'pending');
                                         setActiveMenuId(null);
                                       }}
-                                      className="flex w-full items-center gap-2 px-4 py-2 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+                                      className="flex w-full items-center gap-2 px-4 py-2.5 text-xs font-medium text-amber-600 hover:bg-amber-50 transition-colors hover:text-white"
                                     >
                                       <Clock className="h-3.5 w-3.5" /> Mark Pending
                                     </button>
@@ -239,7 +234,7 @@ export default function AdminPrayerRequestsPage() {
                                         handleStatusUpdate(req.id, 'prayed');
                                         setActiveMenuId(null);
                                       }}
-                                      className="flex w-full items-center gap-2 px-4 py-2 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+                                      className="flex w-full items-center gap-2 px-4 py-2.5 text-xs font-medium text-blue-600 hover:bg-blue-50 transition-colors"
                                     >
                                       <CheckCircle2 className="h-3.5 w-3.5" /> Mark Prayed
                                     </button>
@@ -248,7 +243,7 @@ export default function AdminPrayerRequestsPage() {
                                         handleStatusUpdate(req.id, 'answered');
                                         setActiveMenuId(null);
                                       }}
-                                      className="flex w-full items-center gap-2 px-4 py-2 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+                                      className="flex w-full items-center gap-2 px-4 py-2.5 text-xs font-medium text-rose-600 hover:bg-rose-50 transition-colors"
                                     >
                                       <Heart className="h-3.5 w-3.5" /> Mark Answered
                                     </button>
@@ -259,17 +254,17 @@ export default function AdminPrayerRequestsPage() {
 
                            <button 
                              onClick={() => setSelectedRequest(req)}
-                             className="p-2 rounded-lg hover:bg-rose-500/10 hover:text-rose-500 transition-colors hidden sm:flex"
+                             className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors hidden sm:flex"
                              title="Quick View"
                            >
                              <Eye className="h-4 w-4" />
                            </button>
 
-                          <DeleteButton
-                            message="Are you sure you want to delete this prayer request?"
-                            onDelete={() => handleDelete(req.id)}
-                            isLoading={deleteMutation.isPending}
-                          />
+                           <DeleteButton
+                             message="Are you sure you want to delete this prayer request?"
+                             onDelete={() => handleDelete(req.id)}
+                             isLoading={deleteMutation.isPending}
+                           />
                         </div>
                       </td>
                     </tr>
