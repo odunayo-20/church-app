@@ -84,6 +84,7 @@ function buildSearchQuery(query: any, search: string, table: string) {
     posts: ["title", "excerpt"],
     notifications: ["message", "type"],
     profiles: ["name", "email"],
+    prayer_requests: ["name", "email", "request"],
   };
 
   const fields = searchFields[table] ?? ["name", "email", "title"];

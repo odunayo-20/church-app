@@ -6,13 +6,14 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import { 
   LayoutDashboard, Users, CreditCard, Calendar, 
-  FileText, Bell, Globe, Menu, X, Church, Video
+  FileText, Bell, Globe, Menu, X, Church, Video, Heart
 } from "lucide-react";
 import { useSidebar } from "@/hooks/use-sidebar";
 
 const NAV_ITEMS = [
   { label: "Dashboard", href: "/admin", roles: ["admin", "media"], icon: LayoutDashboard },
   { label: "Members", href: "/admin/members", roles: ["admin"], icon: Users },
+  { label: "Prayer Requests", href: "/admin/prayer-requests", roles: ["admin", "media"], icon: Heart },
   { label: "Sermons", href: "/admin/sermons", roles: ["admin", "media"], icon: Video },
   { label: "Donations", href: "/admin/donations", roles: ["admin"], icon: CreditCard },
   { label: "Events", href: "/admin/events", roles: ["admin", "media"], icon: Calendar },

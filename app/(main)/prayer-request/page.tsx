@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Heart, Send, CheckCircle2, AlertCircle, HandHeart, ShieldCheck, Users } from "lucide-react";
+import { createPrayerRequestAction } from "@/app/action/prayer-actions";
 
 const fade = (delay = 0) => ({
   hidden: { opacity: 0, y: 24 },
@@ -25,9 +26,20 @@ export default function PrayerRequestPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus("loading");
-    // Simulate submission — replace with real server action if needed
-    await new Promise((r) => setTimeout(r, 1200));
-    setStatus("success");
+    
+    try {
+      await createPrayerRequestAction({
+        name: anonymous ? null : name,
+        email: anonymous ? null : email,
+        request,
+        isAnonymous: anonymous,
+        status: "pending",
+      });
+      setStatus("success");
+    } catch (error) {
+      console.error(error);
+      setStatus("error");
+    }
   };
 
   const inputClass =

@@ -99,3 +99,14 @@ export interface Sermon {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface PrayerRequest {
+  id: string;
+  name: string | null;
+  email: string | null;
+  request: string;
+  isAnonymous: boolean;
+  status: "pending" | "prayed" | "answered";
+  createdAt: string;
+  updatedAt: string;
+}

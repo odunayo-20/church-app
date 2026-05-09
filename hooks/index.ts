@@ -51,3 +51,11 @@ export {
   notificationKeys,
 } from "./use-notifications";
 export { useDashboardData } from "./use-dashboard";
+export {
+  usePrayerRequests,
+  usePrayerRequest,
+  useCreatePrayerRequest,
+  useUpdatePrayerRequest,
+  useDeletePrayerRequest,
+  prayerKeys,
+} from "./use-prayer-requests";
