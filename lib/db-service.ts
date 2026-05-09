@@ -61,7 +61,7 @@ export async function paginate<T>(
     query = options.filters(query);
   }
 
-  const { column = "createdAt", ascending = false } = options?.orderBy ?? {};
+  const { column = "created_at", ascending = false } = options?.orderBy ?? {};
   query = query.order(column, { ascending });
 
   const { data, count, error } = await query.range(from, to);

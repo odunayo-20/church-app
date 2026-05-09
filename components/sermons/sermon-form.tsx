@@ -1,13 +1,15 @@
 "use client";
 
 import { useForm } from "react-hook-form";
+import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useCreateSermon, useUpdateSermon } from "@/hooks/use-sermons";
 import { sermonSchema, type SermonInput } from "@/lib/validations";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, Link as LinkIcon, RefreshCcw } from "lucide-react";
+import { slugify } from "@/lib/utils";
 
 interface SermonFormProps {
   sermon?: {
@@ -34,7 +36,9 @@ export default function SermonForm({ sermon, isEditing }: SermonFormProps) {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    setValue,
+    watch,
+    formState: { errors, dirtyFields },
   } = useForm<SermonInput>({
     resolver: zodResolver(sermonSchema),
     defaultValues: {
@@ -42,7 +46,9 @@ export default function SermonForm({ sermon, isEditing }: SermonFormProps) {
       slug: sermon?.slug || "",
       description: sermon?.description || "",
       speaker: sermon?.speaker || "",
-      sermonDate: sermon?.sermonDate ? new Date(sermon.sermonDate) : new Date(),
+      sermonDate: (sermon?.sermonDate 
+        ? new Date(sermon.sermonDate) 
+        : new Date()).toISOString().split('T')[0] as any,
       series: sermon?.series || "",
       imageUrl: sermon?.imageUrl || "",
       audioUrl: sermon?.audioUrl || "",
@@ -50,6 +56,17 @@ export default function SermonForm({ sermon, isEditing }: SermonFormProps) {
       published: sermon?.published || false,
     },
   });
+
+  const title = watch("title");
+  const slug = watch("slug");
+
+  // Auto-generate slug from title
+  useEffect(() => {
+    // Auto-update if it's a new sermon OR if the title has been modified in edit mode
+    if (title && (!isEditing || dirtyFields.title)) {
+      setValue("slug", slugify(title), { shouldValidate: true });
+    }
+  }, [title, setValue, isEditing, dirtyFields.title]);
 
   const onSubmit = async (data: SermonInput) => {
     try {
@@ -89,12 +106,27 @@ export default function SermonForm({ sermon, isEditing }: SermonFormProps) {
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium">Slug</label>
-          <input
-            {...register("slug")}
-            className="w-full rounded-xl border border-input bg-background/50 px-3 py-2 outline-none transition-all focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-            placeholder="e.g., the-power-of-faith"
-          />
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-medium">Slug</label>
+            <button
+              type="button"
+              onClick={() => setValue("slug", slugify(title))}
+              className="text-[10px] font-bold uppercase tracking-wider text-indigo-500 hover:text-indigo-600 flex items-center gap-1"
+            >
+              <RefreshCcw className="h-3 w-3" />
+              Regenerate
+            </button>
+          </div>
+          <div className="relative">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/50">
+              <LinkIcon className="h-4 w-4" />
+            </div>
+            <input
+              {...register("slug")}
+              className="w-full rounded-xl border border-input bg-background/50 pl-9 pr-3 py-2 outline-none transition-all focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-muted-foreground"
+              placeholder="e.g., the-power-of-faith"
+            />
+          </div>
           {errors.slug && (
             <p className="text-sm text-red-500">{errors.slug.message}</p>
           )}
@@ -116,9 +148,7 @@ export default function SermonForm({ sermon, isEditing }: SermonFormProps) {
           <label className="text-sm font-medium">Date *</label>
           <input
             type="date"
-            {...register("sermonDate", {
-              setValueAs: (v) => (v ? new Date(v) : undefined),
-            })}
+            {...register("sermonDate")}
             className="w-full rounded-xl border border-input bg-background/50 px-3 py-2 outline-none transition-all focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
           />
           {errors.sermonDate && (

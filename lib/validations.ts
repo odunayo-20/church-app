@@ -1,9 +1,12 @@
 import { z } from "zod";
 
 const dateSchema = z
-  .string()
-  .or(z.date())
-  .transform((val) => (val ? new Date(val) : val));
+  .preprocess((arg) => {
+    if (typeof arg == "string" || arg instanceof Date) return new Date(arg);
+  }, z.date({
+    invalid_type_error: "Please select a valid date",
+    required_error: "Date is required"
+  }));
 
 export const memberSchema = z.object({
   name: z.string().min(1, "Name is required").max(100),
@@ -62,15 +65,15 @@ export const eventSchema = z.object({
 });
 
 export const sermonSchema = z.object({
-  title: z.string().min(1, "Title is required").max(200),
+  title: z.string().min(2, "Title must be at least 2 characters").max(200),
   slug: z.string().min(1, "Slug is required").max(200).optional(),
-  description: z.string().max(1000).optional().or(z.literal("")),
-  speaker: z.string().min(1, "Speaker is required").max(100),
+  description: z.string().max(2000, "Description is too long").optional().or(z.literal("")),
+  speaker: z.string().min(1, "Speaker name is required").max(100),
   sermonDate: dateSchema,
   series: z.string().max(100).optional().or(z.literal("")),
-  imageUrl: z.string().url("Invalid image URL").optional().or(z.literal("")),
-  audioUrl: z.string().url("Invalid audio URL").optional().or(z.literal("")),
-  videoUrl: z.string().url("Invalid video URL").optional().or(z.literal("")),
+  imageUrl: z.string().url("Please provide a valid image URL").optional().or(z.literal("")),
+  audioUrl: z.string().url("Please provide a valid audio URL").optional().or(z.literal("")),
+  videoUrl: z.string().url("Please provide a valid video URL").optional().or(z.literal("")),
   published: z.boolean().optional(),
 });
 

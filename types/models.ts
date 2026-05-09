@@ -7,6 +7,7 @@ export interface Member {
   anniversary: string | null;
   createdAt: string;
   updatedAt: string;
+  donations?: Donation[];
 }
 
 export interface Donation {

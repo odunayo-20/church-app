@@ -10,10 +10,56 @@ const generateId = () => globalThis.crypto.randomUUID();
 
 export async function getMembersAction(params: PaginationParams): Promise<PaginatedResult<Member>> {
   try {
-    const result = await paginate<Member>("members", params, {
-      orderBy: { column: "createdAt", ascending: false }
-    });
-    return result;
+    const supabase = await createAdminClient();
+    const page = params.page || 1;
+    const limit = params.limit || 10;
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
+
+    let query = supabase
+      .from("members")
+      .select("*", { count: "exact" });
+
+    if (params.search) {
+      query = query.or(`name.like.%${params.search}%,email.like.%${params.search}%,phone.like.%${params.search}%`);
+    }
+
+    // Try ordering by createdAt first, fallback to created_at
+    let { data, count, error } = await query
+      .order("createdAt", { ascending: false })
+      .range(from, to);
+
+    if (error && error.message.includes('column "createdAt" does not exist')) {
+      const fallback = await supabase
+        .from("members")
+        .select("*", { count: "exact" })
+        .order("created_at", { ascending: false })
+        .range(from, to);
+      data = fallback.data;
+      count = fallback.count;
+      error = fallback.error;
+    }
+
+    if (error) throw error;
+
+    return {
+      data: (data || []).map((member: any) => ({
+        id: member.id,
+        name: member.name,
+        email: member.email,
+        phone: member.phone,
+        birthday: member.birthday,
+        anniversary: member.anniversary,
+        createdAt: member.createdAt || member.created_at,
+        updatedAt: member.updatedAt || member.updated_at,
+      })),
+      meta: {
+        total: count || 0,
+        page,
+        limit,
+        totalPages: Math.ceil((count || 0) / limit),
+      },
+    };
   } catch (error) {
     console.error("Error fetching members:", error);
     throw new Error("Failed to fetch members");
@@ -22,7 +68,7 @@ export async function getMembersAction(params: PaginationParams): Promise<Pagina
 
 export async function getMemberByIdAction(id: string): Promise<Member> {
   try {
-    const supabase = await createClient();
+    const supabase = await createAdminClient();
     const { data, error } = await supabase
       .from("members")
       .select("*, donations(*)")
@@ -30,7 +76,27 @@ export async function getMemberByIdAction(id: string): Promise<Member> {
       .single();
 
     if (error) throw error;
-    return data;
+
+    // Map snake_case or camelCase to camelCase
+    return {
+      id: data.id,
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      birthday: data.birthday,
+      anniversary: data.anniversary,
+      createdAt: data.createdAt || data.created_at,
+      updatedAt: data.updatedAt || data.updated_at,
+      donations: data.donations?.map((d: any) => ({
+        id: d.id,
+        amount: d.amount,
+        status: d.status,
+        reference: d.reference,
+        memberId: d.memberId || d.member_id,
+        createdAt: d.createdAt || d.created_at,
+        updatedAt: d.updatedAt || d.updated_at,
+      })) || [],
+    };
   } catch (error) {
     console.error(`Error fetching member ${id}:`, error);
     throw new Error("Failed to fetch member");
