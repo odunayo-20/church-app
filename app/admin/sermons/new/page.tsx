@@ -1,11 +1,11 @@
 "use client";
 
+import SermonForm from "@/components/sermons/sermon-form";
 import { motion } from "framer-motion";
-import PostForm from "@/components/blog/post-form-wrapper";
 import Link from "next/link";
-import { ArrowLeft, PenTool } from "lucide-react";
+import { ArrowLeft, Video } from "lucide-react";
 
-export default function NewPostPage() {
+export default function NewSermonPage() {
   return (
     <div className="space-y-6 max-w-5xl">
       <motion.div
@@ -14,20 +14,20 @@ export default function NewPostPage() {
         transition={{ duration: 0.4 }}
       >
         <Link
-          href="/admin/blog"
-          className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-rose-500"
+          href="/admin/sermons"
+          className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-indigo-500"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to Posts
+          Back to Sermons
         </Link>
         <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500 to-pink-500 text-white shadow-md">
-            <PenTool className="h-5 w-5" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 text-white shadow-md">
+            <Video className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Create New Post</h1>
+            <h1 className="text-3xl font-bold tracking-tight">New Sermon</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Write and publish a new article for your community.
+              Add a new sermon to the library
             </p>
           </div>
         </div>
@@ -39,7 +39,7 @@ export default function NewPostPage() {
         transition={{ duration: 0.5, delay: 0.1 }}
         className="rounded-2xl border border-border/40 bg-card shadow-sm p-6 sm:p-8"
       >
-        <PostForm />
+        <SermonForm />
       </motion.div>
     </div>
   );

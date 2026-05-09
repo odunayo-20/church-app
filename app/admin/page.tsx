@@ -1,19 +1,38 @@
 "use client";
 
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { formatDate } from "@/lib/utils";
 import { DashboardCharts } from "@/components/admin/dashboard-charts";
-import { useDashboardData } from "@/hooks";
+import { useDashboardData, useAuth } from "@/hooks";
+import { Users, CreditCard, Calendar, FileText, ArrowRight, TrendingUp } from "lucide-react";
 
 export default function AdminDashboardPage() {
-  const { data, isLoading, error } = useDashboardData();
+  const { role, loading: authLoading } = useAuth();
+  const { data, isLoading: dataLoading, error } = useDashboardData();
+
+  const isLoading = authLoading || dataLoading;
+  const isMedia = role === "media";
 
   if (isLoading) {
-    return <div className="py-12 text-center">Loading dashboard...</div>;
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-amber-500/30 border-t-amber-500" />
+          <p className="text-sm font-medium text-muted-foreground">Loading dashboard data…</p>
+        </div>
+      </div>
+    );
   }
 
   if (error || !data) {
-    return <div className="py-12 text-center text-red-500">Error loading dashboard data</div>;
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-6 py-4 text-center">
+          <p className="text-sm font-semibold text-red-500">Error loading dashboard data</p>
+        </div>
+      </div>
+    );
   }
 
   const {
@@ -37,107 +56,101 @@ export default function AdminDashboardPage() {
   }));
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-          Dashboard
-        </h1>
-        <p className="mt-1 text-muted-foreground">
-          Overview of your church management system
-        </p>
-      </div>
+    <div className="space-y-8">
+      {/* ── Page Header ── */}
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
+      >
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Dashboard</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Your central hub for community impact and ministry growth.
+          </p>
+        </div>
+      </motion.div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          title="Total Members"
-          value={memberCount}
-          href="/admin/members"
-          icon={
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
-              />
-            </svg>
-          }
-        />
-        <StatCard
-          title="Donations"
-          value={donationCount}
-          href="/admin/donations"
-          icon={
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-          }
-        />
+      {/* ── Stat Cards ── */}
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        {!isMedia && (
+          <StatCard
+            title="Total Members"
+            value={memberCount}
+            href="/admin/members"
+            icon={<Users className="h-5 w-5 text-white" />}
+            gradient="from-blue-500 to-cyan-400"
+            delay={0.1}
+          />
+        )}
+        {!isMedia && (
+          <StatCard
+            title="Total Donations"
+            value={donationCount}
+            href="/admin/donations"
+            icon={<CreditCard className="h-5 w-5 text-white" />}
+            gradient="from-emerald-500 to-teal-400"
+            delay={0.15}
+          />
+        )}
         <StatCard
           title="Upcoming Events"
           value={eventCount}
           href="/admin/events"
-          icon={
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-              />
-            </svg>
-          }
+          icon={<Calendar className="h-5 w-5 text-white" />}
+          gradient="from-amber-500 to-orange-400"
+          delay={0.2}
         />
         <StatCard
           title="Published Posts"
           value={postCount}
           href="/admin/blog"
-          icon={
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"
-              />
-            </svg>
-          }
+          icon={<FileText className="h-5 w-5 text-white" />}
+          gradient="from-rose-500 to-pink-400"
+          delay={0.25}
         />
       </div>
 
+      {/* ── Charts & Events ── */}
       <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <DashboardCharts data={chartData} total={totalDonations} />
-        </div>
-        <UpcomingEventsList events={upcomingEvents} />
+        {!isMedia && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="lg:col-span-2 overflow-hidden rounded-2xl border border-border/40 bg-card shadow-sm"
+          >
+            <div className="border-b border-border/40 bg-muted/20 px-6 py-4 flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-emerald-500" />
+              <h2 className="font-semibold">Donation Trends</h2>
+            </div>
+            <div className="p-6">
+              <DashboardCharts data={chartData} total={totalDonations} />
+            </div>
+          </motion.div>
+        )}
+        
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className={isMedia ? "lg:col-span-3" : ""}
+        >
+          <UpcomingEventsList events={upcomingEvents} />
+        </motion.div>
       </div>
 
-      <RecentDonationsList donations={recentDonations} />
+      {/* ── Recent Donations ── */}
+      {!isMedia && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+        >
+          <RecentDonationsList donations={recentDonations} />
+        </motion.div>
+      )}
     </div>
   );
 }
@@ -147,66 +160,82 @@ function StatCard({
   value,
   href,
   icon,
+  gradient,
+  delay,
 }: {
   title: string;
   value: number;
   href: string;
   icon: React.ReactNode;
+  gradient: string;
+  delay: number;
 }) {
   return (
-    <Link
-      href={href}
-      className="rounded-lg border border-border/40 bg-card p-6 shadow-sm transition-colors hover:bg-accent/50"
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay }}
     >
-      <div className="flex items-center justify-between">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-          {icon}
+      <Link
+        href={href}
+        className="group relative flex flex-col overflow-hidden rounded-2xl border border-border/40 bg-card p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
+      >
+        <div className="mb-4 flex items-center justify-between">
+          <div className={`flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${gradient} shadow-md`}>
+            {icon}
+          </div>
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted/50 text-muted-foreground transition-colors group-hover:bg-amber-500/10 group-hover:text-amber-500">
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+          </div>
         </div>
-        <span className="text-2xl font-bold">{value.toLocaleString()}</span>
-      </div>
-      <p className="mt-2 text-sm text-muted-foreground">{title}</p>
-    </Link>
+        <p className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+          {title}
+        </p>
+        <p className="mt-1 text-3xl font-bold tracking-tight text-foreground">
+          {value.toLocaleString()}
+        </p>
+      </Link>
+    </motion.div>
   );
 }
 
-function UpcomingEventsList({
-  events,
-}: {
-  events: any[];
-}) {
+function UpcomingEventsList({ events }: { events: any[] }) {
   return (
-    <div className="rounded-lg border border-border/40 bg-card shadow-sm">
-      <div className="flex items-center justify-between border-b border-border/40 p-6">
-        <h2 className="text-lg font-semibold">Upcoming Events</h2>
+    <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-border/40 bg-card shadow-sm">
+      <div className="flex items-center justify-between border-b border-border/40 bg-muted/20 px-6 py-4">
+        <div className="flex items-center gap-2">
+          <Calendar className="h-4 w-4 text-amber-500" />
+          <h2 className="font-semibold">Upcoming Events</h2>
+        </div>
         <Link
           href="/admin/events"
-          className="text-sm font-medium text-primary hover:underline"
+          className="text-xs font-semibold text-amber-500 transition-colors hover:text-amber-600"
         >
-          View all
+          View All
         </Link>
       </div>
 
       {events.length === 0 ? (
-        <div className="p-6 text-center text-muted-foreground">
+        <div className="flex flex-1 items-center justify-center p-6 text-sm text-muted-foreground">
           No upcoming events
         </div>
       ) : (
-        <div className="divide-y divide-border/40">
+        <div className="flex-1 divide-y divide-border/40 overflow-y-auto">
           {events.map((event) => (
-            <div key={event.id} className="flex items-start gap-3 p-4">
-              <div className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-lg bg-primary/10">
-                <span className="text-xs font-medium uppercase text-primary">
-                  {new Date(event.date).toLocaleString("default", {
-                    month: "short",
-                  })}
+            <div key={event.id} className="group flex items-start gap-4 p-4 transition-colors hover:bg-muted/30">
+              <div className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                <span className="text-[10px] font-bold uppercase">
+                  {new Date(event.date).toLocaleString("default", { month: "short" })}
                 </span>
-                <span className="text-lg font-bold">
+                <span className="text-lg font-black leading-none">
                   {new Date(event.date).getDate()}
                 </span>
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium truncate">{event.title}</p>
-                <p className="text-xs text-muted-foreground">
+                <p className="truncate text-sm font-semibold transition-colors group-hover:text-amber-500">
+                  {event.title}
+                </p>
+                <p className="truncate text-xs text-muted-foreground">
                   {event.location}
                 </p>
               </div>
@@ -218,56 +247,51 @@ function UpcomingEventsList({
   );
 }
 
-function RecentDonationsList({
-  donations,
-}: {
-  donations: any[];
-}) {
+function RecentDonationsList({ donations }: { donations: any[] }) {
   return (
-    <div className="rounded-lg border border-border/40 bg-card shadow-sm">
-      <div className="flex items-center justify-between border-b border-border/40 p-6">
-        <h2 className="text-lg font-semibold">Recent Donations</h2>
+    <div className="overflow-hidden rounded-2xl border border-border/40 bg-card shadow-sm">
+      <div className="flex items-center justify-between border-b border-border/40 bg-muted/20 px-6 py-4">
+        <div className="flex items-center gap-2">
+          <CreditCard className="h-4 w-4 text-emerald-500" />
+          <h2 className="font-semibold">Recent Donations</h2>
+        </div>
         <Link
           href="/admin/donations"
-          className="text-sm font-medium text-primary hover:underline"
+          className="text-xs font-semibold text-emerald-500 transition-colors hover:text-emerald-600"
         >
-          View all
+          View All
         </Link>
       </div>
 
       {donations.length === 0 ? (
-        <div className="p-6 text-center text-muted-foreground">
+        <div className="p-6 text-center text-sm text-muted-foreground">
           No donations yet
         </div>
       ) : (
         <div className="divide-y divide-border/40">
-          {donations.map((donation) => (
-            <div
-              key={donation.id}
-              className="flex items-center justify-between p-4"
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-sm font-medium text-primary">
-                  {(donation.member?.name || donation.donorName || "?")
-                    .charAt(0)
-                    .toUpperCase()}
+          {donations.map((donation) => {
+            const name = donation.member?.name || donation.donorName || "Anonymous";
+            const initial = name.charAt(0).toUpperCase();
+
+            return (
+              <div key={donation.id} className="flex items-center justify-between p-4 transition-colors hover:bg-muted/30 sm:px-6">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500/20 to-teal-500/20 text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                    {initial}
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold">{name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {donation.paidAt ? formatDate(donation.paidAt) : "Pending"}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm font-medium">
-                    {donation.member?.name || donation.donorName || "Anonymous"}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {donation.paidAt
-                      ? formatDate(donation.paidAt)
-                      : "Pending"}
-                  </p>
-                </div>
+                <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                  ₦{Number(donation.amount).toLocaleString()}
+                </span>
               </div>
-              <span className="font-medium">
-                ₦{Number(donation.amount).toLocaleString()}
-              </span>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

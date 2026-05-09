@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCreateEvent, useUpdateEvent } from "@/hooks";
 import { toast } from "sonner";
+import { Calendar as CalendarIcon, MapPin, Type, AlignLeft, Image as ImageIcon, Send, Users, AlertCircle, Loader2 } from "lucide-react";
 
 interface EventFormProps {
   event?: {
@@ -41,22 +42,10 @@ export function EventForm({ event, isEditing = false }: EventFormProps) {
     e.preventDefault();
     setError("");
 
-    if (!title.trim()) {
-      setError("Title is required");
-      return;
-    }
-    if (!description.trim()) {
-      setError("Description is required");
-      return;
-    }
-    if (!date) {
-      setError("Date is required");
-      return;
-    }
-    if (!location.trim()) {
-      setError("Location is required");
-      return;
-    }
+    if (!title.trim()) { setError("Title is required"); return; }
+    if (!description.trim()) { setError("Description is required"); return; }
+    if (!date) { setError("Date is required"); return; }
+    if (!location.trim()) { setError("Location is required"); return; }
 
     try {
       const eventData = {
@@ -86,123 +75,171 @@ export function EventForm({ event, isEditing = false }: EventFormProps) {
   };
 
   const isPending = createMutation.isPending || updateMutation.isPending;
+  const inputClass =
+    "mt-1.5 w-full rounded-xl border border-input bg-background px-4 py-2.5 pl-10 text-sm shadow-sm outline-none transition-all placeholder:text-muted-foreground/60 focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/20";
+  const textareaClass =
+    "mt-1.5 w-full rounded-xl border border-input bg-background px-4 py-3 pl-10 text-sm shadow-sm outline-none transition-all placeholder:text-muted-foreground/60 focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/20";
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-8">
       {error && (
-        <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+        <div className="flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm font-medium text-red-500">
+          <AlertCircle className="h-5 w-5 shrink-0" />
           {error}
         </div>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      {/* Basic Info */}
+      <div className="grid gap-6 sm:grid-cols-2">
         <div className="sm:col-span-2">
-          <label className="block text-sm font-medium">Title</label>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-            placeholder="Event title"
-            required
-          />
+          <label className="text-sm font-semibold text-foreground">Event Title</label>
+          <div className="relative">
+            <Type className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className={inputClass}
+              placeholder="e.g. Sunday Morning Service"
+              required
+            />
+          </div>
         </div>
 
         <div className="sm:col-span-2">
-          <label className="block text-sm font-medium">Description</label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-            placeholder="Event description"
-            rows={4}
-            required
-          />
+          <label className="text-sm font-semibold text-foreground">Description</label>
+          <div className="relative">
+            <AlignLeft className="absolute left-3.5 top-3.5 h-4 w-4 text-muted-foreground" />
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className={textareaClass}
+              placeholder="What is this event about?"
+              rows={4}
+              required
+            />
+          </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium">Date & Time</label>
-          <input
-            type="datetime-local"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-            required
-          />
+          <label className="text-sm font-semibold text-foreground">Date & Time</label>
+          <div className="relative">
+            <CalendarIcon className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="datetime-local"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className={inputClass}
+              required
+            />
+          </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium">Location</label>
-          <input
-            type="text"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-            placeholder="Event location"
-            required
-          />
+          <label className="text-sm font-semibold text-foreground">Location</label>
+          <div className="relative">
+            <MapPin className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="text"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              className={inputClass}
+              placeholder="Main Sanctuary or Address"
+              required
+            />
+          </div>
         </div>
 
         <div className="sm:col-span-2">
-          <label className="block text-sm font-medium">
-            Image URL (optional)
-          </label>
-          <input
-            type="url"
-            value={imageUrl}
-            onChange={(e) => setImageUrl(e.target.value)}
-            className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-            placeholder="https://example.com/image.jpg"
-          />
+          <label className="text-sm font-semibold text-foreground">Image URL (optional)</label>
+          <div className="relative">
+            <ImageIcon className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="url"
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              className={inputClass}
+              placeholder="https://example.com/image.jpg"
+            />
+          </div>
+          <p className="mt-1.5 text-xs text-muted-foreground ml-1">
+            Provide a direct link to an image. Leave blank to use a default layout.
+          </p>
         </div>
       </div>
 
-      <div className="rounded-lg border border-border/40 p-4 space-y-4">
-        <h3 className="text-sm font-medium">RSVP Settings</h3>
+      {/* RSVP Settings */}
+      <div className="rounded-2xl border border-border/40 bg-muted/20 p-6 space-y-6">
+        <div className="flex items-center gap-2 border-b border-border/40 pb-4">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500">
+            <Users className="h-4 w-4" />
+          </div>
+          <h3 className="font-semibold text-foreground">RSVP Settings</h3>
+        </div>
 
-        <label className="flex items-center gap-2">
+        <label className="flex cursor-pointer items-center gap-3">
           <input
             type="checkbox"
             checked={rsvpEnabled}
             onChange={(e) => setRsvpEnabled(e.target.checked)}
-            className="h-4 w-4 rounded border-input"
+            className="h-5 w-5 rounded border-input accent-emerald-500"
           />
-          <span className="text-sm font-medium">
-            Enable RSVP for this event
-          </span>
+          <div>
+            <p className="font-semibold text-foreground">Enable RSVP for this event</p>
+            <p className="text-xs text-muted-foreground">Allow members to register and reserve their spots.</p>
+          </div>
         </label>
 
         {rsvpEnabled && (
-          <div>
-            <label className="block text-sm font-medium">
+          <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+            <label className="text-sm font-semibold text-foreground">
               Guest limit per RSVP (optional)
             </label>
             <input
               type="number"
               value={rsvpLimit}
               onChange={(e) => setRsvpLimit(e.target.value)}
-              className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              className="mt-1.5 w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm shadow-sm outline-none transition-all placeholder:text-muted-foreground/60 focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 sm:max-w-xs"
               placeholder="Leave empty for unlimited"
               min="1"
             />
+            <p className="mt-1.5 text-xs text-muted-foreground">
+              The maximum number of people a single user can register for (e.g. 5 family members).
+            </p>
           </div>
         )}
       </div>
 
-      <div className="flex gap-2">
-        <button
-          type="submit"
-          disabled={isPending}
-          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {isPending ? "Saving..." : isEditing ? "Update event" : "Create event"}
-        </button>
+      {/* Actions */}
+      <div className="flex w-full gap-3 sm:justify-end">
         <button
           type="button"
           onClick={() => router.back()}
-          className="rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent"
+          className="flex-1 rounded-xl border border-border/40 bg-background px-6 py-2.5 text-sm font-semibold transition-colors hover:bg-muted/50 sm:flex-none"
         >
           Cancel
+        </button>
+        <button
+          type="submit"
+          disabled={isPending}
+          className="group flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-amber-500/25 transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 sm:flex-none"
+        >
+          {isPending ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Saving…
+            </>
+          ) : isEditing ? (
+            <>
+              <Send className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+              Update Event
+            </>
+          ) : (
+            <>
+              <Send className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+              Create Event
+            </>
+          )}
         </button>
       </div>
     </form>

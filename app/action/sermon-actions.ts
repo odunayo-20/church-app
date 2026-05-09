@@ -18,13 +18,15 @@ export interface SermonFilters extends PaginationParams {
 
 export async function getSermonsAction(params: SermonFilters): Promise<PaginatedResult<Sermon>> {
   try {
+    const supabase = await createAdminClient();
     const result = await paginate<Sermon>("sermons", params, {
+      supabase,
       filters: (query) => {
         if (params.series) query.eq("series", params.series);
         if (params.speaker) query.ilike("speaker", `%${params.speaker}%`);
         if (params.topic) query.ilike("topic", `%${params.topic}%`);
         if (params.query) {
-          query.or(`title.ilike.%${params.query}%,description.ilike.%${params.query}%`);
+          query.or(`title.like.%${params.query}%,description.like.%${params.query}%`);
         }
         return query;
       },
@@ -39,11 +41,12 @@ export async function getSermonsAction(params: SermonFilters): Promise<Paginated
 
 export async function getSermonBySlugAction(slug: string): Promise<Sermon> {
   try {
-    const supabase = await createClient();
+    const decodedSlug = decodeURIComponent(slug);
+    const supabase = await createAdminClient();
     const { data, error } = await supabase
       .from("sermons")
       .select("*")
-      .eq("slug", slug)
+      .eq("slug", decodedSlug)
       .single();
 
     if (error) throw error;
@@ -152,7 +155,7 @@ export async function deleteSermonAction(id: string): Promise<boolean> {
 
 export async function getSermonSeriesAction() {
   try {
-    const supabase = await createClient();
+    const supabase = await createAdminClient();
     const { data, error } = await supabase
       .from("sermons")
       .select("series")

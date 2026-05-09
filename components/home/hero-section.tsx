@@ -62,7 +62,7 @@ export function HeroSection() {
           <motion.div variants={itemVariants}>
             <span className="inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-400/10 px-5 py-1.5 text-sm font-semibold uppercase tracking-widest text-amber-300 backdrop-blur-sm">
               <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
-              Welcome to Grace Community
+              Welcome to {process.env.NEXT_PUBLIC_APP_NAME || "Our Church"}
             </span>
           </motion.div>
 
@@ -116,34 +116,7 @@ export function HeroSection() {
         </motion.div>
       </div>
 
-      {/* Stats Strip */}
-      <motion.div
-        className="relative z-10 w-full mt-auto"
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, delay: 0.9, ease: [0.22, 1, 0.36, 1] }}
-      >
-        <div className="border-t border-white/10 bg-black/50 backdrop-blur-md">
-          <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-2 divide-x divide-white/10 lg:grid-cols-4">
-              {stats.map(({ icon: Icon, value, label }) => (
-                <div
-                  key={label}
-                  className="flex flex-col items-center gap-1.5 px-4 py-6 text-center sm:flex-row sm:gap-4 sm:text-left"
-                >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-400/15 text-amber-300">
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-white">{value}</div>
-                    <div className="text-xs font-medium text-white/50">{label}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </motion.div>
+     
     </section>
   );
 }

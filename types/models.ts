@@ -82,3 +82,19 @@ export interface Profile {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface Sermon {
+  id: string;
+  title: string;
+  slug: string;
+  description: string | null;
+  speaker: string;
+  sermonDate: string;
+  series: string | null;
+  imageUrl: string | null;
+  audioUrl: string | null;
+  videoUrl: string | null;
+  publishedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}

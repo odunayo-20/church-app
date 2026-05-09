@@ -7,8 +7,8 @@ const adminRoutes = ["/admin"];
 export async function middleware(request: NextRequest) {
   const { supabase, response } = createMiddlewareClient(request);
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const path = request.nextUrl.pathname;
 
@@ -20,23 +20,23 @@ export async function middleware(request: NextRequest) {
     (route) => path === route || path.startsWith(`${route}/`),
   );
 
-  if (isProtectedRoute && !session) {
+  if (isProtectedRoute && !user) {
     const redirectUrl = new URL("/auth/login", request.url);
     redirectUrl.searchParams.set("redirectedFrom", path);
     return NextResponse.redirect(redirectUrl);
   }
 
-  if (isAdminRoute && session) {
+  if (isAdminRoute && user) {
     const { data: profile, error } = await supabase
       .from("profiles")
       .select("role")
-      .eq("userId", session.user.id)
+      .eq("userId", user.id)
       .single();
 
     const role = profile?.role;
 
     console.log(
-      `Middleware Debug: path=${path}, userId=${session.user.id}, role=${role}, error=${error?.message || "none"}`,
+      `Middleware Debug: path=${path}, userId=${user.id}, role=${role}, error=${error?.message || "none"}`,
     );
 
     if (role !== "admin" && role !== "media") {
@@ -55,11 +55,11 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  if ((path === "/auth/login" || path === "/auth/register") && session) {
+  if ((path === "/auth/login" || path === "/auth/register") && user) {
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
-      .eq("userId", session.user.id)
+      .eq("userId", user.id)
       .single();
 
     if (profile?.role === "admin" || profile?.role === "media") {

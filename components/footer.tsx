@@ -45,7 +45,8 @@ const socialLinks = [
 /* ── Component ──────────────────────────────────── */
 export function Footer() {
   const currentYear = new Date().getFullYear();
-  const siteName = process.env.NEXT_PUBLIC_APP_NAME || "Grace Community";
+    const siteName = process.env.NEXT_PUBLIC_APP_NAME || "Grace Community";
+    const [nameFirst, nameLast] = siteName.split(" ");
 
   return (
     <footer className="relative w-full overflow-hidden bg-slate-950 text-white">
@@ -85,9 +86,9 @@ export function Footer() {
               </div>
               <div className="flex flex-col leading-tight">
                 <span className="text-lg font-bold text-white">
-                  Grace{" "}
+                  {nameFirst}{" "}
                   <span className="bg-gradient-to-r from-amber-400 to-rose-400 bg-clip-text text-transparent">
-                    Community
+                    {nameLast || ""}
                   </span>
                 </span>
                 <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-white/35">

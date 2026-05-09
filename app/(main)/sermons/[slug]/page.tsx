@@ -4,7 +4,7 @@ import { notFound, useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { formatDate } from "@/lib/utils";
+import { formatDate, getEmbedUrl, getAudioEmbedUrl } from "@/lib/utils";
 import { useSermon } from "@/hooks";
 import { ArrowLeft, Clock, Calendar, User, Video, Headphones } from "lucide-react";
 
@@ -140,12 +140,24 @@ export default function SermonPage() {
                 <span className="text-xs font-semibold uppercase tracking-widest text-white/70">Watch Message</span>
               </div>
               <div className="aspect-video w-full bg-black">
-                <iframe
-                  src={sermon.videoUrl}
-                  title={sermon.title}
-                  className="h-full w-full"
-                  allowFullScreen
-                />
+                {sermon.videoUrl.match(/\.(mp4|webm|ogg)$/i) ? (
+                  <video
+                    src={sermon.videoUrl}
+                    controls
+                    className="h-full w-full"
+                    poster={sermon.imageUrl || undefined}
+                  >
+                    Your browser does not support the video tag.
+                  </video>
+                ) : (
+                  <iframe
+                    src={getEmbedUrl(sermon.videoUrl) || ""}
+                    title={sermon.title}
+                    className="h-full w-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                )}
               </div>
             </motion.div>
           )}
@@ -206,9 +218,20 @@ export default function SermonPage() {
                       </div>
                       <h3 className="font-semibold">Listen Audio</h3>
                     </div>
-                    <audio controls className="w-full" src={sermon.audioUrl}>
-                      Your browser does not support the audio element.
-                    </audio>
+                    {getAudioEmbedUrl(sermon.audioUrl) ? (
+                      <iframe
+                        width="100%"
+                        height="166"
+                        scrolling="no"
+                        frameBorder="no"
+                        allow="autoplay"
+                        src={getAudioEmbedUrl(sermon.audioUrl) || ""}
+                      />
+                    ) : (
+                      <audio controls className="w-full" src={sermon.audioUrl}>
+                        Your browser does not support the audio element.
+                      </audio>
+                    )}
                   </div>
                 )}
                 

@@ -31,6 +31,9 @@ export function Header() {
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
+    const siteName = process.env.NEXT_PUBLIC_APP_NAME || "Grace Community";
+    const [nameFirst, nameLast] = siteName.split(" ");
+
   return (
     <>
       <header
@@ -53,9 +56,9 @@ export function Header() {
             </div>
             <div className="flex flex-col leading-tight">
               <span className="text-[17px] font-bold tracking-tight text-white">
-                Grace{" "}
+                {nameFirst}{" "}
                 <span className="bg-gradient-to-r from-amber-400 to-rose-400 bg-clip-text text-transparent">
-                  Community
+                  {nameLast || ""}
                 </span>
               </span>
               <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-white/40">
@@ -174,7 +177,7 @@ export function Header() {
                     <Church className="h-4 w-4 text-white" />
                   </div>
                   <span className="text-sm font-bold text-white">
-                    Grace Community
+                    {siteName}
                   </span>
                 </Link>
                 <button

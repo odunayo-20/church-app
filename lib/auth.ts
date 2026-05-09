@@ -7,7 +7,6 @@ export interface AuthUser {
   id: string;
   email: string | undefined;
   role: UserRole;
-  session: Session;
 }
 
 export async function getSession() {
@@ -32,14 +31,10 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
     .eq("userId", user.id)
     .single();
 
-  const session = await getSession();
-  if (!session) return null;
-
   return {
     id: user.id,
     email: user.email,
     role: (profile?.role as UserRole) || "member",
-    session,
   };
 }
 
