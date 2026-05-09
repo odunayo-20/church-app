@@ -1,38 +1,33 @@
+"use client";
+
 import Link from "next/link";
-import prisma from "@/lib/prisma";
 import { formatDate } from "@/lib/utils";
-import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/auth";
 import { DeleteButton } from "@/components/admin/delete-button";
+import { usePosts, useDeletePost } from "@/hooks";
+import { toast } from "sonner"; // Assuming sonner is used, if not I'll check
 
-export const dynamic = "force-dynamic";
+export default function AdminBlogPage() {
+  const { data, isLoading, error } = usePosts({ page: 1, limit: 100 });
+  const deletePostMutation = useDeletePost();
 
-async function deletePost(formData: FormData) {
-  "use server";
+  const handleDelete = async (id: string) => {
+    try {
+      await deletePostMutation.mutateAsync(id);
+      toast.success("Post deleted successfully");
+    } catch (error) {
+      toast.error("Failed to delete post");
+    }
+  };
 
-  const user = await getCurrentUser();
-  if (!user || user.role !== "admin") {
-    redirect("/auth/login");
+  if (isLoading) {
+    return <div className="container mx-auto px-4 py-12 text-center">Loading...</div>;
   }
 
-  const id = formData.get("id") as string;
-  await prisma.post.delete({ where: { id } });
-  redirect("/admin/blog");
-}
+  if (error) {
+    return <div className="container mx-auto px-4 py-12 text-center text-red-500">Error loading posts</div>;
+  }
 
-export default async function AdminBlogPage() {
-  const posts = await prisma.post.findMany({
-    orderBy: { createdAt: "desc" },
-    select: {
-      id: true,
-      title: true,
-      slug: true,
-      published: true,
-      publishedAt: true,
-      createdAt: true,
-      coverImage: true,
-    },
-  });
+  const posts = data?.data || [];
 
   return (
     <div className="container mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
@@ -64,18 +59,12 @@ export default async function AdminBlogPage() {
           <table className="w-full">
             <thead className="bg-muted/50">
               <tr>
-                <th className="px-4 py-3 text-left text-sm font-medium">
-                  Title
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-medium">
-                  Status
-                </th>
+                <th className="px-4 py-3 text-left text-sm font-medium">Title</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">Status</th>
                 <th className="hidden px-4 py-3 text-left text-sm font-medium md:table-cell">
                   Created
                 </th>
-                <th className="px-4 py-3 text-right text-sm font-medium">
-                  Actions
-                </th>
+                <th className="px-4 py-3 text-right text-sm font-medium">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/40">
@@ -83,9 +72,7 @@ export default async function AdminBlogPage() {
                 <tr key={post.id} className="hover:bg-muted/25">
                   <td className="px-4 py-3">
                     <p className="font-medium">{post.title}</p>
-                    <p className="text-xs text-muted-foreground">
-                      /blog/{post.slug}
-                    </p>
+                    <p className="text-xs text-muted-foreground">/blog/{post.slug}</p>
                   </td>
                   <td className="px-4 py-3">
                     {post.published ? (
@@ -116,10 +103,11 @@ export default async function AdminBlogPage() {
                       >
                         Edit
                       </Link>
-                      <form method="POST" action={deletePost}>
-                        <input type="hidden" name="id" value={post.id} />
-                        <DeleteButton message="Are you sure you want to delete this post?" />
-                      </form>
+                      <DeleteButton 
+                        message="Are you sure you want to delete this post?" 
+                        onDelete={() => handleDelete(post.id)}
+                        isLoading={deletePostMutation.isPending}
+                      />
                     </div>
                   </td>
                 </tr>

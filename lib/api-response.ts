@@ -60,27 +60,7 @@ export function handleApiError(error: unknown) {
   }
 
   if (error instanceof Error) {
-    if (error.name === "PrismaClientKnownRequestError") {
-      const prismaError = error as unknown as Record<string, unknown>;
-      const code = prismaError.code as string | undefined;
-
-      if (code === "P2025") {
-        return errorResponse("Record not found", 404);
-      }
-      if (code === "P2002") {
-        const target = (prismaError.meta as Record<string, unknown> | undefined)
-          ?.target as string[] | undefined;
-        const field = target?.join(", ") ?? "value";
-        return errorResponse(`A record with this ${field} already exists`, 409);
-      }
-      if (code === "P2003") {
-        return errorResponse("Invalid reference to related record", 400);
-      }
-    }
-
-    if (error.name === "PrismaClientValidationError") {
-      return errorResponse("Invalid data provided", 400);
-    }
+    // Basic error handling
   }
 
   logger.error("Unhandled API error", error);

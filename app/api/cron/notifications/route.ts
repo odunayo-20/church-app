@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { processNotifications } from "@/services/notification-service";
+import { processNotificationsAction } from "@/app/action/notification-actions";
 import { successResponse, errorResponse } from "@/lib/api-response";
 import { logger } from "@/lib/logger";
 
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const result = await processNotifications();
+    const result = await processNotificationsAction();
     return successResponse(result);
   } catch (error) {
     logger.error("Cron job failed", error);
@@ -32,7 +32,7 @@ export async function GET() {
   }
 
   try {
-    const result = await processNotifications();
+    const result = await processNotificationsAction();
     return successResponse(result);
   } catch {
     return errorResponse("Notification processing failed", 500);

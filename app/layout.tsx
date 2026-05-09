@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Outfit } from "next/font/google";
+import { Inter, Outfit, Geist } from "next/font/google";
 import "./globals.css";
 
 
@@ -88,6 +88,12 @@ export const viewport = {
   ],
 };
 
+import { QueryProvider } from "@/components/providers/query-provider";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -96,13 +102,13 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${outfit.variable} h-full antialiased`}
+      className={cn("h-full", "antialiased", inter.variable, outfit.variable, "font-sans", geist.variable)}
       suppressHydrationWarning
     >
       <body className="flex min-h-full flex-col">
-        
+        <QueryProvider>
           <main className="flex-1">{children}</main>
-          
+        </QueryProvider>
       </body>
     </html>
   );

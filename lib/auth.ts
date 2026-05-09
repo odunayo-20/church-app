@@ -1,6 +1,5 @@
 import { type Session } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
-import prisma from "@/lib/prisma";
 
 export type UserRole = "admin" | "media" | "member";
 
@@ -27,16 +26,20 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
 
   if (!user) return null;
 
-  const profile = await prisma.profile.findUnique({
-    where: { userId: user.id },
-    select: { role: true },
-  });
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("userId", user.id)
+    .single();
+
+  const session = await getSession();
+  if (!session) return null;
 
   return {
     id: user.id,
     email: user.email,
     role: (profile?.role as UserRole) || "member",
-    session: (await getSession())!,
+    session,
   };
 }
 
@@ -65,12 +68,10 @@ export async function signUp(email: string, password: string) {
   if (error) throw error;
 
   if (data.user) {
-    await prisma.profile.create({
-      data: {
-        userId: data.user.id,
-        email: data.user.email || "",
-        role: "member",
-      },
+    await supabase.from("profiles").insert({
+      userId: data.user.id,
+      email: data.user.email || "",
+      role: "member",
     });
   }
 

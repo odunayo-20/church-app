@@ -1,27 +1,43 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import * as api from "@/lib/api/posts";
-import type { PaginationParams } from "@/types/api";
+import { 
+  getPostsAction, 
+  getPostByIdAction, 
+  getPostBySlugAction,
+  createPostAction, 
+  updatePostAction, 
+  deletePostAction 
+} from "@/app/action/post-actions";
+import type { PaginationParams, PaginatedResult } from "@/types/api";
+import type { Post } from "@/types/models";
 
 const KEYS = {
   all: ["posts"] as const,
   lists: () => [...KEYS.all, "list"] as const,
-  list: (params: PaginationParams) => [...KEYS.lists(), params] as const,
+  list: (params: PaginationParams & { published?: boolean }) => [...KEYS.lists(), params] as const,
   details: () => [...KEYS.all, "detail"] as const,
   detail: (id: string) => [...KEYS.details(), id] as const,
 };
 
-export function usePosts(params?: PaginationParams) {
-  return useQuery({
+export function usePosts(params?: PaginationParams & { published?: boolean }) {
+  return useQuery<PaginatedResult<Post>>({
     queryKey: KEYS.list(params ?? {}),
-    queryFn: () => api.getPosts(params),
+    queryFn: () => getPostsAction(params ?? {}),
   });
 }
 
 export function usePost(id: string) {
-  return useQuery({
+  return useQuery<Post>({
     queryKey: KEYS.detail(id),
-    queryFn: () => api.getPostById(id),
+    queryFn: () => getPostByIdAction(id),
     enabled: !!id,
+  });
+}
+
+export function usePostBySlug(slug: string) {
+  return useQuery<Post>({
+    queryKey: postKeys.detail(slug),
+    queryFn: () => getPostBySlugAction(slug),
+    enabled: !!slug,
   });
 }
 
@@ -29,7 +45,7 @@ export function useCreatePost() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: api.createPost,
+    mutationFn: createPostAction,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: KEYS.lists() });
     },
@@ -43,8 +59,8 @@ export function useUpdatePost() {
     mutationFn: ({
       id,
       ...input
-    }: { id: string } & Parameters<typeof api.updatePost>[1]) =>
-      api.updatePost(id, input),
+    }: { id: string } & Parameters<typeof updatePostAction>[1]) =>
+      updatePostAction(id, input),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: KEYS.lists() });
       queryClient.invalidateQueries({ queryKey: KEYS.detail(variables.id) });
@@ -56,7 +72,7 @@ export function useDeletePost() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: api.deletePost,
+    mutationFn: deletePostAction,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: KEYS.lists() });
     },

@@ -1,40 +1,33 @@
+"use client";
+
 import Link from "next/link";
-import prisma from "@/lib/prisma";
 import { formatDate } from "@/lib/utils";
-import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/auth";
 import { DeleteButton } from "@/components/admin/delete-button";
+import { useEvents, useDeleteEvent } from "@/hooks";
+import { toast } from "sonner";
 
-export const dynamic = "force-dynamic";
+export default function AdminEventsPage() {
+  const { data, isLoading, error } = useEvents({ page: 1, limit: 100 });
+  const deleteEventMutation = useDeleteEvent();
 
-async function deleteEvent(formData: FormData) {
-  "use server";
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteEventMutation.mutateAsync(id);
+      toast.success("Event deleted successfully");
+    } catch (error) {
+      toast.error("Failed to delete event");
+    }
+  };
 
-  const user = await getCurrentUser();
-  if (!user || user.role !== "admin") {
-    redirect("/auth/login");
+  if (isLoading) {
+    return <div className="container mx-auto px-4 py-12 text-center">Loading...</div>;
   }
 
-  const id = formData.get("id") as string;
-  await prisma.event.delete({ where: { id } });
-  redirect("/admin/events");
-}
+  if (error) {
+    return <div className="container mx-auto px-4 py-12 text-center text-red-500">Error loading events</div>;
+  }
 
-export default async function AdminEventsPage() {
-  const events = await prisma.event.findMany({
-    orderBy: { date: "desc" },
-    select: {
-      id: true,
-      title: true,
-      date: true,
-      location: true,
-      rsvpEnabled: true,
-      createdAt: true,
-      _count: {
-        select: { rsvps: true },
-      },
-    },
-  });
+  const events = data?.data || [];
 
   return (
     <div className="container mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
@@ -66,21 +59,15 @@ export default async function AdminEventsPage() {
           <table className="w-full">
             <thead className="bg-muted/50">
               <tr>
-                <th className="px-4 py-3 text-left text-sm font-medium">
-                  Title
-                </th>
+                <th className="px-4 py-3 text-left text-sm font-medium">Title</th>
                 <th className="hidden px-4 py-3 text-left text-sm font-medium md:table-cell">
                   Date
                 </th>
                 <th className="hidden px-4 py-3 text-left text-sm font-medium lg:table-cell">
                   Location
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-medium">
-                  RSVPs
-                </th>
-                <th className="px-4 py-3 text-right text-sm font-medium">
-                  Actions
-                </th>
+                <th className="px-4 py-3 text-left text-sm font-medium">RSVPs</th>
+                <th className="px-4 py-3 text-right text-sm font-medium">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/40">
@@ -109,7 +96,7 @@ export default async function AdminEventsPage() {
                     <td className="hidden px-4 py-3 text-sm text-muted-foreground lg:table-cell">
                       {event.location}
                     </td>
-                    <td className="px-4 py-3 text-sm">{event._count.rsvps}</td>
+                    <td className="px-4 py-3 text-sm">{event._count?.rsvps || 0}</td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex justify-end gap-2">
                         <Link
@@ -125,10 +112,11 @@ export default async function AdminEventsPage() {
                         >
                           Edit
                         </Link>
-                        <form method="POST" action={deleteEvent}>
-                          <input type="hidden" name="id" value={event.id} />
-                          <DeleteButton message="Are you sure you want to delete this event?" />
-                        </form>
+                        <DeleteButton 
+                          message="Are you sure you want to delete this event?" 
+                          onDelete={() => handleDelete(event.id)}
+                          isLoading={deleteEventMutation.isPending}
+                        />
                       </div>
                     </td>
                   </tr>

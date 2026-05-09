@@ -1,25 +1,21 @@
-import { redirect, notFound } from "next/navigation";
-import prisma from "@/lib/prisma";
-import { getCurrentUser } from "@/lib/auth";
+"use client";
+
+import { useMember } from "@/hooks";
 import { MemberEditForm } from "@/components/members/member-edit-form";
+import { useParams } from "next/navigation";
 
-export const dynamic = "force-dynamic";
+export default function EditMemberPage() {
+  const params = useParams();
+  const id = params.id as string;
 
-export default async function EditMemberPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
+  const { data: member, isLoading, error } = useMember(id);
 
-  const user = await getCurrentUser();
-  if (!user || user.role !== "admin") {
-    redirect("/auth/login");
+  if (isLoading) {
+    return <div className="py-12 text-center">Loading member...</div>;
   }
 
-  const member = await prisma.member.findUnique({ where: { id } });
-  if (!member) {
-    notFound();
+  if (error || !member) {
+    return <div className="py-12 text-center text-red-500">Member not found</div>;
   }
 
   return (

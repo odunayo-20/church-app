@@ -56,6 +56,15 @@ export async function middleware(request: NextRequest) {
   }
 
   if ((path === "/auth/login" || path === "/auth/register") && session) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("userId", session.user.id)
+      .single();
+
+    if (profile?.role === "admin" || profile?.role === "media") {
+      return NextResponse.redirect(new URL("/admin", request.url));
+    }
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 

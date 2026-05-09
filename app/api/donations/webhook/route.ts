@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import prisma from "@/lib/prisma";
+import { createAdminClient } from "@/lib/supabase/server";
 import { verifyPaystackWebhookSignature } from "@/lib/crypto";
 import { successResponse, errorResponse } from "@/lib/api-response";
 import { verifyPayment } from "@/lib/paystack";
@@ -24,16 +24,19 @@ export async function POST(request: NextRequest) {
     }
 
     const event = JSON.parse(payload);
+    const supabase = await createAdminClient();
 
     if (event.event === "charge.success") {
       const data = event.data;
       const reference = data.reference;
 
-      const existingDonation = await prisma.donation.findUnique({
-        where: { reference },
-      });
+      const { data: existingDonation, error: fetchError } = await supabase
+        .from("donations")
+        .select("*")
+        .eq("reference", reference)
+        .single();
 
-      if (!existingDonation) {
+      if (fetchError || !existingDonation) {
         return errorResponse("Donation not found", 404);
       }
 
@@ -48,24 +51,24 @@ export async function POST(request: NextRequest) {
         verification.data.amount !==
           Math.round(Number(existingDonation.amount) * 100)
       ) {
-        await prisma.donation.update({
-          where: { reference },
-          data: { status: "failed" },
-        });
+        await supabase
+          .from("donations")
+          .update({ status: "failed" })
+          .eq("reference", reference);
         return errorResponse("Payment verification failed", 400);
       }
 
-      await prisma.donation.update({
-        where: { reference },
-        data: {
+      await supabase
+        .from("donations")
+        .update({
           status: "completed",
-          gatewayReference: data.gateway_response || undefined,
-          paymentMethod: data.channel || undefined,
-          channel: data.channel || undefined,
-          paidAt: new Date(data.paid_at || data.createdAt),
+          gatewayReference: data.gateway_response || null,
+          paymentMethod: data.channel || null,
+          channel: data.channel || null,
+          paidAt: new Date(data.paid_at || data.created_at).toISOString(),
           metadata: data,
-        },
-      });
+        })
+        .eq("reference", reference);
     }
 
     return successResponse({ message: "Webhook processed" });

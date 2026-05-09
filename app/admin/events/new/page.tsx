@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 export default async function NewEventPage() {
   const user = await getCurrentUser();
-  if (!user || user.role !== "admin") {
+  if (!user || (user.role !== "admin" && user.role !== "media")) {
     redirect("/auth/login");
   }
 

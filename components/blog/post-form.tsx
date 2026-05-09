@@ -6,6 +6,8 @@ import dynamic from "next/dynamic";
 import { ImageUpload } from "./image-upload";
 import { slugify } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useCreatePost, useUpdatePost } from "@/hooks";
+import { toast } from "sonner";
 
 const RichTextEditor = dynamic(
   () =>
@@ -33,13 +35,15 @@ interface PostFormProps {
 
 export function PostForm({ post, isEditing = false }: PostFormProps) {
   const router = useRouter();
+  const createMutation = useCreatePost();
+  const updateMutation = useUpdatePost();
+
   const [title, setTitle] = useState(post?.title ?? "");
   const [slug, setSlug] = useState(post?.slug ?? "");
   const [excerpt, setExcerpt] = useState(post?.excerpt ?? "");
   const [content, setContent] = useState(post?.content ?? "");
   const [coverImage, setCoverImage] = useState(post?.coverImage ?? "");
   const [published, setPublished] = useState(post?.published ?? false);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleTitleChange = (value: string) => {
@@ -66,38 +70,33 @@ export function PostForm({ post, isEditing = false }: PostFormProps) {
       return;
     }
 
-    setLoading(true);
-
     try {
-      const url = isEditing ? `/api/blog/posts/${post!.id}` : "/api/blog/posts";
-      const method = isEditing ? "PATCH" : "POST";
+      const postData = {
+        title,
+        slug,
+        excerpt,
+        content,
+        coverImage: coverImage || undefined,
+        published,
+      };
 
-      const response = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title,
-          slug,
-          excerpt,
-          content,
-          coverImage: coverImage || null,
-          published,
-        }),
-      });
-
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.message || "Failed to save post");
+      if (isEditing && post) {
+        await updateMutation.mutateAsync({ id: post.id, ...postData });
+        toast.success("Post updated successfully");
+      } else {
+        await createMutation.mutateAsync(postData);
+        toast.success("Post created successfully");
       }
 
       router.push("/admin/blog");
       router.refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save post");
-    } finally {
-      setLoading(false);
+    } catch (err: any) {
+      setError(err.message || "Failed to save post");
+      toast.error("Failed to save post");
     }
   };
+
+  const isPending = createMutation.isPending || updateMutation.isPending;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -176,10 +175,10 @@ export function PostForm({ post, isEditing = false }: PostFormProps) {
       <div className="flex gap-2">
         <button
           type="submit"
-          disabled={loading}
+          disabled={isPending}
           className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {loading ? "Saving..." : isEditing ? "Update post" : "Create post"}
+          {isPending ? "Saving..." : isEditing ? "Update post" : "Create post"}
         </button>
         <button
           type="button"

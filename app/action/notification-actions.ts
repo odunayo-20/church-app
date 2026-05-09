@@ -1,11 +1,15 @@
-import prisma from "@/lib/prisma";
+"use server"
+
+import { createClient } from "@/lib/supabase/server";
 import { resend } from "@/lib/email";
 import { birthdayEmail, anniversaryEmail } from "@/lib/email-templates";
 import { logger } from "@/lib/logger";
+import { revalidatePath } from "next/cache";
 
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL ?? "onboarding@resend.dev";
+const generateId = () => globalThis.crypto.randomUUID();
 
-export async function processNotifications() {
+export async function processNotificationsAction() {
   if (!resend) {
     logger.warn("Resend not configured, skipping notification processing");
     return {
@@ -25,6 +29,7 @@ export async function processNotifications() {
       anniversary: anniversaryResults,
     });
 
+    revalidatePath("/admin/notifications");
     return { birthday: birthdayResults, anniversary: anniversaryResults };
   } catch (error) {
     logger.error("Notification processing failed", error);
@@ -33,15 +38,19 @@ export async function processNotifications() {
 }
 
 async function processBirthdayNotifications() {
+  const supabase = await createClient();
   const today = new Date();
   const month = today.getMonth();
   const date = today.getDate();
 
-  const members = await prisma.member.findMany({
-    where: { birthday: { not: null } },
-  });
+  const { data: members, error } = await supabase
+    .from("members")
+    .select("*")
+    .not("birthday", "is", null);
 
-  const birthdayMembers = members.filter((member) => {
+  if (error) throw error;
+
+  const birthdayMembers = (members || []).filter((member) => {
     if (!member.birthday) return false;
     const bday = new Date(member.birthday);
     return bday.getMonth() === month && bday.getDate() === date;
@@ -59,15 +68,19 @@ async function processBirthdayNotifications() {
 }
 
 async function processAnniversaryNotifications() {
+  const supabase = await createClient();
   const today = new Date();
   const month = today.getMonth();
   const date = today.getDate();
 
-  const members = await prisma.member.findMany({
-    where: { anniversary: { not: null } },
-  });
+  const { data: members, error } = await supabase
+    .from("members")
+    .select("*")
+    .not("anniversary", "is", null);
 
-  const anniversaryMembers = members.filter((member) => {
+  if (error) throw error;
+
+  const anniversaryMembers = (members || []).filter((member) => {
     if (!member.anniversary) return false;
     const anniversary = new Date(member.anniversary);
     return anniversary.getMonth() === month && anniversary.getDate() === date;
@@ -92,21 +105,22 @@ async function sendNotificationBatch(
     message: string;
   },
 ) {
+  const supabase = await createClient();
   let success = 0;
   let failed = 0;
 
   const notificationPromises = members.map(async (member) => {
     const notification = createNotification(member);
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
 
-    const existingNotification = await prisma.notification.findFirst({
-      where: {
-        memberId: member.id,
-        type: notification.type,
-        createdAt: {
-          gte: new Date(new Date().setHours(0, 0, 0, 0)),
-        },
-      },
-    });
+    const { data: existingNotification } = await supabase
+      .from("notifications")
+      .select("id")
+      .eq("memberId", member.id)
+      .eq("type", notification.type)
+      .gte("createdAt", startOfToday.toISOString())
+      .maybeSingle();
 
     if (existingNotification) {
       logger.debug(`Skipping duplicate notification for ${member.id}`);
@@ -125,15 +139,16 @@ async function sendNotificationBatch(
         html: notification.template.html,
       });
 
-      await prisma.notification.create({
-        data: {
-          memberId: member.id,
-          type: notification.type,
-          message: notification.message,
-          status: emailResult.error ? "failed" : "sent",
-          sentAt: emailResult.error ? null : new Date(),
-          metadata: { messageId: emailResult.data?.id },
-        },
+      await supabase.from("notifications").insert({
+        id: generateId(),
+        memberId: member.id,
+        type: notification.type,
+        message: notification.message,
+        status: emailResult.error ? "failed" : "sent",
+        sentAt: emailResult.error ? null : new Date().toISOString(),
+        metadata: { message_id: emailResult.data?.id },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       });
 
       if (emailResult.error) {
@@ -147,16 +162,17 @@ async function sendNotificationBatch(
       failed++;
       logger.error(`Failed to send notification to ${member.email}`, error);
 
-      await prisma.notification.create({
-        data: {
-          memberId: member.id,
-          type: notification.type,
-          message: notification.message,
-          status: "failed",
-          metadata: {
-            error: error instanceof Error ? error.message : "Unknown error",
-          },
+      await supabase.from("notifications").insert({
+        id: generateId(),
+        memberId: member.id,
+        type: notification.type,
+        message: notification.message,
+        status: "failed",
+        metadata: {
+          error: error instanceof Error ? error.message : "Unknown error",
         },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       });
 
       return { success: false };
@@ -166,4 +182,49 @@ async function sendNotificationBatch(
   await Promise.allSettled(notificationPromises);
 
   return { processed: members.length, success, failed };
+}
+
+export async function getNotificationsAction(filters: { type?: string; status?: string; limit?: number } = {}) {
+  try {
+    const supabase = await createClient();
+    const { type, status, limit = 50 } = filters;
+
+    let query = supabase
+      .from("notifications")
+      .select("*, member:members(*)")
+      .order("createdAt", { ascending: false })
+      .limit(limit);
+
+    if (type) query = query.eq("type", type);
+    if (status) query = query.eq("status", status);
+
+    const { data, error } = await query;
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
+    throw new Error("Failed to fetch notifications");
+  }
+}
+
+export async function getNotificationStatsAction() {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("notifications")
+      .select("status, type");
+
+    if (error) throw error;
+
+    const stats = (data || []).reduce((acc, n) => {
+      acc[n.status] = (acc[n.status] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    return stats;
+  } catch (error) {
+    console.error("Error fetching notification stats:", error);
+    throw new Error("Failed to fetch notification stats");
+  }
 }

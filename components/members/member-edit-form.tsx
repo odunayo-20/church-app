@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useUpdateMember } from "@/hooks";
+import { toast } from "sonner";
 
 interface MemberEditFormProps {
   member: {
@@ -9,23 +11,20 @@ interface MemberEditFormProps {
     name: string;
     email: string;
     phone: string | null;
-    birthday: Date | null;
-    anniversary: Date | null;
+    birthday: string | null;
+    anniversary: string | null;
   };
 }
 
 export function MemberEditForm({ member }: MemberEditFormProps) {
   const router = useRouter();
+  const updateMutation = useUpdateMember();
+  
   const [name, setName] = useState(member.name);
   const [email, setEmail] = useState(member.email);
   const [phone, setPhone] = useState(member.phone ?? "");
-  const [birthday, setBirthday] = useState(
-    member.birthday ? member.birthday.toISOString().split("T")[0] : "",
-  );
-  const [anniversary, setAnniversary] = useState(
-    member.anniversary ? member.anniversary.toISOString().split("T")[0] : "",
-  );
-  const [loading, setLoading] = useState(false);
+  const [birthday, setBirthday] = useState(member.birthday || "");
+  const [anniversary, setAnniversary] = useState(member.anniversary || "");
   const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -41,32 +40,22 @@ export function MemberEditForm({ member }: MemberEditFormProps) {
       return;
     }
 
-    setLoading(true);
-
     try {
-      const response = await fetch(`/api/members/${member.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          email,
-          phone: phone || null,
-          birthday: birthday || null,
-          anniversary: anniversary || null,
-        }),
+      await updateMutation.mutateAsync({
+        id: member.id,
+        name,
+        email,
+        phone: phone || undefined,
+        birthday: birthday ? new Date(birthday) : null,
+        anniversary: anniversary ? new Date(anniversary) : null,
       });
 
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.message || "Failed to update member");
-      }
-
+      toast.success("Member updated successfully");
       router.push("/admin/members");
       router.refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update member");
-    } finally {
-      setLoading(false);
+    } catch (err: any) {
+      setError(err.message || "Failed to update member");
+      toast.error("Failed to update member");
     }
   };
 
@@ -135,10 +124,10 @@ export function MemberEditForm({ member }: MemberEditFormProps) {
       <div className="flex gap-2 pt-2">
         <button
           type="submit"
-          disabled={loading}
+          disabled={updateMutation.isPending}
           className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {loading ? "Saving..." : "Save Changes"}
+          {updateMutation.isPending ? "Saving..." : "Save Changes"}
         </button>
         <button
           type="button"

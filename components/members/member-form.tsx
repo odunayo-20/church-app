@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useCreateMember } from "@/hooks";
+import { toast } from "sonner";
 
 export function MemberForm() {
   const [open, setOpen] = useState(false);
@@ -9,8 +11,9 @@ export function MemberForm() {
   const [phone, setPhone] = useState("");
   const [birthday, setBirthday] = useState("");
   const [anniversary, setAnniversary] = useState("");
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const createMutation = useCreateMember();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,31 +28,25 @@ export function MemberForm() {
       return;
     }
 
-    setLoading(true);
-
     try {
-      const response = await fetch("/api/members", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          email,
-          phone: phone || null,
-          birthday: birthday || null,
-          anniversary: anniversary || null,
-        }),
+      await createMutation.mutateAsync({
+        name,
+        email,
+        phone: phone || null,
+        birthday: birthday || null,
+        anniversary: anniversary || null,
       });
 
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.message || "Failed to create member");
-      }
-
-      window.location.reload();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create member");
-    } finally {
-      setLoading(false);
+      toast.success("Member added successfully");
+      setOpen(false);
+      setName("");
+      setEmail("");
+      setPhone("");
+      setBirthday("");
+      setAnniversary("");
+    } catch (err: any) {
+      setError(err.message || "Failed to create member");
+      toast.error("Failed to create member");
     }
   };
 
@@ -158,10 +155,10 @@ export function MemberForm() {
               <div className="flex gap-2 pt-2">
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={createMutation.isPending}
                   className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {loading ? "Saving..." : "Add Member"}
+                  {createMutation.isPending ? "Saving..." : "Add Member"}
                 </button>
                 <button
                   type="button"

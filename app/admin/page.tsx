@@ -1,15 +1,22 @@
+"use client";
+
 import Link from "next/link";
-import prisma from "@/lib/prisma";
 import { formatDate } from "@/lib/utils";
 import { DashboardCharts } from "@/components/admin/dashboard-charts";
+import { useDashboardData } from "@/hooks";
 
-export const dynamic = "force-dynamic";
+export default function AdminDashboardPage() {
+  const { data, isLoading, error } = useDashboardData();
 
-export default async function AdminDashboardPage() {
-  const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  if (isLoading) {
+    return <div className="py-12 text-center">Loading dashboard...</div>;
+  }
 
-  const [
+  if (error || !data) {
+    return <div className="py-12 text-center text-red-500">Error loading dashboard data</div>;
+  }
+
+  const {
     memberCount,
     donationCount,
     eventCount,
@@ -17,36 +24,15 @@ export default async function AdminDashboardPage() {
     monthlyDonations,
     recentDonations,
     upcomingEvents,
-  ] = await Promise.all([
-    prisma.member.count(),
-    prisma.donation.count({ where: { status: "completed" } }),
-    prisma.event.count({ where: { date: { gte: now } } }),
-    prisma.post.count({ where: { published: true } }),
-    prisma.donation.findMany({
-      where: { status: "completed", paidAt: { gte: startOfMonth } },
-      orderBy: { paidAt: "asc" },
-      select: { paidAt: true, amount: true },
-    }),
-    prisma.donation.findMany({
-      where: { status: "completed" },
-      orderBy: { paidAt: "desc" },
-      take: 5,
-      include: { member: true },
-    }),
-    prisma.event.findMany({
-      where: { date: { gte: now } },
-      orderBy: { date: "asc" },
-      take: 5,
-    }),
-  ]);
+  } = data;
 
   const totalDonations = monthlyDonations.reduce(
     (sum, d) => sum + Number(d.amount),
     0,
   );
 
-  const chartData = monthlyDonations.map((d) => ({
-    date: formatDate(d.paidAt!.toString()),
+  const chartData = monthlyDonations.map((d: any) => ({
+    date: formatDate(d.paidAt),
     amount: Number(d.amount),
   }));
 
@@ -186,7 +172,7 @@ function StatCard({
 function UpcomingEventsList({
   events,
 }: {
-  events: { id: string; title: string; date: Date; location: string }[];
+  events: any[];
 }) {
   return (
     <div className="rounded-lg border border-border/40 bg-card shadow-sm">
@@ -235,13 +221,7 @@ function UpcomingEventsList({
 function RecentDonationsList({
   donations,
 }: {
-  donations: {
-    id: string;
-    amount: unknown;
-    paidAt: Date | null;
-    donorName: string | null;
-    member: { name: string | null } | null;
-  }[];
+  donations: any[];
 }) {
   return (
     <div className="rounded-lg border border-border/40 bg-card shadow-sm">
@@ -278,7 +258,7 @@ function RecentDonationsList({
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {donation.paidAt
-                      ? formatDate(donation.paidAt.toISOString())
+                      ? formatDate(donation.paidAt)
                       : "Pending"}
                   </p>
                 </div>

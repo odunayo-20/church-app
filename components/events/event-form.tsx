@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useCreateEvent, useUpdateEvent } from "@/hooks";
+import { toast } from "sonner";
 
 interface EventFormProps {
   event?: {
@@ -19,6 +21,9 @@ interface EventFormProps {
 
 export function EventForm({ event, isEditing = false }: EventFormProps) {
   const router = useRouter();
+  const createMutation = useCreateEvent();
+  const updateMutation = useUpdateEvent();
+
   const [title, setTitle] = useState(event?.title ?? "");
   const [description, setDescription] = useState(event?.description ?? "");
   const [date, setDate] = useState(
@@ -30,7 +35,6 @@ export function EventForm({ event, isEditing = false }: EventFormProps) {
   const [rsvpLimit, setRsvpLimit] = useState(
     event?.rsvpLimit?.toString() ?? "",
   );
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -54,39 +58,34 @@ export function EventForm({ event, isEditing = false }: EventFormProps) {
       return;
     }
 
-    setLoading(true);
-
     try {
-      const url = isEditing ? `/api/events/${event!.id}` : "/api/events";
-      const method = isEditing ? "PATCH" : "POST";
+      const eventData = {
+        title,
+        description,
+        date: new Date(date),
+        location,
+        imageUrl: imageUrl || undefined,
+        rsvpEnabled,
+        rsvpLimit: rsvpEnabled && rsvpLimit ? parseInt(rsvpLimit) : null,
+      };
 
-      const response = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title,
-          description,
-          date: new Date(date).toISOString(),
-          location,
-          imageUrl: imageUrl || null,
-          rsvpEnabled,
-          rsvpLimit: rsvpEnabled && rsvpLimit ? parseInt(rsvpLimit) : null,
-        }),
-      });
-
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.message || "Failed to save event");
+      if (isEditing && event) {
+        await updateMutation.mutateAsync({ id: event.id, ...eventData });
+        toast.success("Event updated successfully");
+      } else {
+        await createMutation.mutateAsync(eventData);
+        toast.success("Event created successfully");
       }
 
       router.push("/admin/events");
       router.refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save event");
-    } finally {
-      setLoading(false);
+    } catch (err: any) {
+      setError(err.message || "Failed to save event");
+      toast.error("Failed to save event");
     }
   };
+
+  const isPending = createMutation.isPending || updateMutation.isPending;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -193,10 +192,10 @@ export function EventForm({ event, isEditing = false }: EventFormProps) {
       <div className="flex gap-2">
         <button
           type="submit"
-          disabled={loading}
+          disabled={isPending}
           className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {loading ? "Saving..." : isEditing ? "Update event" : "Create event"}
+          {isPending ? "Saving..." : isEditing ? "Update event" : "Create event"}
         </button>
         <button
           type="button"

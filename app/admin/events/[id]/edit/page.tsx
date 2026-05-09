@@ -1,37 +1,21 @@
-import { redirect, notFound } from "next/navigation";
-import prisma from "@/lib/prisma";
-import { getCurrentUser } from "@/lib/auth";
+"use client";
+
+import { useEvent } from "@/hooks";
 import { EventForm } from "@/components/events/event-form";
+import { useParams, notFound } from "next/navigation";
 
-export const dynamic = "force-dynamic";
+export default function EditEventPage() {
+  const params = useParams();
+  const id = params.id as string;
 
-export default async function EditEventPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
+  const { data: event, isLoading, error } = useEvent(id);
 
-  const user = await getCurrentUser();
-  if (!user || user.role !== "admin") {
-    redirect("/auth/login");
+  if (isLoading) {
+    return <div className="py-12 text-center">Loading event...</div>;
   }
 
-  const event = await prisma.event.findUnique({
-    where: { id },
-    select: {
-      id: true,
-      title: true,
-      description: true,
-      date: true,
-      location: true,
-      imageUrl: true,
-      rsvpEnabled: true,
-      rsvpLimit: true,
-    },
-  });
-  if (!event) {
-    notFound();
+  if (error || !event) {
+    return <div className="py-12 text-center text-red-500">Event not found</div>;
   }
 
   return (
@@ -46,7 +30,7 @@ export default async function EditEventPage({
           id: event.id,
           title: event.title,
           description: event.description,
-          date: event.date.toISOString(),
+          date: new Date(event.date).toISOString(),
           location: event.location,
           imageUrl: event.imageUrl,
           rsvpEnabled: event.rsvpEnabled,

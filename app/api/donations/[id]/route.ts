@@ -1,10 +1,9 @@
 import { NextRequest } from "next/server";
 import {
-  getDonationById,
-  updateDonation,
-  deleteDonation,
-} from "@/services/donation-service";
-import { donationUpdateSchema } from "@/lib/validations";
+  getDonationByIdAction,
+  updateDonationAction,
+  deleteDonationAction,
+} from "@/app/action/donation-actions";
 import { successResponse, handleApiError } from "@/lib/api-response";
 
 export async function GET(
@@ -13,7 +12,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const donation = await getDonationById(id);
+    const donation = await getDonationByIdAction(id);
 
     if (!donation) {
       return Response.json(
@@ -35,8 +34,7 @@ export async function PATCH(
   try {
     const { id } = await params;
     const body = await request.json();
-    const validated = donationUpdateSchema.parse(body);
-    const donation = await updateDonation(id, validated);
+    const donation = await updateDonationAction(id, body);
     return successResponse(donation);
   } catch (error) {
     return handleApiError(error);
@@ -49,7 +47,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    await deleteDonation(id);
+    await deleteDonationAction(id);
     return Response.json({ success: true, message: "Donation deleted" });
   } catch (error) {
     return handleApiError(error);

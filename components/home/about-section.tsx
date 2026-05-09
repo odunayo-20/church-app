@@ -1,30 +1,17 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useInView } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import { Button } from "@/components/ui/button";
-import { ArrowRight, Heart, Users, BookOpen } from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
 
-const features = [
-  {
-    icon: Heart,
-    title: "Warm Community",
-    description:
-      "Experience genuine fellowship and build lasting relationships with fellow believers.",
-  },
-  {
-    icon: BookOpen,
-    title: "Bible Teaching",
-    description:
-      "Grow in your understanding of God's Word through engaging, practical teaching.",
-  },
-  {
-    icon: Users,
-    title: "Family Focused",
-    description:
-      "Programs and activities designed to strengthen families at every stage of life.",
-  },
+const pillars = [
+  "Spirit-led worship every Sunday at 9am & 11am",
+  "Life groups for every age and stage of life",
+  "Missions and outreach in our local community",
+  "Children & youth programs rooted in Biblical truth",
+  "Prayer, discipleship, and spiritual mentorship",
 ];
 
 export function AboutSection() {
@@ -32,57 +19,114 @@ export function AboutSection() {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section ref={ref} className="py-20 sm:py-28">
-      <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.5 }}
-          className="mx-auto mb-16 max-w-2xl text-center"
-        >
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            Who We Are
-          </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
-            We are a community of believers committed to sharing God&apos;s
-            love, building meaningful relationships, and making a difference in
-            our city.
-          </p>
-        </motion.div>
+    <section
+      ref={ref}
+      className="relative overflow-hidden bg-[#0b0f1a] py-24 sm:py-32"
+    >
+      {/* Subtle grid */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.04]"
+        style={{
+          backgroundImage:
+            "linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)",
+          backgroundSize: "48px 48px",
+        }}
+      />
 
-        <div className="grid gap-8 md:grid-cols-3">
-          {features.map((feature, index) => (
-            <motion.div
-              key={feature.title}
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="group rounded-xl border border-border/40 bg-card p-8 shadow-sm transition-all hover:border-primary/20 hover:shadow-md"
-            >
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-                <feature.icon className="h-6 w-6" />
-              </div>
-              <h3 className="text-lg font-semibold">{feature.title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                {feature.description}
-              </p>
-            </motion.div>
-          ))}
-        </div>
+      {/* Glow orb */}
+      <div className="pointer-events-none absolute -left-40 top-1/2 -translate-y-1/2 h-[500px] w-[500px] rounded-full bg-amber-600/10 blur-[100px]" />
 
-        <motion.div
-          className="mt-12 text-center"
-          initial={{ opacity: 0 }}
-          animate={isInView ? { opacity: 1 } : {}}
-          transition={{ duration: 0.5, delay: 0.4 }}
-        >
-          <Button asChild variant="outline" size="lg" href="/about">
-            <span className="flex items-center gap-2">
-              Learn More About Us
-              <ArrowRight className="h-4 w-4" />
+      <div className="container relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="grid items-center gap-16 lg:grid-cols-2">
+          {/* Text column */}
+          <motion.div
+            initial={{ opacity: 0, x: -40 }}
+            animate={isInView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          >
+            {/* Eyebrow */}
+            <span className="inline-flex items-center gap-2 rounded-full border border-amber-400/20 bg-amber-400/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-amber-400">
+              Who We Are
             </span>
-          </Button>
-        </motion.div>
+
+            <h2 className="mt-6 text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl">
+              A Community Built on{" "}
+              <span className="bg-gradient-to-r from-amber-400 to-rose-400 bg-clip-text text-transparent">
+                God&apos;s Word
+              </span>
+            </h2>
+
+            <p className="mt-6 text-lg leading-relaxed text-white/60">
+              We are a vibrant, multi-generational community of believers
+              committed to sharing God&apos;s love, building meaningful
+              relationships, and making a lasting difference in our city and
+              beyond.
+            </p>
+
+            {/* Checklist */}
+            <ul className="mt-8 space-y-3">
+              {pillars.map((item) => (
+                <li key={item} className="flex items-start gap-3">
+                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-amber-400" />
+                  <span className="text-sm font-medium text-white/70">{item}</span>
+                </li>
+              ))}
+            </ul>
+
+            {/* CTA */}
+            <Link
+              href="/about"
+              id="about-cta"
+              className="group mt-10 inline-flex items-center gap-2.5 rounded-full border border-white/15 bg-white/8 px-7 py-3.5 text-sm font-semibold text-white backdrop-blur-sm transition-all duration-300 hover:border-amber-400/40 hover:bg-amber-400/10 hover:text-amber-300"
+            >
+              Learn More About Us
+              <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+            </Link>
+          </motion.div>
+
+          {/* Photo collage column */}
+          <motion.div
+            initial={{ opacity: 0, x: 40 }}
+            animate={isInView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+            className="relative"
+          >
+            {/* Decorative ring */}
+            <div className="absolute -inset-4 rounded-3xl border border-amber-400/10" />
+
+            <div className="grid grid-cols-2 gap-4">
+              {/* Large top-left image */}
+              <div className="relative col-span-1 row-span-2 overflow-hidden rounded-2xl">
+                <Image
+                  src="/community.png"
+                  alt="Church community gathering"
+                  width={400}
+                  height={520}
+                  className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+              </div>
+
+              {/* Top right */}
+              <div className="relative overflow-hidden rounded-2xl aspect-square">
+                <Image
+                  src="/worship.png"
+                  alt="Church worship service"
+                  fill
+                  className="object-cover transition-transform duration-700 hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+              </div>
+
+              {/* Bottom right — stat card */}
+              <div className="flex flex-col items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-rose-500 p-6 text-center text-white shadow-lg shadow-amber-500/20">
+                <div className="text-4xl font-extrabold">20+</div>
+                <div className="mt-1 text-sm font-medium opacity-90">Years Serving</div>
+                <div className="mt-3 text-xs opacity-70">Our community has been growing together since 2004</div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
       </div>
     </section>
   );

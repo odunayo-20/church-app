@@ -7,6 +7,11 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "**.supabase.co",
       },
+      {
+        protocol: 'https',
+        hostname: 'i.postimg.cc',
+        pathname: '/**',
+      },
     ],
     formats: ["image/avif", "image/webp"],
   },

@@ -1,73 +1,45 @@
-import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
-
-const BUCKET_NAME = "blog-images";
+import { NextRequest } from "next/server";
+import { createAdminClient } from "@/lib/supabase/server";
+import { successResponse, errorResponse } from "@/lib/api-response";
+import { config } from "@/lib/config";
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-    }
-
     const formData = await request.formData();
     const file = formData.get("file") as File;
 
     if (!file) {
-      return NextResponse.json(
-        { message: "No file provided" },
-        { status: 400 },
-      );
+      return errorResponse("No file uploaded", 400);
     }
 
-    if (!file.type.startsWith("image/")) {
-      return NextResponse.json(
-        { message: "File must be an image" },
-        { status: 400 },
-      );
+    if (file.size > config.storage.maxUploadSize) {
+      return errorResponse("File size exceeds limit", 400);
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      return NextResponse.json(
-        { message: "File must be less than 5MB" },
-        { status: 400 },
-      );
-    }
+    const supabase = await createAdminClient();
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+    const filePath = `uploads/${fileName}`;
 
-    const ext = file.name.split(".").pop() || "png";
-    const fileName = `${user.id}/${Date.now()}.${ext}`;
-
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-
-    const { data, error } = await supabase.storage
-      .from(BUCKET_NAME)
-      .upload(fileName, buffer, {
-        contentType: file.type,
-        cacheControl: "3600",
+    const { data, error: uploadError } = await supabase.storage
+      .from(config.storage.bucketName)
+      .upload(filePath, file, {
+        cacheControl: config.storage.cacheControl,
+        upsert: false,
       });
 
-    if (error) {
-      return NextResponse.json(
-        { message: `Upload failed: ${error.message}` },
-        { status: 500 },
-      );
+    if (uploadError) {
+      console.error("Upload error:", uploadError);
+      return errorResponse(`Upload failed: ${uploadError.message}`, 500);
     }
 
-    const {
-      data: { publicUrl },
-    } = supabase.storage.from(BUCKET_NAME).getPublicUrl(data.path);
+    const { data: { publicUrl } } = supabase.storage
+      .from(config.storage.bucketName)
+      .getPublicUrl(filePath);
 
-    return NextResponse.json({ url: publicUrl });
+    return successResponse({ url: publicUrl });
   } catch (error) {
-    console.error("Upload error:", error);
-    return NextResponse.json(
-      { message: "Internal server error" },
-      { status: 500 },
-    );
+    console.error("Image upload error:", error);
+    return errorResponse("Image upload failed", 500);
   }
 }

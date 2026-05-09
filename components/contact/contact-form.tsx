@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Send, CheckCircle2, AlertCircle } from "lucide-react";
 
 export function ContactForm() {
   const [formData, setFormData] = useState({
@@ -9,9 +10,7 @@ export function ContactForm() {
     subject: "",
     message: "",
   });
-  const [status, setStatus] = useState<
-    "idle" | "loading" | "success" | "error"
-  >("idle");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -35,93 +34,103 @@ export function ContactForm() {
     }
   }
 
+  const inputClass =
+    "mt-1.5 w-full rounded-xl border border-input bg-background px-4 py-3 text-sm shadow-sm outline-none transition-all placeholder:text-muted-foreground/60 focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/20";
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid gap-6 sm:grid-cols-2">
+    <form onSubmit={handleSubmit} className="space-y-5">
+      <div className="grid gap-5 sm:grid-cols-2">
         <div>
-          <label htmlFor="name" className="block text-sm font-medium">
-            Name
+          <label htmlFor="contact-name" className="text-sm font-semibold">
+            Full Name <span className="text-amber-500">*</span>
           </label>
           <input
-            id="name"
+            id="contact-name"
             type="text"
             required
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            placeholder="Your name"
+            className={inputClass}
+            placeholder="Your full name"
           />
         </div>
         <div>
-          <label htmlFor="email" className="block text-sm font-medium">
-            Email
+          <label htmlFor="contact-email" className="text-sm font-semibold">
+            Email Address <span className="text-amber-500">*</span>
           </label>
           <input
-            id="email"
+            id="contact-email"
             type="email"
             required
             value={formData.email}
-            onChange={(e) =>
-              setFormData({ ...formData, email: e.target.value })
-            }
-            className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            className={inputClass}
             placeholder="your@email.com"
           />
         </div>
       </div>
 
       <div>
-        <label htmlFor="subject" className="block text-sm font-medium">
-          Subject
+        <label htmlFor="contact-subject" className="text-sm font-semibold">
+          Subject <span className="text-amber-500">*</span>
         </label>
         <input
-          id="subject"
+          id="contact-subject"
           type="text"
           required
           value={formData.subject}
-          onChange={(e) =>
-            setFormData({ ...formData, subject: e.target.value })
-          }
-          className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-          placeholder="What is this about?"
+          onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+          className={inputClass}
+          placeholder="What's this about?"
         />
       </div>
 
       <div>
-        <label htmlFor="message" className="block text-sm font-medium">
-          Message
+        <label htmlFor="contact-message" className="text-sm font-semibold">
+          Message <span className="text-amber-500">*</span>
         </label>
         <textarea
-          id="message"
+          id="contact-message"
           required
           rows={5}
           value={formData.message}
-          onChange={(e) =>
-            setFormData({ ...formData, message: e.target.value })
-          }
-          className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-          placeholder="Your message..."
+          onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+          className={`${inputClass} resize-none`}
+          placeholder="Share your thoughts, questions, or prayer requests…"
         />
       </div>
 
       <button
+        id="contact-submit"
         type="submit"
         disabled={status === "loading"}
-        className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+        className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-rose-500 px-6 text-sm font-semibold text-white shadow-lg shadow-amber-500/25 transition-all hover:opacity-90 hover:shadow-amber-500/40 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
       >
-        {status === "loading" ? "Sending..." : "Send Message"}
+        {status === "loading" ? (
+          <>
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+            Sending…
+          </>
+        ) : (
+          <>
+            <Send className="h-4 w-4" />
+            Send Message
+          </>
+        )}
       </button>
 
       {status === "success" && (
-        <p className="text-sm text-green-600 dark:text-green-400">
-          Your message has been sent successfully!
-        </p>
+        <div className="flex items-center gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm font-medium text-emerald-600 dark:text-emerald-400">
+          <CheckCircle2 className="h-5 w-5 shrink-0" />
+          Your message has been sent! We&apos;ll get back to you shortly.
+        </div>
       )}
 
       {status === "error" && (
-        <p className="text-sm text-red-600 dark:text-red-400">
+        <div className="flex items-center gap-3 rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">
+          <AlertCircle className="h-5 w-5 shrink-0" />
           Something went wrong. Please try again.
-        </p>
+        </div>
       )}
     </form>
   );

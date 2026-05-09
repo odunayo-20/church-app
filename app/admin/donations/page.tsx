@@ -1,7 +1,9 @@
-import prisma from "@/lib/prisma";
-import { formatDate } from "@/lib/utils";
+"use client";
 
-export const dynamic = "force-dynamic";
+import { formatDate } from "@/lib/utils";
+import { useDonations, useDonationStats } from "@/hooks";
+import { useState } from "react";
+import type { Donation } from "@/types/models";
 
 const STATUS_FILTERS = [
   { label: "All", value: "" },
@@ -11,49 +13,26 @@ const STATUS_FILTERS = [
   { label: "Refunded", value: "refunded" },
 ];
 
-export default async function AdminDonationsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ status?: string; search?: string }>;
-}) {
-  const { status, search } = await searchParams;
+export default function AdminDonationsPage() {
+  const [status, setStatus] = useState("");
+  const [search, setSearch] = useState("");
 
-  const where = {
-    ...(status ? { status } : {}),
-    ...(search
-      ? {
-          OR: [
-            { reference: { contains: search } },
-            { donorName: { contains: search } },
-            { donorEmail: { contains: search } },
-          ],
-        }
-      : {}),
-  };
+  const { data: donationsData, isLoading: isDonationsLoading } = useDonations({ page: 1, limit: 100 });
+  const { data: statsData, isLoading: isStatsLoading } = useDonationStats();
 
-  const [donations, totalDonations, stats] = await Promise.all([
-    prisma.donation.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
-      include: { member: true },
-    }),
-    prisma.donation.aggregate({
-      where: { status: "completed" },
-      _sum: { amount: true },
-    }),
-    prisma.donation.groupBy({
-      by: ["status"],
-      _count: { status: true },
-    }),
-  ]);
+  const donations = donationsData?.data || [];
+  const filteredDonations = donations.filter(d => {
+    const matchesStatus = !status || d.status === status;
+    const matchesSearch = !search || 
+      d.reference.toLowerCase().includes(search.toLowerCase()) ||
+      (d.donorName && d.donorName.toLowerCase().includes(search.toLowerCase())) ||
+      (d.donorEmail && d.donorEmail.toLowerCase().includes(search.toLowerCase()));
+    return matchesStatus && matchesSearch;
+  });
 
-  const statusCounts = stats.reduce(
-    (acc, s) => {
-      acc[s.status] = s._count.status;
-      return acc;
-    },
-    {} as Record<string, number>,
-  );
+  if (isDonationsLoading || isStatsLoading) {
+    return <div className="py-12 text-center">Loading...</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -69,27 +48,27 @@ export default async function AdminDonationsPage({
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatBox
           label="Total Received"
-          value={`₦${Number(totalDonations._sum.amount ?? 0).toLocaleString()}`}
+          value={`₦${Number(statsData?.totalAmount || 0).toLocaleString()}`}
         />
-        <StatBox label="Completed" value={statusCounts.completed ?? 0} />
-        <StatBox label="Pending" value={statusCounts.pending ?? 0} />
-        <StatBox label="Failed" value={statusCounts.failed ?? 0} />
+        <StatBox label="Completed" value={statsData?.counts?.completed || 0} />
+        <StatBox label="Pending" value={statsData?.counts?.pending || 0} />
+        <StatBox label="Failed" value={statsData?.counts?.failed || 0} />
       </div>
 
       <div className="rounded-lg border border-border/40 bg-card shadow-sm">
         <div className="border-b border-border/40 p-4">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <form className="flex flex-1 gap-2">
+            <div className="flex flex-1 gap-2">
               <input
                 type="text"
-                name="search"
                 placeholder="Search by reference or donor..."
-                defaultValue={search}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
                 className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm sm:w-64"
               />
               <select
-                name="status"
-                defaultValue={status}
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
                 className="rounded-md border border-input bg-background px-3 py-2 text-sm"
               >
                 {STATUS_FILTERS.map((filter) => (
@@ -98,11 +77,11 @@ export default async function AdminDonationsPage({
                   </option>
                 ))}
               </select>
-            </form>
+            </div>
           </div>
         </div>
 
-        {donations.length === 0 ? (
+        {filteredDonations.length === 0 ? (
           <div className="py-12 text-center">
             <p className="text-muted-foreground">No donations found.</p>
           </div>
@@ -111,18 +90,12 @@ export default async function AdminDonationsPage({
             <table className="w-full">
               <thead className="bg-muted/50">
                 <tr>
-                  <th className="px-4 py-3 text-left text-sm font-medium">
-                    Reference
-                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-medium">Reference</th>
                   <th className="hidden px-4 py-3 text-left text-sm font-medium sm:table-cell">
                     Donor
                   </th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">
-                    Amount
-                  </th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">
-                    Status
-                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-medium">Amount</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium">Status</th>
                   <th className="hidden px-4 py-3 text-left text-sm font-medium md:table-cell">
                     Method
                   </th>
@@ -132,7 +105,7 @@ export default async function AdminDonationsPage({
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/40">
-                {donations.map((donation) => (
+                {filteredDonations.map((donation: Donation) => (
                   <tr key={donation.id} className="hover:bg-muted/25">
                     <td className="px-4 py-3">
                       <p className="truncate font-mono text-sm">
@@ -161,9 +134,7 @@ export default async function AdminDonationsPage({
                       {donation.channel || donation.paymentMethod || "—"}
                     </td>
                     <td className="hidden px-4 py-3 text-sm text-muted-foreground lg:table-cell">
-                      {donation.paidAt
-                        ? formatDate(donation.paidAt.toISOString())
-                        : formatDate(donation.createdAt)}
+                      {formatDate(donation.paidAt || donation.createdAt)}
                     </td>
                   </tr>
                 ))}

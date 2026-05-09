@@ -1,21 +1,22 @@
-import { notFound } from "next/navigation";
-import prisma from "@/lib/prisma";
+"use client";
+
+import { usePost } from "@/hooks";
 import PostForm from "@/components/blog/post-form-wrapper";
+import { useParams } from "next/navigation";
 
-interface EditPostPageProps {
-  params: Promise<{ id: string }>;
-}
+export default function EditPostPage() {
+  const params = useParams();
+  const id = params.id as string;
 
-export const dynamic = "force-dynamic";
+  const { data: post, isLoading, error } = usePost(id);
 
-export default async function EditPostPage({ params }: EditPostPageProps) {
-  const { id } = await params;
+  if (isLoading) {
+    return <div className="py-12 text-center">Loading post...</div>;
+  }
 
-  const post = await prisma.post.findUnique({
-    where: { id },
-  });
-
-  if (!post) notFound();
+  if (error || !post) {
+    return <div className="py-12 text-center text-red-500">Post not found</div>;
+  }
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">

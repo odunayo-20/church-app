@@ -2,14 +2,13 @@ import { z } from "zod";
 
 const dateSchema = z
   .string()
-  .datetime()
   .or(z.date())
-  .transform((val) => new Date(val));
+  .transform((val) => (val ? new Date(val) : val));
 
 export const memberSchema = z.object({
   name: z.string().min(1, "Name is required").max(100),
   email: z.string().email("Invalid email address"),
-  phone: z.string().max(20).optional().or(z.literal("")),
+  phone: z.string().max(20).optional().nullable().or(z.literal("")),
   birthday: dateSchema.optional().nullable(),
   anniversary: dateSchema.optional().nullable(),
 });
@@ -46,9 +45,10 @@ export const postSchema = z.object({
   slug: z.string().min(1, "Slug is required").max(200).optional(),
   excerpt: z.string().max(500).optional().or(z.literal("")),
   content: z.string().min(1, "Content is required"),
-  image: z.string().url("Invalid image URL").optional().or(z.literal("")),
-  coverImage: z.string().url("Invalid image URL").optional().or(z.literal("")),
+  image: z.string().optional().nullable().or(z.literal("")),
+  coverImage: z.string().optional().nullable().or(z.literal("")),
   published: z.boolean().optional(),
+  authorId: z.string().optional().nullable(),
 });
 
 export const eventSchema = z.object({
@@ -61,6 +61,19 @@ export const eventSchema = z.object({
   rsvpLimit: z.coerce.number().int().positive().optional().nullable(),
 });
 
+export const sermonSchema = z.object({
+  title: z.string().min(1, "Title is required").max(200),
+  slug: z.string().min(1, "Slug is required").max(200).optional(),
+  description: z.string().max(1000).optional().or(z.literal("")),
+  speaker: z.string().min(1, "Speaker is required").max(100),
+  sermonDate: dateSchema,
+  series: z.string().max(100).optional().or(z.literal("")),
+  imageUrl: z.string().url("Invalid image URL").optional().or(z.literal("")),
+  audioUrl: z.string().url("Invalid audio URL").optional().or(z.literal("")),
+  videoUrl: z.string().url("Invalid video URL").optional().or(z.literal("")),
+  published: z.boolean().optional(),
+});
+
 export const rsvpSchema = z.object({
   name: z.string().min(1, "Name is required").max(100),
   email: z.string().email("Invalid email address"),
@@ -71,9 +84,11 @@ export const memberUpdateSchema = memberSchema.partial();
 export const donationUpdateSchema = donationSchema.partial();
 export const postUpdateSchema = postSchema.partial();
 export const eventUpdateSchema = eventSchema.partial();
+export const sermonUpdateSchema = sermonSchema.partial();
 
-export type MemberInput = z.infer<typeof memberSchema>;
+export type MemberInput = z.input<typeof memberSchema>;
 export type DonationInput = z.infer<typeof donationSchema>;
 export type PostInput = z.infer<typeof postSchema>;
 export type EventInput = z.infer<typeof eventSchema>;
+export type SermonInput = z.infer<typeof sermonSchema>;
 export type RsvpInput = z.infer<typeof rsvpSchema>;

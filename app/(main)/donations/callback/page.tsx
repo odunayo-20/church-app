@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState, Suspense, useRef, useCallback } from "react";
+import { useEffect, useState, Suspense, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useVerifyDonation } from "@/hooks";
 
 function DonationCallbackContent() {
   const searchParams = useSearchParams();
@@ -13,43 +14,24 @@ function DonationCallbackContent() {
   const hasVerified = useRef(false);
 
   const reference = searchParams.get("reference");
-
-  const verifyPayment = useCallback(async (ref: string) => {
-    try {
-      const response = await fetch(`/api/donations/verify?reference=${ref}`);
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || "Verification failed");
-      }
-
-      if (result.data.status === "completed") {
-        setStatus("success");
-        setMessage(
-          "Your donation was successful! Thank you for your generosity.",
-        );
-      } else {
-        setStatus("failed");
-        setMessage(
-          "Payment verification failed. Please contact support if this persists.",
-        );
-      }
-    } catch (error) {
-      setStatus("failed");
-      setMessage(
-        error instanceof Error
-          ? error.message
-          : "An error occurred while verifying your payment.",
-      );
-    }
-  }, []);
+  const verifyMutation = useVerifyDonation();
 
   useEffect(() => {
     if (reference && !hasVerified.current) {
       hasVerified.current = true;
-      verifyPayment(reference);
+      
+      verifyMutation.mutate(reference, {
+        onSuccess: () => {
+          setStatus("success");
+          setMessage("Your donation was successful! Thank you for your generosity.");
+        },
+        onError: (error: any) => {
+          setStatus("failed");
+          setMessage(error.message || "Payment verification failed. Please contact support if this persists.");
+        }
+      });
     }
-  }, [reference, verifyPayment]);
+  }, [reference, verifyMutation]);
 
   if (!reference) {
     return (

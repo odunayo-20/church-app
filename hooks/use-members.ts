@@ -1,6 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import * as api from "@/lib/api/members";
-import type { PaginationParams } from "@/types/api";
+import { 
+  getMembersAction, 
+  getMemberByIdAction, 
+  createMemberAction, 
+  updateMemberAction, 
+  deleteMemberAction 
+} from "@/app/action/member-actions";
+import type { PaginationParams, PaginatedResult } from "@/types/api";
+import type { Member } from "@/types/models";
 
 const KEYS = {
   all: ["members"] as const,
@@ -11,16 +18,16 @@ const KEYS = {
 };
 
 export function useMembers(params?: PaginationParams) {
-  return useQuery({
+  return useQuery<PaginatedResult<Member>>({
     queryKey: KEYS.list(params ?? {}),
-    queryFn: () => api.getMembers(params),
+    queryFn: () => getMembersAction(params ?? {}),
   });
 }
 
 export function useMember(id: string) {
-  return useQuery({
+  return useQuery<Member>({
     queryKey: KEYS.detail(id),
-    queryFn: () => api.getMemberById(id),
+    queryFn: () => getMemberByIdAction(id),
     enabled: !!id,
   });
 }
@@ -29,7 +36,7 @@ export function useCreateMember() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: api.createMember,
+    mutationFn: createMemberAction,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: KEYS.lists() });
     },
@@ -43,8 +50,8 @@ export function useUpdateMember() {
     mutationFn: ({
       id,
       ...input
-    }: { id: string } & Parameters<typeof api.updateMember>[1]) =>
-      api.updateMember(id, input),
+    }: { id: string } & Parameters<typeof updateMemberAction>[1]) =>
+      updateMemberAction(id, input),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: KEYS.lists() });
       queryClient.invalidateQueries({ queryKey: KEYS.detail(variables.id) });
@@ -56,7 +63,7 @@ export function useDeleteMember() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: api.deleteMember,
+    mutationFn: deleteMemberAction,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: KEYS.lists() });
     },

@@ -1,36 +1,35 @@
 import { MetadataRoute } from "next";
+import { createClient } from "@/lib/supabase/server";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
 async function getDynamicRoutes() {
   try {
-    const { default: prisma } = await import("@/lib/prisma");
+    const supabase = await createClient();
 
-    const [posts, events] = await Promise.all([
-      prisma.post.findMany({
-        where: { published: true },
-        select: { slug: true, updatedAt: true },
-      }),
-      prisma.event.findMany({
-        where: { date: { gte: new Date() } },
-        select: { id: true, updatedAt: true },
-      }),
+    const [
+      { data: posts },
+      { data: events }
+    ] = await Promise.all([
+      supabase.from("posts").select("slug, updatedAt").eq("published", true),
+      supabase.from("events").select("id, updatedAt").gte("date", new Date().toISOString()),
     ]);
 
-    const postRoutes = posts.map((post) => ({
+    const postRoutes = (posts || []).map((post) => ({
       url: `${baseUrl}/blog/${post.slug}`,
-      lastModified: post.updatedAt,
+      lastModified: new Date(post.updatedAt),
       priority: 0.6,
     }));
 
-    const eventRoutes = events.map((event) => ({
+    const eventRoutes = (events || []).map((event) => ({
       url: `${baseUrl}/events/${event.id}`,
-      lastModified: event.updatedAt,
+      lastModified: new Date(event.updatedAt),
       priority: 0.5,
     }));
 
     return [...postRoutes, ...eventRoutes];
-  } catch {
+  } catch (error) {
+    console.error("Sitemap dynamic routes error:", error);
     return [];
   }
 }

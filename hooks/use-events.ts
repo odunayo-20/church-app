@@ -1,5 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import * as api from "@/lib/api/events";
+import { 
+  getEventsAction, 
+  getEventByIdAction, 
+  createEventAction, 
+  updateEventAction, 
+  deleteEventAction,
+  submitRsvpAction
+} from "@/app/action/event-actions";
 import type { PaginationParams } from "@/types/api";
 
 const KEYS = {
@@ -15,14 +22,14 @@ const KEYS = {
 export function useEvents(params?: PaginationParams & { upcoming?: boolean }) {
   return useQuery({
     queryKey: KEYS.list(params ?? {}),
-    queryFn: () => api.getEvents(params),
+    queryFn: () => getEventsAction(params ?? {}),
   });
 }
 
 export function useEvent(id: string) {
   return useQuery({
     queryKey: KEYS.detail(id),
-    queryFn: () => api.getEventById(id),
+    queryFn: () => getEventByIdAction(id),
     enabled: !!id,
   });
 }
@@ -31,7 +38,7 @@ export function useCreateEvent() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: api.createEvent,
+    mutationFn: createEventAction,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: KEYS.lists() });
     },
@@ -45,8 +52,8 @@ export function useUpdateEvent() {
     mutationFn: ({
       id,
       ...input
-    }: { id: string } & Parameters<typeof api.updateEvent>[1]) =>
-      api.updateEvent(id, input),
+    }: { id: string } & Parameters<typeof updateEventAction>[1]) =>
+      updateEventAction(id, input),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: KEYS.lists() });
       queryClient.invalidateQueries({ queryKey: KEYS.detail(variables.id) });
@@ -58,7 +65,7 @@ export function useDeleteEvent() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: api.deleteEvent,
+    mutationFn: deleteEventAction,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: KEYS.lists() });
     },
@@ -70,7 +77,7 @@ export function useSubmitRsvp(eventId: string) {
 
   return useMutation({
     mutationFn: (input: { name: string; email: string; guests: number }) =>
-      api.submitRsvp(eventId, input),
+      submitRsvpAction(eventId, input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: KEYS.detail(eventId) });
     },

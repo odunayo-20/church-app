@@ -1,4 +1,6 @@
-import prisma from "@/lib/prisma";
+import { getEventsAction } from "@/app/action/event-actions";
+import { getSermonsAction } from "@/app/action/sermon-actions";
+import { getPostsAction } from "@/app/action/post-actions";
 import { HeroSection } from "@/components/home/hero-section";
 import { AboutSection } from "@/components/home/about-section";
 import { EventsSection } from "@/components/home/events-section";
@@ -9,73 +11,42 @@ import { CtaSection } from "@/components/home/cta-section";
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const now = new Date();
-
   const [upcomingEvents, recentSermons, recentPosts] = await Promise.all([
-    prisma.event.findMany({
-      where: { date: { gte: now } },
-      orderBy: { date: "asc" },
-      take: 3,
-      select: {
-        id: true,
-        title: true,
-        description: true,
-        date: true,
-        location: true,
-        imageUrl: true,
-      },
-    }),
-    prisma.sermon.findMany({
-      where: { published: true },
-      orderBy: { sermonDate: "desc" },
-      take: 3,
-      select: {
-        id: true,
-        title: true,
-        speaker: true,
-        sermonDate: true,
-        imageUrl: true,
-        videoUrl: true,
-        series: true,
-      },
-    }),
-    prisma.post.findMany({
-      where: { published: true },
-      orderBy: { publishedAt: "desc" },
-      take: 3,
-      include: {
-        author: {
-          select: {
-            name: true,
-            avatarUrl: true,
-          },
-        },
-      },
-    }),
+    getEventsAction({ upcoming: true, limit: 3 }),
+    getSermonsAction({ limit: 3 }),
+    getPostsAction({ limit: 3 }),
   ]);
+
+  const events = upcomingEvents.data || [];
+  const sermons = recentSermons.data || [];
+  const posts = recentPosts.data || [];
 
   return (
     <div className="flex flex-col">
       <HeroSection />
       <AboutSection />
       <EventsSection
-        events={upcomingEvents.map((e) => ({
+        events={events.map((e: any) => ({
           ...e,
-          date: e.date.toISOString(),
+          date: e.date,
+          imageUrl: e.imageUrl,
         }))}
       />
       <SermonsSection
-        sermons={recentSermons.map((s) => ({
+        sermons={sermons.map((s: any) => ({
           ...s,
-          date: s.sermonDate.toISOString(),
+          date: s.sermonDate,
+          imageUrl: s.imageUrl,
+          videoUrl: s.videoUrl,
         }))}
       />
       <BlogSection
-        posts={recentPosts.map((p) => ({
+        posts={posts.map((p: any) => ({
           ...p,
-          date: p.publishedAt?.toISOString() || p.createdAt.toISOString(),
+          date: p.publishedAt || p.createdAt,
           author: p.author?.name || "Grace Community",
           authorImage: p.author?.avatarUrl || null,
+          imageUrl: p.coverImage,
         }))}
       />
       <CtaSection />

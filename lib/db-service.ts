@@ -1,4 +1,4 @@
-import prisma from "@/lib/prisma";
+import { createClient } from "@/lib/supabase/server";
 import { config } from "@/lib/config";
 
 export interface PaginationParams {
@@ -17,19 +17,6 @@ export interface PaginatedResult<T> {
   };
 }
 
-type PrismaModel = {
-  findMany: (args: unknown) => Promise<unknown[]>;
-  count: (args: unknown) => Promise<number>;
-};
-
-function getModel(modelName: string): PrismaModel {
-  const model = (prisma as unknown as Record<string, PrismaModel>)[modelName];
-  if (!model) {
-    throw new Error(`Model ${modelName} not found`);
-  }
-  return model;
-}
-
 function buildPagination(
   page: number,
   limit: number,
@@ -44,73 +31,64 @@ function buildPagination(
 }
 
 export async function paginate<T>(
-  model: string,
+  table: string,
   params: PaginationParams,
   options?: {
-    where?: Record<string, unknown>;
-    orderBy?: Record<string, unknown>;
-    include?: Record<string, unknown>;
-    select?: Record<string, unknown>;
+    select?: string;
+    filters?: (query: any) => any;
+    orderBy?: { column: string; ascending?: boolean };
+    supabase?: any;
   },
 ): Promise<PaginatedResult<T>> {
+  const supabase = options?.supabase || (await createClient());
   const page = Math.max(1, params.page ?? 1);
   const limit = Math.min(
     config.api.maxPageSize,
     Math.max(1, params.limit ?? config.api.defaultPageSize),
   );
-  const skip = (page - 1) * limit;
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
 
-  const modelClient = getModel(model);
+  let query = supabase
+    .from(table)
+    .select(options?.select ?? "*", { count: "exact" });
 
-  const baseWhere = options?.where ?? {};
-  const searchWhere = buildSearchWhere(params.search, model);
-  const where =
-    Object.keys(searchWhere).length > 0
-      ? { ...baseWhere, ...searchWhere }
-      : baseWhere;
+  if (params.search) {
+    query = buildSearchQuery(query, params.search, table);
+  }
 
-  const orderBy = options?.orderBy ?? { createdAt: "desc" };
+  if (options?.filters) {
+    query = options.filters(query);
+  }
 
-  const queryArgs = {
-    where,
-    skip,
-    take: limit,
-    orderBy,
-    ...(options?.include && { include: options.include }),
-    ...(options?.select && { select: options.select }),
-  };
+  const { column = "createdAt", ascending = false } = options?.orderBy ?? {};
+  query = query.order(column, { ascending });
 
-  const [data, total] = await Promise.all([
-    modelClient.findMany(queryArgs),
-    modelClient.count({ where }),
-  ]);
+  const { data, count, error } = await query.range(from, to);
+
+  if (error) {
+    throw error;
+  }
 
   return {
-    data: data as T[],
-    meta: buildPagination(page, limit, total),
+    data: (data as T[]) || [],
+    meta: buildPagination(page, limit, count ?? 0),
   };
 }
 
-function buildSearchWhere(
-  search: string | undefined,
-  model: string,
-): Record<string, unknown> {
-  if (!search) return {};
-
+function buildSearchQuery(query: any, search: string, table: string) {
   const searchFields: Record<string, string[]> = {
-    member: ["name", "email", "phone"],
-    donation: ["reference", "donorName", "donorEmail"],
-    event: ["title", "description", "location"],
-    post: ["title", "excerpt"],
-    notification: ["message", "type"],
-    profile: ["name", "email"],
+    members: ["name", "email", "phone"],
+    donations: ["reference", "donorName", "donorEmail"],
+    events: ["title", "description", "location"],
+    posts: ["title", "excerpt"],
+    notifications: ["message", "type"],
+    profiles: ["name", "email"],
   };
 
-  const fields = searchFields[model] ?? ["name", "email", "title"];
+  const fields = searchFields[table] ?? ["name", "email", "title"];
+  const orString = fields.map((field) => `${field}.ilike.%${search}%`).join(",");
 
-  return {
-    OR: fields.map((field) => ({
-      [field]: { contains: search },
-    })),
-  };
+  return query.or(orString);
 }
+
