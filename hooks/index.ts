@@ -66,3 +66,12 @@ export {
   useDeleteRsvp,
   rsvpKeys,
 } from "./use-rsvps";
+export {
+  useMedia,
+  useCreateFolder,
+  useUploadMedia,
+  useDeleteMedia,
+  useRenameMedia,
+  useMoveMedia,
+  mediaKeys,
+} from "./use-media";

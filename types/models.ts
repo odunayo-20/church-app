@@ -110,3 +110,22 @@ export interface PrayerRequest {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface MediaFolder {
+  id: string;
+  name: string;
+  parentId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MediaFile {
+  id: string;
+  name: string;
+  folderId: string | null;
+  filePath: string;
+  fileType: string;
+  size: number;
+  createdAt: string;
+  updatedAt: string;
+}
