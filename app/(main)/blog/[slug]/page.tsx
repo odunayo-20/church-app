@@ -159,7 +159,11 @@ export default function PostPage() {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.35 }}
-            className="prose prose-base sm:prose-lg max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-a:text-amber-500 prose-a:no-underline hover:prose-a:underline prose-img:rounded-2xl"
+            className="prose prose-neutral dark:prose-invert
+           prose-base sm:prose-lg max-w-3xl mx-auto
+           prose-p:leading-relaxed
+           prose-img:rounded-2xl prose-img:shadow-md
+           prose-headings:scroll-mt-24"
             dangerouslySetInnerHTML={{ __html: post.content }}
           />
 

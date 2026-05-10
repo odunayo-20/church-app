@@ -4,6 +4,7 @@ import "./../globals.css";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
+import { CookieConsent } from "@/components/cookie-consent";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -106,6 +107,7 @@ export default function MainLayout({
           <Header />
           <main className="flex-1">{children}</main>
           <Footer />
+          <CookieConsent />
         </QueryProvider>
       </body>
     </html>
