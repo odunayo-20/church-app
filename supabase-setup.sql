@@ -1,7 +1,7 @@
 -- Create profiles table for user roles
 CREATE TABLE IF NOT EXISTS profiles (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID UNIQUE NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  "userId" UUID UNIQUE NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   email TEXT NOT NULL,
   role TEXT NOT NULL DEFAULT 'member',
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -14,11 +14,11 @@ ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 -- Policies
 CREATE POLICY "Users can view their own profile"
   ON profiles FOR SELECT
-  USING (auth.uid() = user_id);
+  USING (auth.uid()::text = "userId"::text);
 
 CREATE POLICY "Users can update their own profile"
   ON profiles FOR UPDATE
-  USING (auth.uid() = user_id);
+  USING (auth.uid()::text = "userId"::text);
 
 CREATE POLICY "Service role can manage all profiles"
   ON profiles FOR ALL
@@ -47,7 +47,7 @@ CREATE POLICY "Admins can manage members"
   USING (
     EXISTS (
       SELECT 1 FROM profiles
-      WHERE profiles.user_id = auth.uid()
+      WHERE profiles."userId"::text = auth.uid()::text
       AND profiles.role = 'admin'
     )
   );
@@ -74,7 +74,7 @@ CREATE POLICY "Admins can manage donations"
   USING (
     EXISTS (
       SELECT 1 FROM profiles
-      WHERE profiles.user_id = auth.uid()
+      WHERE profiles."userId"::text = auth.uid()::text
       AND profiles.role = 'admin'
     )
   );
@@ -100,7 +100,7 @@ CREATE POLICY "Admins can manage posts"
   USING (
     EXISTS (
       SELECT 1 FROM profiles
-      WHERE profiles.user_id = auth.uid()
+      WHERE profiles."userId"::text = auth.uid()::text
       AND profiles.role = 'admin'
     )
   );
@@ -127,7 +127,7 @@ CREATE POLICY "Admins can manage events"
   USING (
     EXISTS (
       SELECT 1 FROM profiles
-      WHERE profiles.user_id = auth.uid()
+      WHERE profiles."userId"::text = auth.uid()::text
       AND profiles.role = 'admin'
     )
   );
@@ -159,7 +159,7 @@ CREATE POLICY "Admins can manage notifications"
   USING (
     EXISTS (
       SELECT 1 FROM profiles
-      WHERE profiles.user_id = auth.uid()
+      WHERE profiles."userId"::text = auth.uid()::text
       AND profiles.role = 'admin'
     )
   );
@@ -191,3 +191,37 @@ CREATE TRIGGER update_events_updated_at BEFORE UPDATE ON events
 
 CREATE TRIGGER update_notifications_updated_at BEFORE UPDATE ON notifications
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Create contact_messages table
+CREATE TABLE IF NOT EXISTS contact_messages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  subject TEXT NOT NULL,
+  message TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'unread',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+ALTER TABLE contact_messages ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Anyone can insert contact_messages"
+  ON contact_messages FOR INSERT
+  WITH CHECK (true);
+
+CREATE POLICY "Admins can manage contact_messages"
+  ON contact_messages FOR ALL
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles."userId"::text = auth.uid()::text
+      AND (profiles.role = 'admin' OR profiles.role = 'media')
+    )
+  );
+
+CREATE TRIGGER update_contact_messages_updated_at BEFORE UPDATE ON contact_messages
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Grant permissions to default roles
+GRANT ALL ON public.contact_messages TO anon, authenticated, service_role;

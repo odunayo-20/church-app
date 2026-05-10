@@ -97,6 +97,15 @@ export const prayerRequestSchema = z.object({
 });
 export const prayerRequestUpdateSchema = prayerRequestSchema.partial();
 
+export const contactMessageSchema = z.object({
+  name: z.string().min(1, "Name is required").max(100),
+  email: z.string().email("Invalid email address"),
+  subject: z.string().min(1, "Subject is required").max(200),
+  message: z.string().min(1, "Message is required").max(2000),
+  status: z.enum(["unread", "read", "replied"]).default("unread"),
+});
+export const contactMessageUpdateSchema = contactMessageSchema.partial();
+
 export type MemberInput = z.input<typeof memberSchema>;
 export type DonationInput = z.infer<typeof donationSchema>;
 export type PostInput = z.infer<typeof postSchema>;
@@ -104,3 +113,4 @@ export type EventInput = z.infer<typeof eventSchema>;
 export type SermonInput = z.infer<typeof sermonSchema>;
 export type RsvpInput = z.infer<typeof rsvpSchema>;
 export type PrayerRequestInput = z.infer<typeof prayerRequestSchema>;
+export type ContactMessageInput = z.infer<typeof contactMessageSchema>;

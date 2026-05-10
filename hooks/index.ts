@@ -75,3 +75,10 @@ export {
   useMoveMedia,
   mediaKeys,
 } from "./use-media";
+export {
+  useContactMessages,
+  useContactMessage,
+  useUpdateContactMessage,
+  useDeleteContactMessage,
+  contactKeys,
+} from "./use-contacts";

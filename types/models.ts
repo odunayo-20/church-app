@@ -111,6 +111,17 @@ export interface PrayerRequest {
   updatedAt: string;
 }
 
+export interface ContactMessage {
+  id: string;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  status: "unread" | "read" | "replied";
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface MediaFolder {
   id: string;
   name: string;
