@@ -10,6 +10,7 @@ import { sermonSchema, type SermonInput } from "@/lib/validations";
 import { Button } from "@/components/ui/button";
 import { Loader2, Link as LinkIcon, RefreshCcw } from "lucide-react";
 import { slugify } from "@/lib/utils";
+import { MediaImagePicker } from "@/components/ui/media-image-picker";
 
 interface SermonFormProps {
   sermon?: {
@@ -168,12 +169,13 @@ export default function SermonForm({ sermon, isEditing }: SermonFormProps) {
           )}
         </div>
 
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Image URL</label>
-          <input
-            {...register("imageUrl")}
-            className="w-full rounded-xl border border-input bg-background/50 px-3 py-2 outline-none transition-all focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-            placeholder="https://..."
+        <div className="space-y-2 sm:col-span-2">
+          <MediaImagePicker
+            label="Thumbnail Image (optional)"
+            value={watch("imageUrl") || ""}
+            onChange={(url) => setValue("imageUrl", url, { shouldValidate: true })}
+            accentColor="indigo"
+            hint="Pick a thumbnail from your media library."
           />
           {errors.imageUrl && (
             <p className="text-sm text-red-500">{errors.imageUrl.message}</p>

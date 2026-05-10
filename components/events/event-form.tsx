@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCreateEvent, useUpdateEvent } from "@/hooks";
 import { toast } from "sonner";
 import { Calendar as CalendarIcon, MapPin, Type, AlignLeft, Image as ImageIcon, Send, Users, AlertCircle, Loader2 } from "lucide-react";
+import { MediaImagePicker } from "@/components/ui/media-image-picker";
 
 interface EventFormProps {
   event?: {
@@ -151,20 +152,13 @@ export function EventForm({ event, isEditing = false }: EventFormProps) {
         </div>
 
         <div className="sm:col-span-2">
-          <label className="text-sm font-semibold text-foreground">Image URL (optional)</label>
-          <div className="relative">
-            <ImageIcon className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <input
-              type="url"
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              className={inputClass}
-              placeholder="https://example.com/image.jpg"
-            />
-          </div>
-          <p className="mt-1.5 text-xs text-muted-foreground ml-1">
-            Provide a direct link to an image. Leave blank to use a default layout.
-          </p>
+          <MediaImagePicker
+            label="Event Image (optional)"
+            value={imageUrl}
+            onChange={setImageUrl}
+            accentColor="amber"
+            hint="Pick a banner image from your media library. Leave blank for a default layout."
+          />
         </div>
       </div>
 
