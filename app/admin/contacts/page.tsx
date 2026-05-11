@@ -142,12 +142,11 @@ export default function AdminContactsPage() {
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto pb-32">
-              <table className="w-full text-left text-sm">
+            <div className="pb-32">
+              <table className="w-full text-left text-sm overflow-x-auto">
                 <thead className="bg-muted/50 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                   <tr>
                     <th className="px-6 py-4 font-bold">Sender</th>
-                    <th className="px-6 py-4 font-bold">Subject</th>
                     <th className="hidden px-6 py-4 md:table-cell font-bold">Status</th>
                     <th className="hidden px-6 py-4 lg:table-cell font-bold">Date</th>
                     <th className="sticky right-0 z-10 bg-muted/50 px-6 py-4 text-right font-bold">Actions</th>
@@ -174,9 +173,7 @@ export default function AdminContactsPage() {
                           </div>
                         </div>
                       </td>
-                      <td className={`px-6 py-4 ${msg.status === 'unread' ? 'font-semibold text-foreground' : 'text-muted-foreground'}`}>
-                        {msg.subject.length > 40 ? msg.subject.substring(0, 40) + "..." : msg.subject}
-                      </td>
+                      
                       <td className="hidden px-6 py-4 md:table-cell">
                         <div className="flex items-center">
                            <StatusBadge status={msg.status} />
@@ -322,7 +319,7 @@ export default function AdminContactsPage() {
                 <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Subject</p>
                 <p className="mt-1 font-semibold text-foreground">{selectedMessage.subject}</p>
               </div>
-              <div className="h-px bg-border/40" />
+              <div className="h-px bg-border-/40" />
               <div>
                 <p className="mb-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">Message</p>
                 <p className="whitespace-pre-wrap leading-relaxed text-foreground">
@@ -331,7 +328,7 @@ export default function AdminContactsPage() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between border-t border-border/40 pt-6">
+            <div className="flex items-center justify-between border-t border-border-/40 pt-6">
               <div className="flex items-center gap-2">
                 <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Actions:</p>
                 <div className="flex gap-2">

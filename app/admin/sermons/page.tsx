@@ -87,9 +87,9 @@ export default function AdminSermonsPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
       >
-        <div className="overflow-hidden rounded-2xl border border-border/40 bg-card shadow-sm">
+        <div className="overflow-hidden rounded-2xl border border-border-/40 bg-card shadow-sm">
           {/* Table Header area */}
-          <div className="flex items-center justify-between border-b border-border/40 bg-muted/20 px-6 py-4">
+          <div className="flex items-center justify-between border-b border-border-/40 bg-muted/20 px-6 py-4">
             <div className="flex items-center gap-2 text-indigo-500">
               <Video className="h-5 w-5" />
               <h2 className="font-semibold text-foreground">All Sermons</h2>
@@ -116,17 +116,16 @@ export default function AdminSermonsPage() {
               </Link>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
+            <div className="">
+              <table className="w-full text-left text-sm overflow-auto">
                 <thead className="bg-muted/30 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                   <tr>
                     <th className="px-6 py-4">Title & Speaker</th>
-                    <th className="px-6 py-4">Date & Series</th>
                     <th className="px-6 py-4">Status</th>
                     <th className="px-6 py-4 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border/40">
+                <tbody className="divide-y divide-border-/40">
                   {sermons.map((sermon) => (
                     <tr
                       key={sermon.id}
@@ -143,19 +142,6 @@ export default function AdminSermonsPage() {
                         <p className="mt-1 text-xs font-medium text-foreground">
                           {sermon.speaker}
                         </p>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex flex-col gap-1.5">
-                          <div className="flex items-center gap-1.5 text-sm text-foreground">
-                            <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-                            {formatDate(sermon.sermonDate)}
-                          </div>
-                          {sermon.series && (
-                            <span className="inline-flex w-fit items-center rounded-md border border-border/40 bg-background px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground shadow-sm">
-                              {sermon.series}
-                            </span>
-                          )}
-                        </div>
                       </td>
                       <td className="px-6 py-4">
                         {sermon.publishedAt ? (
@@ -175,14 +161,14 @@ export default function AdminSermonsPage() {
                           <Link
                             href={`/sermons/${sermon.slug}`}
                             target="_blank"
-                            className="inline-flex h-8 items-center justify-center rounded-lg border border-border/40 bg-background px-3 text-xs font-medium text-muted-foreground transition-colors hover:border-blue-500/30 hover:bg-blue-500/10 hover:text-blue-500"
+                            className="inline-flex h-8 items-center justify-center rounded-lg border border-border-/40 bg-background px-3 text-xs font-medium text-muted-foreground transition-colors hover:border-blue-500/30 hover:bg-blue-500/10 hover:text-blue-500"
                             title="View Live"
                           >
                             <Eye className="h-3.5 w-3.5" />
                           </Link>
                           <Link
                             href={`/admin/sermons/${sermon.slug}/edit`}
-                            className="inline-flex h-8 items-center justify-center rounded-lg border border-border/40 bg-background px-3 text-xs font-medium text-muted-foreground transition-colors hover:border-amber-500/30 hover:bg-amber-500/10 hover:text-amber-500"
+                            className="inline-flex h-8 items-center justify-center rounded-lg border border-border-/40 bg-background px-3 text-xs font-medium text-muted-foreground transition-colors hover:border-amber-500/30 hover:bg-amber-500/10 hover:text-amber-500"
                             title="Edit"
                           >
                             <Pencil className="h-3.5 w-3.5" />
