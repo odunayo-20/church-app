@@ -269,3 +269,36 @@ export async function getDonationStatsAction() {
     throw new Error("Failed to fetch donation stats");
   }
 }
+
+export async function sendDonorMessageAction(donationId: string, subject: string, message: string): Promise<{ success: true }> {
+  try {
+    const supabase = await createAdminClient();
+    const { data: donation, error } = await supabase
+      .from("donations")
+      .select("*")
+      .eq("id", donationId)
+      .single();
+
+    if (error || !donation) throw new Error("Donation not found");
+
+    await sendEmail({
+      to: donation.donor_email,
+      subject: subject,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">
+          <h2 style="color: #f59e0b;">Message from ${process.env.NEXT_PUBLIC_APP_NAME || "Church App"}</h2>
+          <div style="white-space: pre-wrap; margin: 20px 0; line-height: 1.6;">${message}</div>
+          <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;" />
+          <p style="font-size: 12px; color: #999; text-align: center;">
+            Regarding Donation Reference: ${donation.reference}
+          </p>
+        </div>
+      `,
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error sending donor message:", error);
+    throw new Error("Failed to send message");
+  }
+}
