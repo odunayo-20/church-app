@@ -4,8 +4,10 @@ const dateSchema = z
   .preprocess((arg) => {
     if (typeof arg == "string" || arg instanceof Date) return new Date(arg);
   }, z.date({
-    invalid_type_error: "Please select a valid date",
-    required_error: "Date is required"
+    error: (issue) =>
+      issue.input === undefined
+        ? "Date is required"
+        : "Please select a valid date"
   }));
 
 export const memberSchema = z.object({
@@ -105,6 +107,19 @@ export const contactMessageSchema = z.object({
   status: z.enum(["unread", "read", "replied"]).default("unread"),
 });
 export const contactMessageUpdateSchema = contactMessageSchema.partial();
+
+export const newsletterSubscriberSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  status: z.enum(["active", "unsubscribed"]).default("active"),
+});
+
+export const newsletterSchema = z.object({
+  subject: z.string().min(1, "Subject is required").max(200),
+  content: z.string().min(1, "Content is required"),
+  status: z.enum(["draft", "sent"]).default("draft"),
+});
+
+export const newsletterUpdateSchema = newsletterSchema.partial();
 
 export type MemberInput = z.input<typeof memberSchema>;
 export type DonationInput = z.infer<typeof donationSchema>;

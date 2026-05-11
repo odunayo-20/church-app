@@ -1,17 +1,17 @@
 "use server"
 
 import { createClient } from "@/lib/supabase/server";
-import { resend } from "@/lib/email";
+import { sendEmail } from "@/lib/email";
 import { birthdayEmail, anniversaryEmail } from "@/lib/email-templates";
 import { logger } from "@/lib/logger";
 import { revalidatePath } from "next/cache";
+import { config } from "@/lib/config";
 
-const FROM_EMAIL = process.env.RESEND_FROM_EMAIL ?? "onboarding@resend.dev";
 const generateId = () => globalThis.crypto.randomUUID();
 
 export async function processNotificationsAction() {
-  if (!resend) {
-    logger.warn("Resend not configured, skipping notification processing");
+  if (!config.email.apiKey) {
+    logger.warn("Brevo not configured, skipping notification processing");
     return {
       birthday: { processed: 0, success: 0, failed: 0 },
       anniversary: { processed: 0, success: 0, failed: 0 },
@@ -106,8 +106,8 @@ async function sendNotificationBatch(
   },
 ) {
   const supabase = await createClient();
-  let success = 0;
-  let failed = 0;
+  let successCount = 0;
+  let failedCount = 0;
 
   const notificationPromises = members.map(async (member) => {
     const notification = createNotification(member);
@@ -127,13 +127,8 @@ async function sendNotificationBatch(
       return { success: false, skipped: true };
     }
 
-    if (!resend) {
-      return { success: false, skipped: true };
-    }
-
     try {
-      const emailResult = await resend.emails.send({
-        from: FROM_EMAIL,
+      const { success, data: emailData, error: emailError } = await sendEmail({
         to: member.email,
         subject: notification.template.subject,
         html: notification.template.html,
@@ -144,22 +139,22 @@ async function sendNotificationBatch(
         memberId: member.id,
         type: notification.type,
         message: notification.message,
-        status: emailResult.error ? "failed" : "sent",
-        sentAt: emailResult.error ? null : new Date().toISOString(),
-        metadata: { message_id: emailResult.data?.id },
+        status: success ? "sent" : "failed",
+        sentAt: success ? new Date().toISOString() : null,
+        metadata: { message_id: emailData?.messageId, error: emailError },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });
 
-      if (emailResult.error) {
-        failed++;
+      if (!success) {
+        failedCount++;
       } else {
-        success++;
+        successCount++;
       }
 
-      return { success: !emailResult.error };
+      return { success };
     } catch (error) {
-      failed++;
+      failedCount++;
       logger.error(`Failed to send notification to ${member.email}`, error);
 
       await supabase.from("notifications").insert({
@@ -181,7 +176,7 @@ async function sendNotificationBatch(
 
   await Promise.allSettled(notificationPromises);
 
-  return { processed: members.length, success, failed };
+  return { processed: members.length, success: successCount, failed: failedCount };
 }
 
 export async function getNotificationsAction(filters: { type?: string; status?: string; limit?: number } = {}) {

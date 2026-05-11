@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import { 
   LayoutDashboard, Users, CreditCard, Calendar, 
-  FileText, Bell, Globe, Menu, X, Church, Video, Heart, Images, Mail
+  FileText, Bell, Globe, Menu, X, Church, Video, Heart, Images, Mail, Send
 } from "lucide-react";
 import { useSidebar } from "@/hooks/use-sidebar";
 
@@ -21,6 +21,7 @@ const NAV_ITEMS = [
   { label: "Events", href: "/admin/events", roles: ["admin", "media"], icon: Calendar },
   { label: "RSVPs", href: "/admin/rsvps", roles: ["admin", "media"], icon: Globe },
   { label: "Blog Posts", href: "/admin/blog", roles: ["admin", "media"], icon: FileText },
+  { label: "Newsletters", href: "/admin/newsletters", roles: ["admin"], icon: Send },
   { label: "Notifications", href: "/admin/notifications", roles: ["admin", "media"], icon: Bell },
 ];
 

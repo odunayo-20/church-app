@@ -20,7 +20,8 @@ export const config = {
     batchSize: parseInt(process.env.NOTIFICATION_BATCH_SIZE ?? "50"),
   },
   email: {
-    from: process.env.RESEND_FROM_EMAIL ?? "onboarding@resend.dev",
+    apiKey: process.env.BREVO_API_KEY ?? "",
+    from: process.env.BREVO_FROM_EMAIL ?? "onboarding@brevo.com",
     admin: process.env.ADMIN_EMAIL ?? "",
   },
   env: {

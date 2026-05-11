@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { formatDate } from "@/lib/utils";
 import { DashboardCharts } from "@/components/admin/dashboard-charts";
 import { useDashboardData, useAuth } from "@/hooks";
-import { Users, CreditCard, Calendar, FileText, ArrowRight, TrendingUp, Globe } from "lucide-react";
+import { Users, CreditCard, Calendar, FileText, ArrowRight, TrendingUp, Globe, Send } from "lucide-react";
 
 export default function AdminDashboardPage() {
   const { role, loading: authLoading } = useAuth();
@@ -117,6 +117,14 @@ export default function AdminDashboardPage() {
           color="indigo"
           delay={0.3}
         />
+        <StatCard
+          title="Subscribers"
+          value={data.subscriberCount || 0}
+          href="/admin/newsletters/subscribers"
+          icon={<Send className="h-5 w-5" />}
+          color="violet"
+          delay={0.35}
+        />
       </div>
 
       {/* ── Charts & Events ── */}
@@ -183,6 +191,7 @@ function StatCard({
     amber: "text-amber-600 bg-amber-50 border-amber-100",
     rose: "text-rose-600 bg-rose-50 border-rose-100",
     indigo: "text-indigo-600 bg-indigo-50 border-indigo-100",
+    violet: "text-violet-600 bg-violet-50 border-violet-100",
   };
 
   const config = colorConfigs[color] || colorConfigs.blue;

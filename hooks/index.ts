@@ -82,3 +82,16 @@ export {
   useDeleteContactMessage,
   contactKeys,
 } from "./use-contacts";
+
+export {
+  useNewsletterSubscribers,
+  useSubscribe,
+  useDeleteSubscriber,
+  useNewsletters,
+  useNewsletter,
+  useCreateNewsletter,
+  useUpdateNewsletter,
+  useDeleteNewsletter,
+  useSendNewsletter,
+  newsletterKeys,
+} from "./use-newsletters";

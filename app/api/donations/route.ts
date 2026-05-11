@@ -26,7 +26,7 @@ export async function PUT(request: NextRequest) {
     });
 
     // 2. Initialize Paystack payment
-    const callbackUrl = `${config.env.baseUrl}/donate/callback`;
+    const callbackUrl = `${config.env.baseUrl}/donations/callback`;
     const paystackResponse = await initializePayment({
       email: donorEmail,
       amount,

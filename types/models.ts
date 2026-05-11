@@ -140,3 +140,21 @@ export interface MediaFile {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface NewsletterSubscriber {
+  id: string;
+  email: string;
+  status: "active" | "unsubscribed";
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Newsletter {
+  id: string;
+  subject: string;
+  content: string;
+  status: "draft" | "sent";
+  sentAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}

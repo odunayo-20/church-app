@@ -10,10 +10,19 @@ import type { ContactMessageInput } from "@/lib/validations";
 export async function getContactMessagesAction(params: PaginationParams): Promise<PaginatedResult<ContactMessage>> {
   try {
     const supabase = await createAdminClient();
-    return await paginate<ContactMessage>("contact_messages", params, {
+    const result = await paginate<any>("contact_messages", params, {
       supabase,
       orderBy: { column: "created_at", ascending: false },
     });
+
+    return {
+      ...result,
+      data: result.data.map((msg: any) => ({
+        ...msg,
+        createdAt: msg.created_at,
+        updatedAt: msg.updated_at,
+      })) as ContactMessage[],
+    };
   } catch (error) {
     console.error("Error fetching contact messages:", error);
     throw new Error("Failed to fetch contact messages");
@@ -30,7 +39,11 @@ export async function getContactMessageByIdAction(id: string): Promise<ContactMe
       .single();
 
     if (error) throw error;
-    return data;
+    return {
+      ...data,
+      createdAt: data.created_at,
+      updatedAt: data.updated_at,
+    } as ContactMessage;
   } catch (error) {
     console.error(`Error fetching contact message ${id}:`, error);
     throw new Error("Failed to fetch contact message");
@@ -55,7 +68,11 @@ export async function updateContactMessageAction(id: string, data: Partial<Conta
     if (error) throw error;
     
     revalidatePath("/admin/contacts");
-    return request;
+    return {
+      ...request,
+      createdAt: request.created_at,
+      updatedAt: request.updated_at,
+    } as ContactMessage;
   } catch (error) {
     console.error("Error updating contact message:", error);
     throw error;
