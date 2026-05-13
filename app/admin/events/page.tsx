@@ -124,7 +124,7 @@ export default function AdminEventsPage() {
                       Date & Time
                     </th>
                     <th className="hidden px-6 py-4 lg:table-cell font-bold">Location</th>
-                    <th className="px-6 py-4 text-center font-bold">RSVPs</th>
+                    <th className="hidden px-6 py-4 text-center font-bold sm:table-cell">RSVPs</th>
                     <th className="px-6 py-4 text-right font-bold">Actions</th>
                   </tr>
                 </thead>
@@ -176,7 +176,7 @@ export default function AdminEventsPage() {
                             </span>
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-center">
+                        <td className="hidden px-6 py-4 text-center sm:table-cell">
                           <Link 
                             href={`/admin/rsvps?eventId=${event.id}`}
                             className="inline-flex flex-col items-center justify-center group/rsvp"
@@ -196,7 +196,7 @@ export default function AdminEventsPage() {
                             <Link
                               href={`/events/${event.id}`}
                               target="_blank"
-                              className="inline-flex h-8 items-center justify-center rounded-lg border border-border bg-background px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                              className="inline-flex h-8 items-center justify-center rounded-lg border border-border bg-background px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground hidden md:flex"
                               title="View Live"
                             >
                               <Eye className="h-3.5 w-3.5" />
@@ -208,11 +208,13 @@ export default function AdminEventsPage() {
                             >
                               <Pencil className="h-3.5 w-3.5" />
                             </Link>
-                            <DeleteButton
-                              message="Are you sure you want to delete this event?"
-                              onDelete={() => handleDelete(event.id)}
-                              isLoading={deleteEventMutation.isPending}
-                            />
+                            <div className="hidden sm:flex">
+                              <DeleteButton
+                                message="Are you sure you want to delete this event?"
+                                onDelete={() => handleDelete(event.id)}
+                                isLoading={deleteEventMutation.isPending}
+                              />
+                            </div>
                           </div>
                         </td>
                       </tr>

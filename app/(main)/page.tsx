@@ -8,7 +8,7 @@ import { SermonsSection } from "@/components/home/sermons-section";
 import { BlogSection } from "@/components/home/blog-section";
 import { CtaSection } from "@/components/home/cta-section";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60; // Use Incremental Static Regeneration (ISR) to cache the page for 60 seconds
 
 export default async function Home() {
   const [upcomingEvents, recentSermons, recentPosts] = await Promise.all([

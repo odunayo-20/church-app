@@ -14,7 +14,7 @@ export async function getPostsAction(params: PaginationParams & { published?: bo
     const supabase = await createAdminClient();
     const result = await paginate<Post>("posts", params, {
       supabase,
-      select: "*, author:profiles(name, avatarUrl)",
+      select: "id, title, slug, excerpt, coverImage, published, publishedAt, createdAt, authorId, author:profiles(name, avatarUrl)",
       filters: (query) => {
         if (params.published !== undefined) {
           return query.eq("published", params.published);

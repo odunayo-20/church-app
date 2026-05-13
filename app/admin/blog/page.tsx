@@ -100,70 +100,119 @@ export default function AdminBlogPage() {
               </Link>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-muted/30 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                  <tr>
-                    <th className="px-6 py-4">Title & Slug</th>
-                    <th className="px-6 py-4">Status</th>
-                    <th className="hidden px-6 py-4 md:table-cell">Created</th>
-                    <th className="px-6 py-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border/40">
-                  {posts.map((post) => (
-                    <tr key={post.id} className="group transition-colors hover:bg-muted/20">
-                      <td className="px-6 py-4">
-                        <p className="font-semibold text-foreground transition-colors group-hover:text-rose-500">{post.title}</p>
-                        <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+            <div>
+              {/* ── Mobile Card View ── */}
+              <div className="divide-y divide-border/40 md:hidden">
+                {posts.map((post) => (
+                  <div key={post.id} className="p-5 space-y-4 transition-colors hover:bg-muted/10">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="space-y-1">
+                        <p className="font-bold text-foreground leading-tight">{post.title}</p>
+                        <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
                           <ExternalLink className="h-3 w-3" />
-                          /blog/{post.slug}
+                          <span className="truncate max-w-[150px]">/blog/{post.slug}</span>
                         </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        {post.published ? (
-                          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                            Published
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/20 bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-600 dark:text-amber-400">
-                            <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-                            Draft
-                          </span>
-                        )}
-                      </td>
-                      <td className="hidden px-6 py-4 text-muted-foreground md:table-cell">
-                        {formatDate(post.createdAt)}
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Link
-                            href={`/blog/${post.slug}`}
-                            target="_blank"
-                            className="inline-flex h-8 items-center justify-center rounded-lg border border-border/40 bg-background px-3 text-xs font-medium text-muted-foreground transition-colors hover:border-blue-500/30 hover:bg-blue-500/10 hover:text-blue-500"
-                            title="View Live"
-                          >
-                            <Eye className="h-3.5 w-3.5" />
-                          </Link>
-                          <Link
-                            href={`/admin/blog/${post.id}/edit`}
-                            className="inline-flex h-8 items-center justify-center rounded-lg border border-border/40 bg-background px-3 text-xs font-medium text-muted-foreground transition-colors hover:border-amber-500/30 hover:bg-amber-500/10 hover:text-amber-500"
-                            title="Edit"
-                          >
-                            <Pencil className="h-3.5 w-3.5" />
-                          </Link>
-                          <DeleteButton 
-                            message="Are you sure you want to delete this post?" 
-                            onDelete={() => handleDelete(post.id)}
-                            isLoading={deletePostMutation.isPending}
-                          />
-                        </div>
-                      </td>
+                        <p className="text-[10px] font-medium text-muted-foreground pt-1">
+                          {formatDate(post.createdAt)}
+                        </p>
+                      </div>
+                      {post.published ? (
+                        <span className="shrink-0 inline-flex h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" title="Published" />
+                      ) : (
+                        <span className="shrink-0 inline-flex h-2 w-2 rounded-full bg-amber-500" title="Draft" />
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center justify-end gap-3 pt-2">
+                      <Link
+                        href={`/blog/${post.slug}`}
+                        target="_blank"
+                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-border/40 bg-background text-muted-foreground"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Link>
+                      <Link
+                        href={`/admin/blog/${post.id}/edit`}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-border/40 bg-background text-muted-foreground"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Link>
+                      <DeleteButton 
+                        message="Are you sure you want to delete this post?" 
+                        onDelete={() => handleDelete(post.id)}
+                        isLoading={deletePostMutation.isPending}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* ── Desktop Table View ── */}
+              <div className="hidden md:block">
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-muted/30 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                    <tr>
+                      <th className="px-6 py-4">Title & Slug</th>
+                      <th className="px-6 py-4">Status</th>
+                      <th className="hidden px-6 py-4 md:table-cell">Created</th>
+                      <th className="px-6 py-4 text-right">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-border/40">
+                    {posts.map((post) => (
+                      <tr key={post.id} className="group transition-colors hover:bg-muted/20">
+                        <td className="px-6 py-4">
+                          <p className="font-semibold text-foreground transition-colors group-hover:text-rose-500">{post.title}</p>
+                          <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <ExternalLink className="h-3 w-3" />
+                            /blog/{post.slug}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          {post.published ? (
+                            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-600">
+                              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                              Published
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/20 bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-600">
+                              <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                              Draft
+                            </span>
+                          )}
+                        </td>
+                        <td className="hidden px-6 py-4 text-muted-foreground md:table-cell">
+                          {formatDate(post.createdAt)}
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <Link
+                              href={`/blog/${post.slug}`}
+                              target="_blank"
+                              className="inline-flex h-8 items-center justify-center rounded-lg border border-border/40 bg-background px-3 text-xs font-medium text-muted-foreground transition-colors hover:border-blue-500/30 hover:bg-blue-500/10 hover:text-blue-500"
+                              title="View Live"
+                            >
+                              <Eye className="h-3.5 w-3.5" />
+                            </Link>
+                            <Link
+                              href={`/admin/blog/${post.id}/edit`}
+                              className="inline-flex h-8 items-center justify-center rounded-lg border border-border/40 bg-background px-3 text-xs font-medium text-muted-foreground transition-colors hover:border-amber-500/30 hover:bg-amber-500/10 hover:text-amber-500"
+                              title="Edit"
+                            >
+                              <Pencil className="h-3.5 w-3.5" />
+                            </Link>
+                            <DeleteButton 
+                              message="Are you sure you want to delete this post?" 
+                              onDelete={() => handleDelete(post.id)}
+                              isLoading={deletePostMutation.isPending}
+                            />
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </div>

@@ -144,14 +144,14 @@ export default function AdminPrayerRequestsPage() {
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto pb-32">
+            <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <thead className="bg-muted/50 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                   <tr>
                     <th className="px-6 py-4 font-bold">Requester</th>
                     <th className="hidden px-6 py-4 md:table-cell font-bold">Status</th>
                     <th className="hidden px-6 py-4 lg:table-cell font-bold">Submitted</th>
-                    <th className="sticky right-0 z-10 bg-muted/50 px-6 py-4 text-right font-bold">Actions</th>
+                    <th className="sticky right-0 z-10 bg-muted/90 px-6 py-4 text-right font-bold backdrop-blur-sm">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -188,7 +188,7 @@ export default function AdminPrayerRequestsPage() {
                           <span>{formatDate(req.createdAt)}</span>
                         </div>
                       </td>
-                      <td className={`sticky right-0 px-6 py-4 text-right transition-colors bg-card group-hover:bg-muted/30 ${activeMenuId === req.id ? 'z-30' : 'z-10'}`}>
+                      <td className={`sticky right-0 px-6 py-4 text-right transition-colors bg-card/95 backdrop-blur-sm group-hover:bg-muted/50 ${activeMenuId === req.id ? 'z-30' : 'z-10'}`}>
                         <div className="flex items-center justify-end gap-2">
                            <div className="relative">
                               <button 
@@ -254,17 +254,19 @@ export default function AdminPrayerRequestsPage() {
 
                            <button 
                              onClick={() => setSelectedRequest(req)}
-                             className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors hidden sm:flex"
+                             className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors hidden md:flex"
                              title="Quick View"
                            >
                              <Eye className="h-4 w-4" />
                            </button>
 
-                           <DeleteButton
-                             message="Are you sure you want to delete this prayer request?"
-                             onDelete={() => handleDelete(req.id)}
-                             isLoading={deleteMutation.isPending}
-                           />
+                           <div className="hidden sm:flex">
+                             <DeleteButton
+                               message="Are you sure you want to delete this prayer request?"
+                               onDelete={() => handleDelete(req.id)}
+                               isLoading={deleteMutation.isPending}
+                             />
+                           </div>
                         </div>
                       </td>
                     </tr>

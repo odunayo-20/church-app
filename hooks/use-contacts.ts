@@ -17,24 +17,12 @@ export const contactKeys = {
   detail: (id: string) => [...contactKeys.details(), id] as const,
 };
 
-// export function useContactMessages(params: PaginationParams = { page: 1, limit: 10 }) {
-//   return useQuery({
-//     queryKey: contactKeys.list(params),
-//     queryFn: () => getContactMessagesAction(params),
-//   });
-// }
-
-
 export function useContactMessages(
   params: PaginationParams = { page: 1, limit: 10 }
 ) {
   return useQuery({
     queryKey: contactKeys.list(params),
     queryFn: () => getContactMessagesAction(params),
-
-    staleTime: 1000 * 60 * 5,
-    gcTime: 1000 * 60 * 30,
-    refetchOnWindowFocus: false,
     placeholderData: (prev) => prev,
   });
 }

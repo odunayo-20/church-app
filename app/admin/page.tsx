@@ -3,7 +3,11 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { formatDate } from "@/lib/utils";
-import { DashboardCharts } from "@/components/admin/dashboard-charts";
+import dynamic from "next/dynamic";
+const DashboardCharts = dynamic(
+  () => import("@/components/admin/dashboard-charts").then((mod) => ({ default: mod.DashboardCharts })),
+  { ssr: false, loading: () => <div className="h-[300px] w-full animate-pulse rounded-xl bg-muted" /> }
+);
 import { useDashboardData, useAuth } from "@/hooks";
 import { Users, CreditCard, Calendar, FileText, ArrowRight, TrendingUp, Globe, Send } from "lucide-react";
 

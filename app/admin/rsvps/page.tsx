@@ -185,7 +185,7 @@ export default function AdminRsvpsPage() {
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto pb-32">
+            <div className="overflow-x-auto">
               <table className="w-full text-left text-sm text-foreground/80">
                 <thead className="bg-muted/50 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                   <tr>
@@ -193,7 +193,7 @@ export default function AdminRsvpsPage() {
                     <th className="hidden px-6 py-4 md:table-cell font-bold">Event</th>
                     <th className="hidden px-6 py-4 lg:table-cell font-bold">Status</th>
                     <th className="hidden px-6 py-4 xl:table-cell font-bold">Guests</th>
-                    <th className="sticky right-0 z-10 bg-muted/50 px-6 py-4 text-right font-bold backdrop-blur-none">Actions</th>
+                    <th className="sticky right-0 z-10 bg-muted/90 px-6 py-4 text-right font-bold backdrop-blur-sm">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -235,7 +235,7 @@ export default function AdminRsvpsPage() {
                           <span>{rsvp.guests} guest{rsvp.guests !== 1 ? 's' : ''}</span>
                         </div>
                       </td>
-                      <td className={`sticky right-0 px-6 py-4 text-right transition-colors bg-card group-hover:bg-muted/30 ${activeMenuId === rsvp.id ? 'z-30' : 'z-10'}`}>
+                      <td className={`sticky right-0 px-6 py-4 text-right transition-colors bg-card/95 backdrop-blur-sm group-hover:bg-muted/50 ${activeMenuId === rsvp.id ? 'z-30' : 'z-10'}`}>
                         <div className="flex items-center justify-end gap-2">
                            <div className="relative">
                               <button 
@@ -301,17 +301,19 @@ export default function AdminRsvpsPage() {
 
                            <button 
                              onClick={() => setSelectedRsvp(rsvp)}
-                             className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors hidden sm:flex"
+                             className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors hidden md:flex"
                              title="Quick View"
                            >
                              <Eye className="h-4 w-4" />
                            </button>
 
-                          <DeleteButton
-                            message="Are you sure you want to delete this RSVP record?"
-                            onDelete={() => handleDelete(rsvp.id)}
-                            isLoading={deleteMutation.isPending}
-                          />
+                          <div className="hidden sm:flex">
+                            <DeleteButton
+                              message="Are you sure you want to delete this RSVP record?"
+                              onDelete={() => handleDelete(rsvp.id)}
+                              isLoading={deleteMutation.isPending}
+                            />
+                          </div>
                         </div>
                       </td>
                     </tr>

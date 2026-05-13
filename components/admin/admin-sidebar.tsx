@@ -23,6 +23,7 @@ const NAV_ITEMS = [
   { label: "Blog Posts", href: "/admin/blog", roles: ["admin", "media"], icon: FileText },
   { label: "Newsletters", href: "/admin/newsletters", roles: ["admin"], icon: Send },
   { label: "Notifications", href: "/admin/notifications", roles: ["admin", "media"], icon: Bell },
+  { label: "Roles", href: "/admin/settings/roles", roles: ["admin"], icon: Users },
 ];
 
 export function AdminSidebar() {
