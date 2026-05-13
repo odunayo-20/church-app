@@ -1,27 +1,47 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { 
-  getPostsAction, 
-  getPostByIdAction, 
+import {
+  getPostsAction,
+  getPostByIdAction,
   getPostBySlugAction,
-  createPostAction, 
-  updatePostAction, 
-  deletePostAction 
+  createPostAction,
+  updatePostAction,
+  deletePostAction,
 } from "@/app/action/post-actions";
 import type { PaginationParams, PaginatedResult } from "@/types/api";
 import type { Post } from "@/types/models";
 
+// const KEYS = {
+//   all: ["posts"] as const,
+//   lists: () => [...KEYS.all, "list"] as const,
+//   list: (params: PaginationParams & { published?: boolean }) => [...KEYS.lists(), params] as const,
+//   details: () => [...KEYS.all, "detail"] as const,
+//   detail: (id: string) => [...KEYS.details(), id] as const,
+// };
+
 const KEYS = {
   all: ["posts"] as const,
+
   lists: () => [...KEYS.all, "list"] as const,
-  list: (params: PaginationParams & { published?: boolean }) => [...KEYS.lists(), params] as const,
+
+  list: (params: PaginationParams & { published?: boolean }) =>
+    [...KEYS.lists(), params] as const,
+
   details: () => [...KEYS.all, "detail"] as const,
+
   detail: (id: string) => [...KEYS.details(), id] as const,
+
+  slug: (slug: string) => [...KEYS.all, "slug", slug] as const,
 };
 
 export function usePosts(params?: PaginationParams & { published?: boolean }) {
   return useQuery<PaginatedResult<Post>>({
     queryKey: KEYS.list(params ?? {}),
     queryFn: () => getPostsAction(params ?? {}),
+
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 30,
+    refetchOnWindowFocus: false,
+    placeholderData: (prev) => prev,
   });
 }
 
@@ -30,14 +50,32 @@ export function usePost(id: string) {
     queryKey: KEYS.detail(id),
     queryFn: () => getPostByIdAction(id),
     enabled: !!id,
+
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 30,
+    refetchOnWindowFocus: false,
+    placeholderData: (prev) => prev,
   });
 }
 
+// export function usePostBySlug(slug: string) {
+//   return useQuery<Post>({
+//     queryKey: postKeys.detail(slug),
+//     queryFn: () => getPostBySlugAction(slug),
+//     enabled: !!slug,
+//   });
+// }
+
 export function usePostBySlug(slug: string) {
   return useQuery<Post>({
-    queryKey: postKeys.detail(slug),
+    queryKey: KEYS.slug(slug),
     queryFn: () => getPostBySlugAction(slug),
     enabled: !!slug,
+
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 30,
+    refetchOnWindowFocus: false,
+    placeholderData: (prev) => prev,
   });
 }
 

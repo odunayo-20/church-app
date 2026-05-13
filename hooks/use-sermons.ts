@@ -13,9 +13,9 @@ const KEYS = {
   all: ["sermons"] as const,
   lists: () => [...KEYS.all, "list"] as const,
   list: (filters: SermonFilters) => [...KEYS.lists(), filters] as const,
-  details: () => [...KEYS.all, "detail"] as const,
+  details: () => [...KEYS.lists(), "detail"] as const,
   detail: (slug: string) => [...KEYS.details(), slug] as const,
-  series: () => [...KEYS.all, "series"] as const,
+  series: () => [...KEYS.lists(), "series"] as const,
 };
 
 export function useSermons(filters: SermonFilters = {}) {

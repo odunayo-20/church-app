@@ -42,7 +42,7 @@ export function useSubscribe() {
   return useMutation({
     mutationFn: subscribeAction,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: newsletterKeys.subscribers.all });
+      queryClient.invalidateQueries({ queryKey: newsletterKeys.subscribers.lists() });
     },
   });
 }
@@ -53,7 +53,7 @@ export function useDeleteSubscriber() {
   return useMutation({
     mutationFn: deleteSubscriberAction,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: newsletterKeys.subscribers.all });
+      queryClient.invalidateQueries({ queryKey: newsletterKeys.subscribers.lists() });
     },
   });
 }
@@ -81,7 +81,7 @@ export function useCreateNewsletter() {
   return useMutation({
     mutationFn: createNewsletterAction,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: newsletterKeys.all });
+      queryClient.invalidateQueries({ queryKey: newsletterKeys.lists() });
     },
   });
 }
@@ -92,7 +92,7 @@ export function useUpdateNewsletter() {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) => updateNewsletterAction(id, data),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: newsletterKeys.all });
+      queryClient.invalidateQueries({ queryKey: newsletterKeys.lists() });
       queryClient.setQueryData(newsletterKeys.detail(data.id), data);
     },
   });
@@ -104,7 +104,7 @@ export function useDeleteNewsletter() {
   return useMutation({
     mutationFn: deleteNewsletterAction,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: newsletterKeys.all });
+      queryClient.invalidateQueries({ queryKey: newsletterKeys.lists() });
     },
   });
 }

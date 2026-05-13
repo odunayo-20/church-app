@@ -32,7 +32,7 @@ export function useProcessNotifications() {
   return useMutation({
     mutationFn: processNotificationsAction,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: KEYS.all });
+      queryClient.invalidateQueries({ queryKey: KEYS.lists() });
     },
   });
 }

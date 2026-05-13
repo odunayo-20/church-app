@@ -13,7 +13,7 @@ export const prayerKeys = {
   all: ["prayer-requests"] as const,
   lists: () => [...prayerKeys.all, "list"] as const,
   list: (params: PaginationParams) => [...prayerKeys.lists(), params] as const,
-  details: () => [...prayerKeys.all, "detail"] as const,
+  details: () => [...prayerKeys.lists(), "detail"] as const,
   detail: (id: string) => [...prayerKeys.details(), id] as const,
 };
 
@@ -37,7 +37,7 @@ export function useCreatePrayerRequest() {
   return useMutation({
     mutationFn: createPrayerRequestAction,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: prayerKeys.all });
+      queryClient.invalidateQueries({ queryKey: prayerKeys.lists() });
     },
   });
 }
@@ -48,7 +48,7 @@ export function useUpdatePrayerRequest() {
     mutationFn: ({ id, data }: { id: string; data: Partial<PrayerRequestInput> }) =>
       updatePrayerRequestAction(id, data),
     onSuccess: (_, { id }) => {
-      queryClient.invalidateQueries({ queryKey: prayerKeys.all });
+      queryClient.invalidateQueries({ queryKey: prayerKeys.lists() });
       queryClient.invalidateQueries({ queryKey: prayerKeys.detail(id) });
     },
   });
@@ -59,7 +59,7 @@ export function useDeletePrayerRequest() {
   return useMutation({
     mutationFn: deletePrayerRequestAction,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: prayerKeys.all });
+      queryClient.invalidateQueries({ queryKey: prayerKeys.lists() });
     },
   });
 }

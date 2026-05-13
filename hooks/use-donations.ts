@@ -86,7 +86,7 @@ export function useVerifyDonation() {
   return useMutation({
     mutationFn: verifyDonationAction,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: donationKeys.all });
+      queryClient.invalidateQueries({ queryKey: donationKeys.lists() });
     },
   });
 }

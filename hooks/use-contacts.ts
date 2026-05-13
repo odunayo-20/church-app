@@ -17,10 +17,25 @@ export const contactKeys = {
   detail: (id: string) => [...contactKeys.details(), id] as const,
 };
 
-export function useContactMessages(params: PaginationParams = { page: 1, limit: 10 }) {
+// export function useContactMessages(params: PaginationParams = { page: 1, limit: 10 }) {
+//   return useQuery({
+//     queryKey: contactKeys.list(params),
+//     queryFn: () => getContactMessagesAction(params),
+//   });
+// }
+
+
+export function useContactMessages(
+  params: PaginationParams = { page: 1, limit: 10 }
+) {
   return useQuery({
     queryKey: contactKeys.list(params),
     queryFn: () => getContactMessagesAction(params),
+
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 30,
+    refetchOnWindowFocus: false,
+    placeholderData: (prev) => prev,
   });
 }
 
@@ -39,8 +54,13 @@ export function useUpdateContactMessage() {
     mutationFn: ({ id, data }: { id: string; data: Partial<ContactMessageInput> }) =>
       updateContactMessageAction(id, data),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: contactKeys.all });
+      queryClient.invalidateQueries({ queryKey: contactKeys.lists() });
       queryClient.setQueryData(contactKeys.detail(data.id), data);
+
+       queryClient.invalidateQueries({
+    queryKey: contactKeys.lists(),
+  });
+  
     },
   });
 }
@@ -51,8 +71,10 @@ export function useDeleteContactMessage() {
   return useMutation({
     mutationFn: deleteContactMessageAction,
     onSuccess: (_, id) => {
-      queryClient.invalidateQueries({ queryKey: contactKeys.all });
+     
       queryClient.removeQueries({ queryKey: contactKeys.detail(id) });
+
+       queryClient.invalidateQueries({ queryKey: contactKeys.lists() });
     },
   });
 }

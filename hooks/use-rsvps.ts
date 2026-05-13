@@ -30,7 +30,7 @@ export function useCreateRsvp() {
     mutationFn: ({ eventId, data }: { eventId: string; data: RsvpInput }) => 
       submitRsvpAction(eventId, data),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: rsvpKeys.all });
+      queryClient.invalidateQueries({ queryKey: rsvpKeys.lists() });
       queryClient.invalidateQueries({ queryKey: ["events", "detail", variables.eventId] });
     },
   });
@@ -42,7 +42,7 @@ export function useUpdateRsvpStatus() {
     mutationFn: ({ id, status }: { id: string; status: Rsvp["status"] }) => 
       updateRsvpStatusAction(id, status),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: rsvpKeys.all });
+      queryClient.invalidateQueries({ queryKey: rsvpKeys.lists() });
       queryClient.invalidateQueries({ queryKey: ["events"] });
     },
   });
@@ -53,7 +53,7 @@ export function useDeleteRsvp() {
   return useMutation({
     mutationFn: deleteRsvpAction,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: rsvpKeys.all });
+      queryClient.invalidateQueries({ queryKey: rsvpKeys.lists() });
       queryClient.invalidateQueries({ queryKey: ["events"] });
     },
   });
