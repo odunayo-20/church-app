@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import { formatDate, readingTime, stripHtml } from "@/lib/utils";
 import { ArrowRight, User, Clock, BookOpen } from "lucide-react";
 import { usePosts } from "@/hooks";
 import type { Post } from "@/types/models";
 
-const fade = (delay = 0) => ({
+const fade = (delay = 0): Variants => ({
   hidden: { opacity: 0, y: 28 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] } },
 });

@@ -181,11 +181,11 @@ export default function AdminEventsPage() {
                             href={`/admin/rsvps?eventId=${event.id}`}
                             className="inline-flex flex-col items-center justify-center group/rsvp"
                           >
-                            <span
+                            {/* <span
                               className={`text-lg font-bold leading-none transition-colors ${event._count?.rsvps > 0 ? "text-amber-600 group-hover/rsvp:text-amber-700" : "text-muted-foreground group-hover/rsvp:text-foreground"}`}
                             >
                               {event._count?.rsvps || 0}
-                            </span>
+                            </span> */}
                             <span className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground group-hover/rsvp:text-foreground transition-colors">
                               Guests
                             </span>
