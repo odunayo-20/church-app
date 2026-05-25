@@ -28,8 +28,7 @@ export function BlogSection({ posts }: BlogSectionProps) {
     return null;
   }
 
-  const featured = posts[0];
-  const gridPosts = posts.slice(1, 4);
+
 
   return (
     <section ref={ref} className="bg-slate-50 py-24 sm:py-32 dark:bg-slate-900/50">
@@ -62,100 +61,61 @@ export function BlogSection({ posts }: BlogSectionProps) {
           </Link>
         </motion.div>
 
-        <div className="grid gap-8 lg:grid-cols-5">
-          {/* Featured post — 3 cols */}
-          <motion.div
-            className="lg:col-span-3"
-            initial={{ opacity: 0, y: 32 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <Link
-              href={`/blog/${featured.slug}`}
-              className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm ring-1 ring-black/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/70 dark:border-slate-800 dark:bg-slate-900 dark:ring-white/5"
-            >
-              {/* Image */}
-              <div className="relative h-72 overflow-hidden bg-gradient-to-br from-teal-400 to-indigo-500">
-                {featured.coverImage ? (
-                  <Image
-                    src={featured.coverImage}
-                    alt={featured.title}
-                    fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                ) : null}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                {/* Reading time badge */}
-                <div className="absolute bottom-4 left-4 flex items-center gap-1.5 rounded-full bg-black/50 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-sm">
-                  <Clock className="h-3 w-3" />
-                  {readingTime(featured.content)} min read
-                </div>
-              </div>
-
-              {/* Content */}
-              <div className="flex flex-1 flex-col p-7">
-                {featured.publishedAt && (
-                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                    {formatDate(featured.publishedAt)}
-                  </p>
-                )}
-                <h3 className="mt-3 text-2xl font-bold leading-snug text-slate-900 transition-colors group-hover:text-teal-600 dark:text-white dark:group-hover:text-teal-400">
-                  {featured.title}
-                </h3>
-                <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-                  {featured.excerpt || stripHtml(featured.content).slice(0, 180)}
-                </p>
-
-                {featured.author?.name && (
-                  <div className="mt-6 flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
-                    <User className="h-4 w-4 text-slate-400" />
-                    {featured.author.name}
-                  </div>
-                )}
-              </div>
-            </Link>
-          </motion.div>
-
-          {/* Side posts — 2 cols */}
-          <div className="flex flex-col gap-5 lg:col-span-2">
-            {gridPosts.map((post, index) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {posts.map((post, index) => (
               <motion.div
                 key={post.id}
-                initial={{ opacity: 0, x: 32 }}
-                animate={isInView ? { opacity: 1, x: 0 } : {}}
-                transition={{ duration: 0.6, delay: (index + 1) * 0.1, ease: [0.22, 1, 0.36, 1] }}
+                initial={{ opacity: 0, y: 32 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, delay: index * 0.12, ease: [0.22, 1, 0.36, 1] }}
+                className="h-full"
               >
                 <Link
                   href={`/blog/${post.slug}`}
-                  className="group flex h-full gap-4 overflow-hidden rounded-2xl border border-slate-100 bg-white p-4 shadow-sm ring-1 ring-black/5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-slate-200/70 dark:border-slate-800 dark:bg-slate-900 dark:ring-white/5"
+                  className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm ring-1 ring-black/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/70 dark:border-slate-800 dark:bg-slate-900 dark:ring-white/5"
                 >
-                  {post.coverImage && (
-                    <div className="relative h-20 w-24 shrink-0 overflow-hidden rounded-xl">
+                  {/* Image */}
+                  <div className="relative h-48 overflow-hidden bg-gradient-to-br from-teal-400 to-indigo-500">
+                    {post.coverImage && (
                       <Image
                         src={post.coverImage}
                         alt={post.title}
                         fill
                         className="object-cover transition-transform duration-500 group-hover:scale-105"
                       />
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                    {/* Reading time badge */}
+                    <div className="absolute bottom-4 left-4 flex items-center gap-1.5 rounded-full bg-black/50 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-sm">
+                      <Clock className="h-3 w-3" />
+                      {readingTime(post.content)} min read
                     </div>
-                  )}
-                  <div className="flex min-w-0 flex-col justify-center">
+                  </div>
+
+                  {/* Content */}
+                  <div className="flex flex-1 flex-col p-6">
                     {post.publishedAt && (
-                      <p className="text-xs font-medium text-slate-400">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
                         {formatDate(post.publishedAt)}
                       </p>
                     )}
-                    <h3 className="mt-1 line-clamp-2 text-sm font-bold leading-snug text-slate-900 transition-colors group-hover:text-teal-600 dark:text-white dark:group-hover:text-teal-400">
+                    <h3 className="mt-3 text-lg font-bold leading-snug text-slate-900 transition-colors group-hover:text-teal-600 dark:text-white dark:group-hover:text-teal-400">
                       {post.title}
                     </h3>
-                    <p className="mt-1 line-clamp-1 text-xs text-slate-400">
-                      {post.excerpt || stripHtml(post.content).slice(0, 70)}
+                    <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
+                      {post.excerpt || stripHtml(post.content).slice(0, 180)}
                     </p>
+
+                    {post.author?.name && (
+                      <div className="mt-6 flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                        <User className="h-4 w-4 text-slate-400" />
+                        {post.author.name}
+                      </div>
+                    )}
                   </div>
                 </Link>
               </motion.div>
             ))}
-          </div>
         </div>
       </div>
     </section>

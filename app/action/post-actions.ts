@@ -14,7 +14,7 @@ export async function getPostsAction(params: PaginationParams & { published?: bo
     const supabase = await createAdminClient();
     const result = await paginate<Post>("posts", params, {
       supabase,
-      select: "id, title, slug, excerpt, coverImage, published, publishedAt, createdAt, authorId, author:profiles(name, avatarUrl)",
+      select: "id, title, slug, excerpt, content, coverImage, published, publishedAt, createdAt, authorId, author:profiles(name, avatarUrl)",
       filters: (query) => {
         if (params.published !== undefined) {
           return query.eq("published", params.published);
@@ -133,8 +133,8 @@ export async function updatePostAction(id: string, data: Partial<PostInput>): Pr
     if (error) throw error;
     
     revalidatePath("/admin/blog");
-    revalidatePath(`/blog/${post.slug}`);
-    revalidatePath("/blog");
+    // revalidatePath(`/blog/${post.slug}`);
+    // revalidatePath("/blog");
     return post;
   } catch (error) {
     console.error("Error updating post:", error);

@@ -13,6 +13,7 @@ export default function SermonsPage() {
   const { data: sermonsData, isLoading: isSermonsLoading } = useSermons({
     search,
     series: selectedSeries === "All" ? undefined : selectedSeries,
+    published: true,
   });
   const { data: seriesData, isLoading: isSeriesLoading } = useSermonSeries();
 

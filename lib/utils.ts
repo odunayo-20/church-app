@@ -16,10 +16,11 @@ export function formatDate(date: string | Date | null | undefined) {
 
 export function readingTime(text: string | null | undefined) {
   if (!text) return 0;
+  const cleanText = stripHtml(text);
   const wordsPerMinute = 200;
-  const noOfWords = text.split(/\s/g).length;
+  const noOfWords = cleanText.split(/\s+/).filter(word => word.length > 0).length;
   const minutes = noOfWords / wordsPerMinute;
-  return Math.ceil(minutes);
+  return Math.max(1, Math.ceil(minutes));
 }
 
 export function stripHtml(html: string | null | undefined) {

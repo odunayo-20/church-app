@@ -78,7 +78,6 @@ export function PostForm({ post, isEditing = false }: PostFormProps) {
       }
 
       router.push("/admin/blog");
-      router.refresh();
     } catch (err: any) {
       setError(err.message || "Failed to save post");
       toast.error("Failed to save post");
@@ -170,7 +169,7 @@ export function PostForm({ post, isEditing = false }: PostFormProps) {
       </div>
 
       {/* Status & Actions */}
-      <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-border/40 bg-muted/20 p-6">
+      <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-border-/40 bg-muted/20 p-6">
         <label className="flex cursor-pointer items-center gap-3">
           <input
             type="checkbox"
@@ -188,7 +187,7 @@ export function PostForm({ post, isEditing = false }: PostFormProps) {
           <button
             type="button"
             onClick={() => router.back()}
-            className="flex-1 rounded-xl border border-border/40 bg-background px-6 py-2.5 text-sm font-semibold transition-colors hover:bg-muted/50 sm:flex-none"
+            className="flex-1 rounded-xl border border-border-/40 bg-background px-6 py-2.5 text-sm font-semibold transition-colors hover:bg-muted/50 sm:flex-none"
           >
             Cancel
           </button>

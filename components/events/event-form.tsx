@@ -68,7 +68,7 @@ export function EventForm({ event, isEditing = false }: EventFormProps) {
       }
 
       router.push("/admin/events");
-      router.refresh();
+      
     } catch (err: any) {
       setError(err.message || "Failed to save event");
       toast.error("Failed to save event");

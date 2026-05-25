@@ -13,8 +13,8 @@ export const revalidate = 60; // Use Incremental Static Regeneration (ISR) to ca
 export default async function Home() {
   const [upcomingEvents, recentSermons, recentPosts] = await Promise.all([
     getEventsAction({ upcoming: true, limit: 3 }),
-    getSermonsAction({ limit: 3 }),
-    getPostsAction({ limit: 3 }),
+    getSermonsAction({ limit: 3, published: true }),
+    getPostsAction({ limit: 3, published: true }),
   ]);
 
   const events = upcomingEvents.data || [];

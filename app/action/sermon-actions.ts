@@ -14,6 +14,7 @@ export interface SermonFilters extends PaginationParams {
   speaker?: string;
   topic?: string;
   query?: string;
+   published?: boolean;
 }
 
 export async function getSermonsAction(params: SermonFilters): Promise<PaginatedResult<Sermon>> {
@@ -27,6 +28,9 @@ export async function getSermonsAction(params: SermonFilters): Promise<Paginated
         if (params.topic) query.ilike("topic", `%${params.topic}%`);
         if (params.query) {
           query.or(`title.like.%${params.query}%,description.like.%${params.query}%`);
+        }
+        if (params.published === true) {
+          query.eq("published", true);
         }
         return query;
       },

@@ -85,7 +85,6 @@ export async function createEventAction(data: EventInput): Promise<Event> {
     if (error) throw error;
     
     revalidatePath("/admin/events");
-    revalidatePath("/events");
     return event;
   } catch (error) {
     console.error("Error creating event:", error);
@@ -119,8 +118,7 @@ export async function updateEventAction(id: string, data: Partial<EventInput>): 
     if (error) throw error;
     
     revalidatePath("/admin/events");
-    revalidatePath(`/events/${id}`);
-    revalidatePath("/events");
+  
     return event;
   } catch (error) {
     console.error("Error updating event:", error);
@@ -136,7 +134,6 @@ export async function deleteEventAction(id: string): Promise<boolean> {
     if (error) throw error;
     
     revalidatePath("/admin/events");
-    revalidatePath("/events");
     return true;
   } catch (error) {
     console.error("Error deleting event:", error);

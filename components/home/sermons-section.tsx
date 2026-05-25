@@ -62,13 +62,14 @@ export function SermonsSection({ sermons }: SermonsSectionProps) {
             No sermons available yet. Check back soon!
           </div>
         ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {sermons.slice(0, 3).map((sermon, index) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {sermons.map((sermon, index) => (
               <motion.div
                 key={sermon.id}
                 initial={{ opacity: 0, y: 32 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.6, delay: index * 0.12, ease: [0.22, 1, 0.36, 1] }}
+                className="h-full"
               >
                 <Link
                   href={`/sermons/${sermon.slug}`}

@@ -65,8 +65,8 @@ export function EventsSection({ events }: EventsSectionProps) {
             No upcoming events at the moment. Check back soon!
           </div>
         ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {events.slice(0, 3).map((event, index) => {
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {events.map((event, index) => {
               const gradient = PLACEHOLDER_GRADIENT[index % PLACEHOLDER_GRADIENT.length];
               const dateObj = new Date(event.date);
               const day = dateObj.getDate();
@@ -78,6 +78,7 @@ export function EventsSection({ events }: EventsSectionProps) {
                   initial={{ opacity: 0, y: 32 }}
                   animate={isInView ? { opacity: 1, y: 0 } : {}}
                   transition={{ duration: 0.6, delay: index * 0.12, ease: [0.22, 1, 0.36, 1] }}
+                  className="h-full"
                 >
                   <Link
                     href={`/events/${event.id}`}
