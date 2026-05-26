@@ -80,6 +80,7 @@ export {
   useContactMessage,
   useUpdateContactMessage,
   useDeleteContactMessage,
+  useSendContactReply,
   contactKeys,
 } from "./use-contacts";
 

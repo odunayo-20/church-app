@@ -4,6 +4,7 @@ import {
   getContactMessageByIdAction,
   updateContactMessageAction,
   deleteContactMessageAction,
+  sendContactReplyAction,
 } from "@/app/action/contact-actions";
 import type { ContactMessage } from "@/types/models";
 import type { ContactMessageInput } from "@/lib/validations";
@@ -63,6 +64,23 @@ export function useDeleteContactMessage() {
       queryClient.removeQueries({ queryKey: contactKeys.detail(id) });
 
        queryClient.invalidateQueries({ queryKey: contactKeys.lists() });
+    },
+  });
+}
+
+export function useSendContactReply() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      replyData,
+    }: {
+      id: string;
+      replyData: { to: string; name: string; subject: string; body: string };
+    }) => sendContactReplyAction(id, replyData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: contactKeys.lists() });
     },
   });
 }
