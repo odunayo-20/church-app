@@ -19,7 +19,7 @@ interface MemberEditFormProps {
 export function MemberEditForm({ member }: MemberEditFormProps) {
   const router = useRouter();
   const updateMutation = useUpdateMember();
-  
+
   const [name, setName] = useState(member.name);
   const [email, setEmail] = useState(member.email);
   const [phone, setPhone] = useState(member.phone ?? "");
@@ -52,7 +52,6 @@ export function MemberEditForm({ member }: MemberEditFormProps) {
 
       toast.success("Member updated successfully");
       router.push("/admin/members");
-      router.refresh();
     } catch (err: any) {
       setError(err.message || "Failed to update member");
       toast.error("Failed to update member");

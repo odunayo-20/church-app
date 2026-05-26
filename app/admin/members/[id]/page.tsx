@@ -7,6 +7,8 @@ import { motion } from "framer-motion";
 import { ArrowLeft, AlertCircle, Calendar, Mail, Phone, CreditCard, History } from "lucide-react";
 import Link from "next/link";
 import { formatDate, formatCurrency } from "@/lib/utils";
+import { getDonationTotalByEmailAction } from "@/app/action/donation-actions";
+import { useEffect, useState } from "react";
 
 export default function MemberDetailsPage() {
   const params = useParams();
@@ -14,6 +16,16 @@ export default function MemberDetailsPage() {
 
   const { data: member, isLoading, error } = useMember(id);
   const { role, loading: authLoading } = useAuth();
+  
+  const [emailDonationTotal, setEmailDonationTotal] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (member?.email) {
+      getDonationTotalByEmailAction(member.email)
+        .then(setEmailDonationTotal)
+        .catch(console.error);
+    }
+  }, [member?.email]);
 
   if (authLoading || isLoading) {
     return (
@@ -69,7 +81,7 @@ export default function MemberDetailsPage() {
     );
   }
 
-  const totalDonated = member.donations?.reduce((sum, d) => sum + Number(d.amount), 0) || 0;
+  const totalDonated = emailDonationTotal ?? (member.donations?.reduce((sum, d) => sum + Number(d.amount), 0) || 0);
 
   return (
     <div className="space-y-8 pb-12">

@@ -13,17 +13,41 @@ import {
   Sparkles,
 } from "lucide-react";
 import { NAV_ITEMS } from "@/lib/constants";
+import { createClient } from "@/lib/supabase/client";
+import { type User } from "@supabase/supabase-js";
 
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
+  const [user, setUser] = useState<User | null>(null);
+  const supabase = createClient();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 24);
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  useEffect(() => {
+    const getUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    getUser();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
 
   // Close mobile menu on route change
   useEffect(() => setMenuOpen(false), [pathname]);
@@ -94,13 +118,35 @@ export function Header() {
 
           {/* Desktop Actions */}
           <div className="hidden items-center gap-3 lg:flex">
-            <Link
-              href="/auth/login"
-              id="nav-signin"
-              className="text-sm font-medium text-white/60 transition-colors duration-200 hover:text-white"
-            >
-              Sign In
-            </Link>
+            {user ? (
+              <>
+                <Link
+                  href="/dashboard"
+                  id="nav-dashboard"
+                  className="text-sm font-medium text-white/60 transition-colors duration-200 hover:text-white"
+                >
+                  Dashboard
+                </Link>
+                <button
+                  onClick={async () => {
+                    await supabase.auth.signOut();
+                    window.location.reload();
+                  }}
+                  id="nav-signout"
+                  className="cursor-pointer text-sm font-medium text-white/40 transition-colors duration-200 hover:text-red-400"
+                >
+                  Sign Out
+                </button>
+              </>
+            ) : (
+              <Link
+                href="/auth/login"
+                id="nav-signin"
+                className="text-sm font-medium text-white/60 transition-colors duration-200 hover:text-white"
+              >
+                Sign In
+              </Link>
+            )}
             <Link
               href="/donate"
               id="nav-donate"
@@ -219,13 +265,35 @@ export function Header() {
 
               {/* Drawer Footer Actions */}
               <div className="border-t border-white/10 p-4 space-y-3">
-                <Link
-                  href="/auth/login"
-                  id="mobile-nav-signin"
-                  className="flex w-full items-center justify-center rounded-xl border border-white/10 bg-white/5 py-3 text-sm font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white"
-                >
-                  Sign In
-                </Link>
+                {user ? (
+                  <>
+                    <Link
+                      href="/dashboard"
+                      id="mobile-nav-dashboard"
+                      className="flex w-full items-center justify-center rounded-xl border border-white/10 bg-white/5 py-3 text-sm font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+                    >
+                      Dashboard
+                    </Link>
+                    <button
+                      onClick={async () => {
+                        await supabase.auth.signOut();
+                        window.location.reload();
+                      }}
+                      id="mobile-nav-signout"
+                      className="flex w-full cursor-pointer items-center justify-center rounded-xl border border-red-500/20 bg-red-500/10 py-3 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/20"
+                    >
+                      Sign Out
+                    </button>
+                  </>
+                ) : (
+                  <Link
+                    href="/auth/login"
+                    id="mobile-nav-signin"
+                    className="flex w-full items-center justify-center rounded-xl border border-white/10 bg-white/5 py-3 text-sm font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+                  >
+                    Sign In
+                  </Link>
+                )}
                 <Link
                   href="/donate"
                   id="mobile-nav-donate"

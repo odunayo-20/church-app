@@ -270,6 +270,25 @@ export async function getDonationStatsAction() {
   }
 }
 
+export async function getDonationTotalByEmailAction(email: string): Promise<number> {
+  try {
+    const supabase = await createAdminClient();
+    const { data, error } = await supabase
+      .from("donations")
+      .select("amount")
+      .eq("donor_email", email)
+      .eq("status", "completed");
+
+    if (error) throw error;
+
+    const total = (data || []).reduce((acc, d) => acc + Number(d.amount), 0);
+    return total;
+  } catch (error) {
+    console.error(`Error fetching donations for email ${email}:`, error);
+    throw new Error("Failed to fetch donation total by email");
+  }
+}
+
 export async function sendDonorMessageAction(donationId: string, subject: string, message: string): Promise<{ success: true }> {
   try {
     const supabase = await createAdminClient();

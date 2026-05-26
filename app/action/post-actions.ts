@@ -92,6 +92,13 @@ export async function createPostAction(data: PostInput): Promise<Post> {
 
     if (error) throw error;
     
+    if (validatedData.published) {
+      // Broadcast new post notification (non-blocking)
+      import("@/app/action/message-actions")
+        .then(({ broadcastNewPostNotification }) => broadcastNewPostNotification(post))
+        .catch(console.error);
+    }
+
     revalidatePath("/admin/blog");
     revalidatePath("/blog");
     return post;
@@ -105,6 +112,14 @@ export async function updatePostAction(id: string, data: Partial<PostInput>): Pr
   try {
     const validatedData = postUpdateSchema.parse(data);
     const supabase = await createAdminClient(); // Bypass RLS for admin action
+
+    // Fetch existing post to check current published status
+    const { data: existingPost } = await supabase
+      .from("posts")
+      .select("published, title, excerpt, slug, content")
+      .eq("id", id)
+      .single();
+
     const updateData: Record<string, unknown> = {};
 
     if (validatedData.title !== undefined) {
@@ -132,6 +147,16 @@ export async function updatePostAction(id: string, data: Partial<PostInput>): Pr
 
     if (error) throw error;
     
+    // Check transition
+    const wasPublishedBefore = !!existingPost?.published;
+    const isPublishedNow = !!post.published;
+    if (isPublishedNow && !wasPublishedBefore) {
+      // Broadcast new post notification (non-blocking)
+      import("@/app/action/message-actions")
+        .then(({ broadcastNewPostNotification }) => broadcastNewPostNotification(post))
+        .catch(console.error);
+    }
+
     revalidatePath("/admin/blog");
     // revalidatePath(`/blog/${post.slug}`);
     // revalidatePath("/blog");

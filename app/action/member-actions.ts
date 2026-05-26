@@ -180,3 +180,83 @@ export async function deleteMemberAction(id: string): Promise<{ success: true }>
     throw new Error("Failed to delete member");
   }
 }
+
+// ── Self-service: get the current user's own member record ──────────────────
+export async function getMemberProfileAction(): Promise<Member | null> {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
+
+    const adminClient = await createAdminClient();
+    const { data, error } = await adminClient
+      .from("members")
+      .select("*")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!data) return null;
+
+    return {
+      id: data.id,
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      birthday: data.birthday,
+      anniversary: data.anniversary,
+      createdAt: data.createdAt || data.created_at,
+      updatedAt: data.updatedAt || data.updated_at,
+    };
+  } catch (error) {
+    console.error("Error fetching member profile:", error);
+    return null;
+  }
+}
+
+// ── Self-service: update the current user's own member record ───────────────
+export async function updateMemberProfileAction(
+  data: Partial<MemberInput>
+): Promise<Member> {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Not authenticated");
+
+    const validatedData = memberUpdateSchema.parse(data);
+    const adminClient = await createAdminClient();
+
+    // Locate the member row linked to this auth user
+    const { data: existing, error: findError } = await adminClient
+      .from("members")
+      .select("id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (findError) throw findError;
+    if (!existing) throw new Error("Member record not found");
+
+    const updateData: Record<string, any> = {};
+    if (validatedData.name !== undefined) updateData.name = validatedData.name;
+    if (validatedData.phone !== undefined) updateData.phone = validatedData.phone || null;
+    if (validatedData.birthday !== undefined) updateData.birthday = validatedData.birthday || null;
+    if (validatedData.anniversary !== undefined) updateData.anniversary = validatedData.anniversary || null;
+    updateData.updatedAt = new Date().toISOString();
+
+    const { data: member, error } = await adminClient
+      .from("members")
+      .update(updateData)
+      .eq("id", existing.id)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    revalidatePath("/dashboard");
+    revalidatePath("/dashboard/profile");
+    return member;
+  } catch (error) {
+    console.error("Error updating member profile:", error);
+    throw error;
+  }
+}

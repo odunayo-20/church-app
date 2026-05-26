@@ -89,6 +89,13 @@ export async function createSermonAction(data: SermonInput): Promise<Sermon> {
 
     if (error) throw error;
     
+    if (validatedData.published) {
+      // Broadcast new sermon notification (non-blocking)
+      import("@/app/action/message-actions")
+        .then(({ broadcastNewSermonNotification }) => broadcastNewSermonNotification(sermon))
+        .catch(console.error);
+    }
+
     revalidatePath("/admin/sermons");
     revalidatePath("/sermons");
     return sermon;
@@ -102,6 +109,14 @@ export async function updateSermonAction(id: string, data: Partial<SermonInput>)
   try {
     const validatedData = sermonUpdateSchema.parse(data);
     const supabase = await createAdminClient();
+
+    // Fetch existing sermon to check current published status
+    const { data: existingSermon } = await supabase
+      .from("sermons")
+      .select("publishedAt, title, speaker, slug, description")
+      .eq("id", id)
+      .single();
+
     const updateData: Record<string, any> = {};
 
     if (validatedData.title !== undefined) {
@@ -131,6 +146,16 @@ export async function updateSermonAction(id: string, data: Partial<SermonInput>)
 
     if (error) throw error;
     
+    // Check transition
+    const wasPublishedBefore = !!existingSermon?.publishedAt;
+    const isPublishedNow = !!sermon.publishedAt;
+    if (isPublishedNow && !wasPublishedBefore) {
+      // Broadcast new sermon notification (non-blocking)
+      import("@/app/action/message-actions")
+        .then(({ broadcastNewSermonNotification }) => broadcastNewSermonNotification(sermon))
+        .catch(console.error);
+    }
+
     revalidatePath("/admin/sermons");
     revalidatePath(`/sermons/${sermon.slug}`);
     revalidatePath("/sermons");

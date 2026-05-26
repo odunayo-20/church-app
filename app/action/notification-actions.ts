@@ -15,6 +15,7 @@ export async function processNotificationsAction() {
     return {
       birthday: { processed: 0, success: 0, failed: 0 },
       anniversary: { processed: 0, success: 0, failed: 0 },
+      eventReminder: { processed: 0, success: 0, failed: 0, skipped: 0 },
     };
   }
 
@@ -23,14 +24,20 @@ export async function processNotificationsAction() {
   try {
     const birthdayResults = await processBirthdayNotifications();
     const anniversaryResults = await processAnniversaryNotifications();
+    const eventReminderResults = await processEventReminderNotifications();
 
     logger.info("Notification processing complete", {
       birthday: birthdayResults,
       anniversary: anniversaryResults,
+      eventReminder: eventReminderResults,
     });
 
     revalidatePath("/admin/notifications");
-    return { birthday: birthdayResults, anniversary: anniversaryResults };
+    return {
+      birthday: birthdayResults,
+      anniversary: anniversaryResults,
+      eventReminder: eventReminderResults,
+    };
   } catch (error) {
     logger.error("Notification processing failed", error);
     throw error;
@@ -223,3 +230,123 @@ export async function getNotificationStatsAction() {
     throw new Error("Failed to fetch notification stats");
   }
 }
+
+async function processEventReminderNotifications() {
+  const supabase = await createClient();
+  
+  // Find events happening tomorrow
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+
+  const startOfTomorrow = new Date(tomorrow);
+  startOfTomorrow.setHours(0, 0, 0, 0);
+
+  const endOfTomorrow = new Date(tomorrow);
+  endOfTomorrow.setHours(23, 59, 59, 999);
+
+  // Fetch all events happening tomorrow
+  const { data: events, error: eventsError } = await supabase
+    .from("events")
+    .select("*")
+    .gte("date", startOfTomorrow.toISOString())
+    .lte("date", endOfTomorrow.toISOString());
+
+  if (eventsError) throw eventsError;
+  if (!events || events.length === 0) {
+    return { processed: 0, success: 0, failed: 0, skipped: 0 };
+  }
+
+  // Fetch all members
+  const { data: members, error: membersError } = await supabase
+    .from("members")
+    .select("id, name, email");
+
+  if (membersError) throw membersError;
+  if (!members || members.length === 0) {
+    return { processed: 0, success: 0, failed: 0, skipped: 0 };
+  }
+
+  const { eventReminderEmail } = await import("@/lib/email-templates");
+
+  let successCount = 0;
+  let failedCount = 0;
+  let skippedCount = 0;
+
+  // Process reminders for each event tomorrow
+  for (const event of events) {
+    const eventDateFormatted = new Date(event.date).toLocaleDateString("en-US", {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+
+    const reminderPromises = members.map(async (member) => {
+      // Check if we've already sent a reminder for this specific event to this member
+      const { data: existingNotification } = await supabase
+        .from("notifications")
+        .select("id")
+        .eq("memberId", member.id)
+        .eq("type", "event_reminder")
+        .eq("metadata->>eventId", event.id)
+        .maybeSingle();
+
+      if (existingNotification) {
+        skippedCount++;
+        return;
+      }
+
+      try {
+        const tmpl = eventReminderEmail(member.name, event.title, eventDateFormatted, event.location, event.id);
+        const { success, data: emailData, error: emailError } = await sendEmail({
+          to: member.email,
+          subject: tmpl.subject,
+          html: tmpl.html,
+        });
+
+        await supabase.from("notifications").insert({
+          id: generateId(),
+          memberId: member.id,
+          type: "event_reminder",
+          message: `Reminder: "${event.title}" is tomorrow!`,
+          status: success ? "sent" : "failed",
+          sentAt: success ? new Date().toISOString() : null,
+          metadata: { eventId: event.id, message_id: emailData?.messageId, error: emailError },
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
+
+        if (success) {
+          successCount++;
+        } else {
+          failedCount++;
+        }
+      } catch (err) {
+        failedCount++;
+        logger.error(`Failed to send event reminder to ${member.email}`, err);
+
+        await supabase.from("notifications").insert({
+          id: generateId(),
+          memberId: member.id,
+          type: "event_reminder",
+          message: `Reminder: "${event.title}" is tomorrow!`,
+          status: "failed",
+          metadata: {
+            eventId: event.id,
+            error: err instanceof Error ? err.message : "Unknown error",
+          },
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
+      }
+    });
+
+    await Promise.allSettled(reminderPromises);
+  }
+
+  return { processed: events.length * members.length, success: successCount, failed: failedCount, skipped: skippedCount };
+}
+

@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser, signOut } from "@/lib/auth";
+import { getMemberProfileAction } from "@/app/action/member-actions";
 import Link from "next/link";
 import {
   LayoutDashboard,
@@ -27,10 +28,12 @@ export default async function DashboardPage() {
     redirect("/auth/login");
   }
 
+  // Fetch member record linked to this auth user (non-fatal)
+  const member = await getMemberProfileAction().catch(() => null);
+
   const isAdmin = user.role === "admin" || user.role === "media";
-  const initials = user.email
-    ? user.email.slice(0, 2).toUpperCase()
-    : "GC";
+  const displayName = member?.name || user.email?.split("@")[0] || "Member";
+  const initials = displayName.slice(0, 2).toUpperCase();
 
   return (
     <div className="flex flex-col">
@@ -50,7 +53,7 @@ export default async function DashboardPage() {
               <div>
                 <p className="text-xs font-bold uppercase tracking-widest text-amber-400">Member Dashboard</p>
                 <h1 className="mt-1 text-2xl font-extrabold text-white sm:text-3xl">
-                  Welcome back! 👋
+                  Welcome back, {displayName.split(" ")[0]}! 👋
                 </h1>
                 <p className="mt-0.5 text-sm text-white/50">{user.email}</p>
               </div>
@@ -123,8 +126,8 @@ export default async function DashboardPage() {
                   <div className="flex items-center gap-3 rounded-xl border border-border/40 bg-muted/30 px-4 py-3">
                     <User className="h-4 w-4 shrink-0 text-amber-500" />
                     <div className="min-w-0">
-                      <p className="text-xs text-muted-foreground">Email</p>
-                      <p className="truncate text-sm font-semibold">{user.email}</p>
+                      <p className="text-xs text-muted-foreground">Name</p>
+                      <p className="truncate text-sm font-semibold">{displayName}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 rounded-xl border border-border/40 bg-muted/30 px-4 py-3">
@@ -136,6 +139,16 @@ export default async function DashboardPage() {
                   </div>
                 </div>
 
+                {/* Edit profile link */}
+                <Link
+                  href="/dashboard/profile"
+                  id="dashboard-edit-profile"
+                  className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm font-semibold text-amber-500 transition-all hover:bg-amber-500/10"
+                >
+                  <User className="h-4 w-4" />
+                  Edit My Profile
+                </Link>
+
                 {/* Sign out */}
                 <form
                   action={async () => {
@@ -143,7 +156,7 @@ export default async function DashboardPage() {
                     await signOut();
                     redirect("/auth/login");
                   }}
-                  className="mt-5"
+                  className="mt-3"
                 >
                   <button
                     id="dashboard-signout"
