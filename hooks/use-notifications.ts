@@ -16,6 +16,7 @@ export function useNotifications(filters: any = {}) {
   return useQuery({
     queryKey: KEYS.list(filters),
     queryFn: () => getNotificationsAction(filters),
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -23,6 +24,7 @@ export function useNotificationStats() {
   return useQuery({
     queryKey: KEYS.stats(),
     queryFn: () => getNotificationStatsAction(),
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -32,7 +34,9 @@ export function useProcessNotifications() {
   return useMutation({
     mutationFn: processNotificationsAction,
     onSuccess: () => {
+      // Invalidate both the list and stats so they refresh after processing
       queryClient.invalidateQueries({ queryKey: KEYS.lists() });
+      queryClient.invalidateQueries({ queryKey: KEYS.stats() });
     },
   });
 }

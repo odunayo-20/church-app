@@ -67,38 +67,71 @@ export function MediaLibrary() {
   };
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
-    if (!file.type.startsWith("image/")) {
-      toast.error("Only images are allowed");
+    // Filter only images
+    const imageFiles = files.filter(file => file.type.startsWith("image/"));
+    
+    if (imageFiles.length === 0) {
+      toast.error("Only image files are allowed");
+      e.target.value = "";
       return;
     }
 
     const MAX_SIZE = 10 * 1024 * 1024; // 10MB
-    if (file.size > MAX_SIZE) {
-      toast.error(`File is too large. Max size is 10MB. Your file is ${(file.size / (1024 * 1024)).toFixed(1)}MB`);
+    const validFiles = imageFiles.filter(file => file.size <= MAX_SIZE);
+    
+    if (validFiles.length < imageFiles.length) {
+      toast.error(`${imageFiles.length - validFiles.length} file(s) were skipped because they exceed the 10MB limit`);
+    }
+
+    if (validFiles.length === 0) {
+      e.target.value = "";
       return;
     }
 
-    setIsUploading(true);
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      await uploadMediaAction(formData, currentFolderId);
-      toast.success("File uploaded successfully");
-      fetchData();
-    } catch (error: any) {
-      const msg = error?.message || "";
-      if (msg.includes("Body exceeded") || msg.includes("413")) {
-        toast.error("File is too large to upload. Please keep images under 10MB.");
-      } else {
-        toast.error("Failed to upload file");
-      }
-    } finally {
-      setIsUploading(false);
+    if (imageFiles.length < files.length) {
+      toast.warning(`Skipped ${files.length - imageFiles.length} non-image files`);
     }
+
+    setIsUploading(true);
+    let successCount = 0;
+    let failCount = 0;
+
+    // Execute uploads in parallel for extreme high performance and responsiveness
+    const uploadPromises = validFiles.map(async (file) => {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        await uploadMediaAction(formData, currentFolderId);
+        successCount++;
+      } catch (error: any) {
+        failCount++;
+        const msg = error?.message || "";
+        if (msg.includes("Body exceeded") || msg.includes("413")) {
+          toast.error(`"${file.name}" is too large. Please keep images under 10MB.`);
+        } else {
+          toast.error(`Failed to upload "${file.name}"`);
+          console.error(`Upload failed for ${file.name}:`, error);
+        }
+      }
+    });
+
+    await Promise.all(uploadPromises);
+
+    if (successCount > 0) {
+      toast.success(`Successfully uploaded ${successCount} image(s)`);
+      fetchData();
+    }
+    
+    if (failCount > 0) {
+      toast.error(`Failed to upload ${failCount} image(s)`);
+    }
+
+    setIsUploading(false);
+    e.target.value = "";
   };
 
   const filteredFolders = folders.filter(f => f.name.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -126,6 +159,7 @@ export function MediaLibrary() {
               onChange={handleUpload}
               accept="image/*"
               disabled={isUploading}
+              multiple
             />
             <Button 
               variant="default" 
@@ -135,7 +169,7 @@ export function MediaLibrary() {
             >
               <label htmlFor="media-upload" className="cursor-pointer">
                 {isUploading ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
-                Upload Image
+                {isUploading ? "Uploading..." : "Upload Images"}
               </label>
             </Button>
           </div>

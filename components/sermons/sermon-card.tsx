@@ -25,21 +25,21 @@ export function SermonCard({ sermon }: SermonCardProps) {
   return (
     <Link
       href={`/sermons/${sermon.slug}`}
-      className="group flex flex-col overflow-hidden rounded-lg border border-border/40 bg-card shadow-sm transition-colors hover:bg-accent/50"
+      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border/40 bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-rose-500/35 hover:shadow-rose-500/5"
     >
       {sermon.imageUrl ? (
-        <div className="relative h-40 w-full overflow-hidden">
+        <div className="relative aspect-video w-full overflow-hidden">
           <Image
             src={sermon.imageUrl}
             alt={sermon.title}
             fill
-            className="object-cover transition-transform group-hover:scale-105"
+            className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
           />
         </div>
       ) : (
-        <div className="flex h-40 items-center justify-center bg-primary/10">
+        <div className="flex aspect-video w-full items-center justify-center bg-gradient-to-br from-rose-500/10 via-rose-500/5 to-violet-500/10">
           <svg
-            className="h-12 w-12 text-primary/50"
+            className="h-12 w-12 text-rose-500/30"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"

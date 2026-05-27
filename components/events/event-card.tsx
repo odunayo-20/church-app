@@ -41,36 +41,36 @@ export function EventCard({ event, variant = "default" }: EventCardProps) {
   }
 
   return (
-    <div className="group flex flex-col overflow-hidden rounded-2xl border border-border/40 bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-border/60">
+    <div className="group flex flex-col overflow-hidden rounded-2xl border border-border/40 bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-amber-500/35 hover:shadow-amber-500/5">
       {/* Thumbnail */}
-      <Link href={`/events/${event.id}`} className="relative block aspect-video overflow-hidden">
+      <Link href={`/events/${event.id}`} className="relative block aspect-[16/10] w-full overflow-hidden">
         {event.imageUrl ? (
           <Image
             src={event.imageUrl}
             alt={event.title}
             fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
           />
         ) : (
-          <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-amber-500/10 to-rose-500/10">
+          <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-rose-500/10">
             <div className="flex flex-col items-center justify-center rounded-2xl p-4 text-center">
-              <span className="text-xs font-bold uppercase tracking-widest text-amber-500">{month}</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-amber-500">{month}</span>
               <span className="text-4xl font-black leading-tight">{day}</span>
-              <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{weekday}</span>
+              <span className="mt-0.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{weekday}</span>
             </div>
           </div>
         )}
 
         {/* Date badge overlay */}
         {event.imageUrl && (
-          <div className="absolute left-3 top-3 flex flex-col items-center rounded-xl bg-black/60 px-3 py-2 text-center backdrop-blur-sm">
+          <div className="absolute left-3 top-3 flex flex-col items-center rounded-xl bg-slate-950/70 border border-white/10 px-3.5 py-2 text-center shadow-lg backdrop-blur-md">
             <span className="text-[10px] font-bold uppercase tracking-widest text-amber-400">{month}</span>
-            <span className="text-xl font-black text-white leading-tight">{day}</span>
+            <span className="text-xl font-black text-white leading-none">{day}</span>
           </div>
         )}
 
         {isPast && (
-          <span className="absolute right-3 top-3 rounded-full bg-black/60 px-3 py-1 text-xs font-semibold text-white/70 backdrop-blur-sm">
+          <span className="absolute right-3 top-3 rounded-full bg-slate-950/75 border border-white/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white/80 shadow-md backdrop-blur-sm">
             Past
           </span>
         )}

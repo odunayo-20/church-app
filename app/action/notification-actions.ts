@@ -1,8 +1,13 @@
 "use server"
 
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/email";
-import { birthdayEmail, anniversaryEmail } from "@/lib/email-templates";
+import {
+  birthdayEmail,
+  anniversaryEmail,
+  adminNotificationDigestEmail,
+  type AdminNotificationSummaryRow,
+} from "@/lib/email-templates";
 import { logger } from "@/lib/logger";
 import { revalidatePath } from "next/cache";
 import { config } from "@/lib/config";
@@ -21,6 +26,8 @@ export async function processNotificationsAction() {
 
   logger.info("Starting notification processing");
 
+  const ranAt = new Date();
+
   try {
     const birthdayResults = await processBirthdayNotifications();
     const anniversaryResults = await processAnniversaryNotifications();
@@ -31,6 +38,24 @@ export async function processNotificationsAction() {
       anniversary: anniversaryResults,
       eventReminder: eventReminderResults,
     });
+
+    // --- Send admin digest email ---
+    if (config.email.admin) {
+      const allRows: AdminNotificationSummaryRow[] = [
+        ...(birthdayResults.rows ?? []),
+        ...(anniversaryResults.rows ?? []),
+        ...(eventReminderResults.rows ?? []),
+      ];
+      const digest = adminNotificationDigestEmail(allRows, ranAt);
+      await sendEmail({
+        to: config.email.admin,
+        subject: digest.subject,
+        html: digest.html,
+      });
+      logger.info("Admin digest sent to", config.email.admin);
+    } else {
+      logger.warn("ADMIN_EMAIL not set — skipping admin digest");
+    }
 
     revalidatePath("/admin/notifications");
     return {
@@ -45,7 +70,7 @@ export async function processNotificationsAction() {
 }
 
 async function processBirthdayNotifications() {
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
   const today = new Date();
   const month = today.getMonth();
   const date = today.getDate();
@@ -75,7 +100,7 @@ async function processBirthdayNotifications() {
 }
 
 async function processAnniversaryNotifications() {
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
   const today = new Date();
   const month = today.getMonth();
   const date = today.getDate();
@@ -99,7 +124,12 @@ async function processAnniversaryNotifications() {
 
   return sendNotificationBatch(anniversaryMembers, (member) => ({
     type: "anniversary",
-    template: anniversaryEmail(member.name, 1),
+    template: anniversaryEmail(
+      member.name,
+      member.anniversary
+        ? new Date().getFullYear() - new Date(member.anniversary).getFullYear()
+        : 1
+    ),
     message: `Happy Anniversary ${member.name}!`,
   }));
 }
@@ -112,9 +142,10 @@ async function sendNotificationBatch(
     message: string;
   },
 ) {
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
   let successCount = 0;
   let failedCount = 0;
+  const rows: AdminNotificationSummaryRow[] = [];
 
   const notificationPromises = members.map(async (member) => {
     const notification = createNotification(member);
@@ -131,6 +162,7 @@ async function sendNotificationBatch(
 
     if (existingNotification) {
       logger.debug(`Skipping duplicate notification for ${member.id}`);
+      rows.push({ recipientName: member.name, recipientEmail: member.email, type: notification.type, status: "skipped" });
       return { success: false, skipped: true };
     }
 
@@ -141,40 +173,56 @@ async function sendNotificationBatch(
         html: notification.template.html,
       });
 
-      await supabase.from("notifications").insert({
+      const errMsg = typeof emailError === "string" ? emailError : (emailError as any)?.message;
+
+      const { error: dbError } = await supabase.from("notifications").insert({
         id: generateId(),
         memberId: member.id,
         type: notification.type,
         message: notification.message,
         status: success ? "sent" : "failed",
-        sentAt: success ? new Date().toISOString() : null,
-        metadata: { message_id: emailData?.messageId, error: emailError },
+        ...(success ? { sentAt: new Date().toISOString() } : {}),
+        metadata: { message_id: (emailData as any)?.messageId, error: emailError },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });
+      if (dbError) logger.error("[DB] Failed to insert notification:", dbError);
 
-      if (!success) {
-        failedCount++;
-      } else {
-        successCount++;
-      }
+      rows.push({
+        recipientName: member.name,
+        recipientEmail: member.email,
+        type: notification.type,
+        status: success ? "sent" : "failed",
+        error: success ? undefined : errMsg,
+      });
+
+      if (!success) failedCount++;
+      else successCount++;
 
       return { success };
     } catch (error) {
       failedCount++;
+      const errMsg = error instanceof Error ? error.message : "Unknown error";
       logger.error(`Failed to send notification to ${member.email}`, error);
 
-      await supabase.from("notifications").insert({
+      const { error: dbError2 } = await supabase.from("notifications").insert({
         id: generateId(),
         memberId: member.id,
         type: notification.type,
         message: notification.message,
         status: "failed",
-        metadata: {
-          error: error instanceof Error ? error.message : "Unknown error",
-        },
+        metadata: { error: errMsg },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
+      });
+      if (dbError2) logger.error("[DB] Failed to insert failed notification:", dbError2);
+
+      rows.push({
+        recipientName: member.name,
+        recipientEmail: member.email,
+        type: notification.type,
+        status: "failed",
+        error: errMsg,
       });
 
       return { success: false };
@@ -183,56 +231,93 @@ async function sendNotificationBatch(
 
   await Promise.allSettled(notificationPromises);
 
-  return { processed: members.length, success: successCount, failed: failedCount };
+  return { processed: members.length, success: successCount, failed: failedCount, rows };
 }
 
 export async function getNotificationsAction(filters: { type?: string; status?: string; limit?: number } = {}) {
   try {
-    const supabase = await createClient();
+    const supabase = await createAdminClient();
     const { type, status, limit = 50 } = filters;
 
+    // Step 1: fetch notifications (no join — avoids PostgREST FK hint issues)
     let query = supabase
       .from("notifications")
-      .select("*, member:members(*)")
+      .select("*")
       .order("createdAt", { ascending: false })
       .limit(limit);
 
     if (type) query = query.eq("type", type);
     if (status) query = query.eq("status", status);
 
-    const { data, error } = await query;
+    const { data: notifications, error } = await query;
 
-    if (error) throw error;
-    return data;
+    if (error) {
+      console.error("[getNotificationsAction] Supabase error:", JSON.stringify(error));
+      // If columns are missing (migration not run), return empty list instead of crashing
+      if (
+        error.message?.includes("column") ||
+        error.code === "42703" // undefined_column
+      ) {
+        console.warn("[getNotificationsAction] Missing columns — run supabase-notifications-migration.sql");
+        return [];
+      }
+      throw error;
+    }
+
+    if (!notifications || notifications.length === 0) return [];
+
+    // Step 2: batch-fetch member names for the returned notifications
+    const memberIds = [...new Set(notifications.map((n) => n.memberId).filter(Boolean))];
+
+    const { data: members, error: membersError } = await supabase
+      .from("members")
+      .select("id, name, email")
+      .in("id", memberIds);
+
+    if (membersError) {
+      console.warn("[getNotificationsAction] Could not fetch member names:", membersError.message);
+    }
+
+    const memberMap = new Map((members || []).map((m) => [m.id, m]));
+
+    // Attach member info to each notification
+    return notifications.map((n) => ({
+      ...n,
+      members: memberMap.get(n.memberId) ?? null,
+    }));
   } catch (error) {
-    console.error("Error fetching notifications:", error);
+    console.error("[getNotificationsAction] Error:", error);
     throw new Error("Failed to fetch notifications");
   }
 }
 
 export async function getNotificationStatsAction() {
   try {
-    const supabase = await createClient();
+    const supabase = await createAdminClient();
     const { data, error } = await supabase
       .from("notifications")
       .select("status, type");
 
-    if (error) throw error;
+    if (error) {
+      // If columns don't exist yet (migration not run), return zeros gracefully
+      console.warn("[getNotificationStatsAction] Error (migration may be pending):", error.message);
+      return { sent: 0, pending: 0, failed: 0 };
+    }
 
     const stats = (data || []).reduce((acc, n) => {
-      acc[n.status] = (acc[n.status] || 0) + 1;
+      if (n.status) acc[n.status] = (acc[n.status] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
 
-    return stats;
+    return { sent: 0, pending: 0, failed: 0, ...stats };
   } catch (error) {
-    console.error("Error fetching notification stats:", error);
-    throw new Error("Failed to fetch notification stats");
+    console.error("[getNotificationStatsAction] Error:", error);
+    return { sent: 0, pending: 0, failed: 0 };
   }
 }
 
 async function processEventReminderNotifications() {
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
   
   // Find events happening tomorrow
   const today = new Date();
@@ -272,6 +357,7 @@ async function processEventReminderNotifications() {
   let successCount = 0;
   let failedCount = 0;
   let skippedCount = 0;
+  const rows: AdminNotificationSummaryRow[] = [];
 
   // Process reminders for each event tomorrow
   for (const event of events) {
@@ -296,6 +382,7 @@ async function processEventReminderNotifications() {
 
       if (existingNotification) {
         skippedCount++;
+        rows.push({ recipientName: member.name, recipientEmail: member.email, type: "event_reminder", status: "skipped" });
         return;
       }
 
@@ -307,25 +394,33 @@ async function processEventReminderNotifications() {
           html: tmpl.html,
         });
 
+        const errMsg = typeof emailError === "string" ? emailError : (emailError as any)?.message;
+
         await supabase.from("notifications").insert({
           id: generateId(),
           memberId: member.id,
           type: "event_reminder",
           message: `Reminder: "${event.title}" is tomorrow!`,
           status: success ? "sent" : "failed",
-          sentAt: success ? new Date().toISOString() : null,
-          metadata: { eventId: event.id, message_id: emailData?.messageId, error: emailError },
+          ...(success ? { sentAt: new Date().toISOString() } : {}),
+          metadata: { eventId: event.id, message_id: (emailData as any)?.messageId, error: emailError },
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         });
 
-        if (success) {
-          successCount++;
-        } else {
-          failedCount++;
-        }
+        rows.push({
+          recipientName: member.name,
+          recipientEmail: member.email,
+          type: "event_reminder",
+          status: success ? "sent" : "failed",
+          error: success ? undefined : errMsg,
+        });
+
+        if (success) successCount++;
+        else failedCount++;
       } catch (err) {
         failedCount++;
+        const errMsg = err instanceof Error ? err.message : "Unknown error";
         logger.error(`Failed to send event reminder to ${member.email}`, err);
 
         await supabase.from("notifications").insert({
@@ -334,12 +429,17 @@ async function processEventReminderNotifications() {
           type: "event_reminder",
           message: `Reminder: "${event.title}" is tomorrow!`,
           status: "failed",
-          metadata: {
-            eventId: event.id,
-            error: err instanceof Error ? err.message : "Unknown error",
-          },
+          metadata: { eventId: event.id, error: errMsg },
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
+        });
+
+        rows.push({
+          recipientName: member.name,
+          recipientEmail: member.email,
+          type: "event_reminder",
+          status: "failed",
+          error: errMsg,
         });
       }
     });
@@ -347,6 +447,5 @@ async function processEventReminderNotifications() {
     await Promise.allSettled(reminderPromises);
   }
 
-  return { processed: events.length * members.length, success: successCount, failed: failedCount, skipped: skippedCount };
+  return { processed: events.length * members.length, success: successCount, failed: failedCount, skipped: skippedCount, rows };
 }
-

@@ -124,25 +124,25 @@ export default function BlogPage() {
                   initial={{ opacity: 0, y: 32 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-                  className="group relative overflow-hidden rounded-3xl border border-border/40 bg-card shadow-md transition-all duration-300 hover:shadow-xl"
+                  className="group relative overflow-hidden rounded-3xl border border-border/40 bg-card shadow-md transition-all duration-300 hover:shadow-xl hover:border-amber-500/35 hover:shadow-amber-500/5"
                 >
                   <div className="grid gap-0 lg:grid-cols-2">
                     {/* Image */}
-                    <div className="relative min-h-[280px] lg:min-h-[420px]">
+                    <div className="relative aspect-[16/10] sm:aspect-video lg:aspect-auto lg:min-h-[420px] w-full overflow-hidden">
                       {featuredPost.coverImage ? (
                         <Image
                           src={featuredPost.coverImage}
                           alt={featuredPost.title}
                           fill
-                          className="object-cover transition-transform duration-500 group-hover:scale-105"
+                          className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
                         />
                       ) : (
-                        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-amber-500/10 to-rose-500/10">
+                        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-rose-500/10">
                           <BookOpen className="h-16 w-16 text-amber-500/30" />
                         </div>
                       )}
                       {/* Featured badge */}
-                      <span className="absolute left-4 top-4 rounded-full bg-gradient-to-r from-amber-500 to-rose-500 px-3 py-1 text-xs font-bold text-white shadow">
+                      <span className="absolute left-4 top-4 rounded-full bg-slate-950/70 border border-white/10 px-3.5 py-1.5 text-[10px] font-black uppercase tracking-widest text-transparent bg-gradient-to-r from-amber-400 to-rose-400 bg-clip-text shadow-md backdrop-blur-md">
                         Featured
                       </span>
                     </div>
@@ -203,19 +203,19 @@ export default function BlogPage() {
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.55, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] }}
                         viewport={{ once: true }}
-                        className="group flex flex-col overflow-hidden rounded-2xl border border-border/40 bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+                        className="group flex flex-col overflow-hidden rounded-2xl border border-border/40 bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-amber-500/35 hover:shadow-amber-500/5"
                       >
                         {/* Thumbnail */}
-                        <div className="relative aspect-[16/9] overflow-hidden">
+                        <div className="relative aspect-[16/10] w-full overflow-hidden">
                           {post.coverImage ? (
                             <Image
                               src={post.coverImage}
                               alt={post.title}
                               fill
-                              className="object-cover transition-transform duration-500 group-hover:scale-105"
+                              className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                             />
                           ) : (
-                            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-amber-500/8 to-rose-500/8">
+                            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-rose-500/10">
                               <BookOpen className="h-10 w-10 text-amber-500/25" />
                             </div>
                           )}

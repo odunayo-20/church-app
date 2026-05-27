@@ -130,16 +130,28 @@ export function generalMessageEmail(name: string, subject: string, body: string)
 
 export function birthdayEmail(name: string) {
   return {
-    subject: `Happy Birthday, ${name}!`,
+    subject: `🎂 Happy Birthday, ${name}! — ${appName}`,
     html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h1 style="color: #4f46e5;">Happy Birthday, ${name}!</h1>
-        <p>Wishing you a wonderful day filled with joy and blessings.</p>
-        <p>May this year bring you health, happiness, and peace.</p>
-        <p style="color: #6b7280; font-size: 14px;">
-          With warm regards,<br/>
-          ${process.env.NEXT_PUBLIC_APP_NAME || "Church App"} Team
-        </p>
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #0f172a; color: #f8fafc; border-radius: 12px; overflow: hidden;">
+        <div style="background: linear-gradient(135deg, #f59e0b, #ef4444); padding: 40px 30px; text-align: center;">
+          <p style="margin: 0 0 8px; font-size: 36px;">🎂</p>
+          <h1 style="margin: 0; font-size: 26px; font-weight: 800; color: #fff;">Happy Birthday, ${name}!</h1>
+          <p style="margin: 8px 0 0; color: rgba(255,255,255,0.8); font-size: 14px;">Celebrating YOU today! 🎉</p>
+        </div>
+        <div style="padding: 32px 30px;">
+          <p style="font-size: 16px; color: #94a3b8;">Dear <strong style="color: #fff;">${name}</strong>,</p>
+          <p style="color: #94a3b8; line-height: 1.8;">On behalf of everyone at <strong style="color: #f59e0b;">${appName}</strong>, we want to wish you the most joyful birthday! May this special day be filled with love, laughter, and God's abundant blessings.</p>
+          <p style="color: #94a3b8; line-height: 1.8;">May the Lord continue to bless and keep you through every season of life.</p>
+          <div style="background: #1e293b; border-radius: 8px; padding: 20px; margin: 24px 0; text-align: center;">
+            <p style="margin: 0; color: #f59e0b; font-style: italic; font-size: 15px;">"For I know the plans I have for you, declares the Lord, plans to prosper you and not to harm you." — Jeremiah 29:11</p>
+          </div>
+          <div style="text-align: center; margin: 32px 0;">
+            <a href="${baseUrl}/dashboard" style="background: linear-gradient(135deg, #f59e0b, #ef4444); color: #fff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 700; font-size: 15px;">Visit Your Dashboard</a>
+          </div>
+          <p style="color: #64748b; font-size: 14px; border-top: 1px solid #1e293b; padding-top: 20px;">
+            With love & blessings,<br/><strong style="color: #94a3b8;">${appName} Family</strong>
+          </p>
+        </div>
       </div>
     `,
   };
@@ -148,21 +160,121 @@ export function birthdayEmail(name: string) {
 export function anniversaryEmail(name: string, years: number) {
   const ordinal =
     years === 1 ? "st" : years === 2 ? "nd" : years === 3 ? "rd" : "th";
+  const yearsLabel = years > 0 ? `${years}${ordinal} ` : "";
   return {
-    subject: `Happy ${years}${ordinal} Anniversary, ${name}!`,
+    subject: `💍 Happy ${yearsLabel}Anniversary, ${name}! — ${appName}`,
     html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h1 style="color: #4f46e5;">Happy ${years}${ordinal} Anniversary, ${name}!</h1>
-        <p>Celebrating ${years} years of love and commitment.</p>
-        <p>May your bond continue to grow stronger with each passing year.</p>
-        <p style="color: #6b7280; font-size: 14px;">
-          With warm regards,<br/>
-          ${process.env.NEXT_PUBLIC_APP_NAME || "Church App"} Team
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #0f172a; color: #f8fafc; border-radius: 12px; overflow: hidden;">
+        <div style="background: linear-gradient(135deg, #ec4899, #8b5cf6); padding: 40px 30px; text-align: center;">
+          <p style="margin: 0 0 8px; font-size: 36px;">💍</p>
+          <h1 style="margin: 0; font-size: 26px; font-weight: 800; color: #fff;">Happy ${yearsLabel}Anniversary!</h1>
+          <p style="margin: 8px 0 0; color: rgba(255,255,255,0.8); font-size: 14px;">${name}, you are so loved! ❤️</p>
+        </div>
+        <div style="padding: 32px 30px;">
+          <p style="font-size: 16px; color: #94a3b8;">Dear <strong style="color: #fff;">${name}</strong>,</p>
+          <p style="color: #94a3b8; line-height: 1.8;">Today we celebrate a beautiful milestone with you! On behalf of the entire <strong style="color: #ec4899;">${appName}</strong> family, we wish you a blessed and joyful anniversary.</p>
+          <p style="color: #94a3b8; line-height: 1.8;">May God's grace continue to fill your home with love, laughter, and peace.</p>
+          <div style="background: #1e293b; border-radius: 8px; padding: 20px; margin: 24px 0; text-align: center;">
+            <p style="margin: 0; color: #ec4899; font-style: italic; font-size: 15px;">"Love is patient, love is kind... it always protects, always trusts, always hopes, always perseveres." — 1 Cor. 13:4,7</p>
+          </div>
+          <div style="text-align: center; margin: 32px 0;">
+            <a href="${baseUrl}/dashboard" style="background: linear-gradient(135deg, #ec4899, #8b5cf6); color: #fff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 700; font-size: 15px;">Visit Your Dashboard</a>
+          </div>
+          <p style="color: #64748b; font-size: 14px; border-top: 1px solid #1e293b; padding-top: 20px;">
+            With love & blessings,<br/><strong style="color: #94a3b8;">${appName} Family</strong>
+          </p>
+        </div>
+      </div>
+    `,
+  };
+}
+export interface AdminNotificationSummaryRow {
+  recipientName: string;
+  recipientEmail: string;
+  type: string;
+  status: "sent" | "failed" | "skipped";
+  error?: string;
+}
+
+export function adminNotificationDigestEmail(
+  rows: AdminNotificationSummaryRow[],
+  ranAt: Date = new Date()
+) {
+  const sentRows = rows.filter((r) => r.status === "sent");
+  const failedRows = rows.filter((r) => r.status === "failed");
+  const skippedRows = rows.filter((r) => r.status === "skipped");
+
+  const typeLabel = (t: string) =>
+    ({ birthday: "🎂 Birthday", anniversary: "💍 Anniversary", event_reminder: "📅 Event Reminder", general: "📢 General" }[t] ?? t);
+
+  const rowHtml = (r: AdminNotificationSummaryRow, i: number) => `
+    <tr style="background: ${i % 2 === 0 ? "#1e293b" : "#0f172a"};">
+      <td style="padding:10px 14px; color:#f8fafc; font-size:13px;">${r.recipientName}</td>
+      <td style="padding:10px 14px; color:#94a3b8; font-size:13px;">${r.recipientEmail}</td>
+      <td style="padding:10px 14px; color:#94a3b8; font-size:13px;">${typeLabel(r.type)}</td>
+      <td style="padding:10px 14px;">
+        ${r.status === "sent"
+          ? '<span style="background:#10b981;color:#fff;padding:2px 10px;border-radius:99px;font-size:11px;font-weight:700;">SENT</span>'
+          : r.status === "failed"
+          ? `<span style="background:#ef4444;color:#fff;padding:2px 10px;border-radius:99px;font-size:11px;font-weight:700;">FAILED</span>${r.error ? `<br/><span style="color:#f87171;font-size:11px;">${r.error}</span>` : ""}`
+          : '<span style="background:#64748b;color:#fff;padding:2px 10px;border-radius:99px;font-size:11px;font-weight:700;">SKIPPED</span>'}
+      </td>
+    </tr>`;
+
+  return {
+    subject: `[${appName}] Notification Digest — ${ranAt.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}`,
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:700px;margin:0 auto;background:#0f172a;color:#f8fafc;border-radius:12px;overflow:hidden;">
+        <div style="background:linear-gradient(135deg,#6366f1,#8b5cf6);padding:32px 30px;text-align:center;">
+          <p style="margin:0 0 6px;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.7);">Admin Report</p>
+          <h1 style="margin:0;font-size:24px;font-weight:800;color:#fff;">Notification Digest</h1>
+          <p style="margin:8px 0 0;color:rgba(255,255,255,.7);font-size:13px;">${ranAt.toLocaleString("en-US", { dateStyle: "full", timeStyle: "short" })}</p>
+        </div>
+
+        <!-- Summary cards -->
+        <div style="display:flex;gap:16px;padding:24px 30px 0;">
+          <div style="flex:1;background:#1e293b;border-radius:10px;padding:16px;text-align:center;">
+            <p style="margin:0;font-size:28px;font-weight:800;color:#10b981;">${sentRows.length}</p>
+            <p style="margin:4px 0 0;font-size:12px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">Sent</p>
+          </div>
+          <div style="flex:1;background:#1e293b;border-radius:10px;padding:16px;text-align:center;">
+            <p style="margin:0;font-size:28px;font-weight:800;color:#ef4444;">${failedRows.length}</p>
+            <p style="margin:4px 0 0;font-size:12px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">Failed</p>
+          </div>
+          <div style="flex:1;background:#1e293b;border-radius:10px;padding:16px;text-align:center;">
+            <p style="margin:0;font-size:28px;font-weight:800;color:#64748b;">${skippedRows.length}</p>
+            <p style="margin:4px 0 0;font-size:12px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">Skipped</p>
+          </div>
+        </div>
+
+        <!-- Detail table -->
+        <div style="padding:24px 30px;">
+          ${rows.length === 0
+            ? `<p style="text-align:center;color:#64748b;padding:32px 0;">No notifications were processed in this run.</p>`
+            : `<table style="width:100%;border-collapse:collapse;border-radius:10px;overflow:hidden;">
+                <thead>
+                  <tr style="background:#6366f1;">
+                    <th style="padding:10px 14px;text-align:left;font-size:12px;color:#fff;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Name</th>
+                    <th style="padding:10px 14px;text-align:left;font-size:12px;color:#fff;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Email</th>
+                    <th style="padding:10px 14px;text-align:left;font-size:12px;color:#fff;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Type</th>
+                    <th style="padding:10px 14px;text-align:left;font-size:12px;color:#fff;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${rows.map(rowHtml).join("")}
+                </tbody>
+              </table>`}
+        </div>
+
+        <p style="color:#475569;font-size:12px;text-align:center;padding:0 30px 24px;">
+          This is an automated digest from <strong style="color:#94a3b8;">${appName}</strong>. 
+          <a href="${baseUrl}/admin/notifications" style="color:#6366f1;">View full notification log →</a>
         </p>
       </div>
     `,
   };
 }
+
 export function donationReceiptEmail(name: string, amount: number, reference: string) {
   return {
     subject: `Thank You for Your Donation - ${process.env.NEXT_PUBLIC_APP_NAME || "Church App"}`,

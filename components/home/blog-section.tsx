@@ -72,22 +72,22 @@ export function BlogSection({ posts }: BlogSectionProps) {
               >
                 <Link
                   href={`/blog/${post.slug}`}
-                  className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm ring-1 ring-black/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/70 dark:border-slate-800 dark:bg-slate-900 dark:ring-white/5"
+                  className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm ring-1 ring-black/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/70 hover:border-teal-500/30 dark:border-slate-800 dark:bg-slate-900 dark:ring-white/5 dark:hover:border-teal-400/25"
                 >
                   {/* Image */}
-                  <div className="relative h-48 overflow-hidden bg-gradient-to-br from-teal-400 to-indigo-500">
+                  <div className="relative aspect-[16/10] w-full overflow-hidden bg-gradient-to-br from-teal-400 to-indigo-500">
                     {post.coverImage && (
                       <Image
                         src={post.coverImage}
                         alt={post.title}
                         fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                       />
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
                     {/* Reading time badge */}
-                    <div className="absolute bottom-4 left-4 flex items-center gap-1.5 rounded-full bg-black/50 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-sm">
-                      <Clock className="h-3 w-3" />
+                    <div className="absolute bottom-4 left-4 flex items-center gap-1.5 rounded-full bg-slate-950/60 border border-white/10 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-md shadow-sm">
+                      <Clock className="h-3 w-3 text-teal-400" />
                       {readingTime(post.content)} min read
                     </div>
                   </div>

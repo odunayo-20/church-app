@@ -82,16 +82,16 @@ export function EventsSection({ events }: EventsSectionProps) {
                 >
                   <Link
                     href={`/events/${event.id}`}
-                    className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm ring-1 ring-black/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/70 dark:border-slate-800 dark:bg-slate-900 dark:ring-white/5 dark:hover:shadow-slate-900/70"
+                    className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm ring-1 ring-black/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/70 hover:border-violet-500/30 dark:border-slate-800 dark:bg-slate-900 dark:ring-white/5 dark:hover:shadow-slate-900/70 dark:hover:border-violet-400/25"
                   >
                     {/* Image / Gradient placeholder */}
-                    <div className={`relative h-48 overflow-hidden bg-gradient-to-br ${gradient}`}>
+                    <div className={`relative aspect-[16/10] w-full overflow-hidden bg-gradient-to-br ${gradient}`}>
                       {event.imageUrl ? (
                         <Image
                           src={event.imageUrl}
                           alt={event.title}
                           fill
-                          className="object-cover transition-transform duration-500 group-hover:scale-105"
+                          className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                         />
                       ) : (
                         <div className="absolute inset-0 flex items-center justify-center opacity-20">
@@ -99,9 +99,9 @@ export function EventsSection({ events }: EventsSectionProps) {
                         </div>
                       )}
                       {/* Date badge */}
-                      <div className="absolute left-4 top-4 flex flex-col items-center rounded-xl bg-white/95 px-3 py-1.5 text-center shadow-md backdrop-blur-sm">
-                        <span className="text-xl font-extrabold leading-none text-slate-900">{day}</span>
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">{month}</span>
+                      <div className="absolute left-4 top-4 flex flex-col items-center rounded-xl bg-slate-950/70 border border-white/10 px-3.5 py-2 text-center shadow-lg backdrop-blur-md">
+                        <span className="text-xl font-black leading-none text-white">{day}</span>
+                        <span className="mt-0.5 text-[9px] font-bold uppercase tracking-widest text-violet-400">{month}</span>
                       </div>
                     </div>
 
