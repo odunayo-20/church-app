@@ -55,7 +55,11 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  if ((path === "/auth/login" || path === "/auth/register") && user) {
+  // Only redirect already-logged-in users away from login/register.
+  // Allow forgot-password and reset-password through — those pages
+  // need a temporary session established by verifyOtp.
+  const authOnlyRedirectPaths = ["/auth/login", "/auth/register"];
+  if (authOnlyRedirectPaths.some((p) => path === p) && user) {
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")

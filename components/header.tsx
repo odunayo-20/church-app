@@ -55,8 +55,8 @@ export function Header() {
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
-    const siteName = process.env.NEXT_PUBLIC_APP_NAME || "Grace Community";
-    const [nameFirst, nameLast] = siteName.split(" ");
+  const siteName = process.env.NEXT_PUBLIC_APP_NAME || "Grace Community";
+  const [nameFirst, nameLast] = siteName.split(" ");
 
   return (
     <>

@@ -1,3 +1,5 @@
+"use server";
+
 import { createClient } from "@/lib/supabase/server";
 
 export type UserRole = "admin" | "media" | "member";
@@ -147,3 +149,59 @@ export async function signOut() {
   const { error } = await supabase.auth.signOut();
   if (error) throw error;
 }
+
+export async function requestPasswordReset(email: string, redirectTo?: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: redirectTo || `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback?next=/auth/reset-password`,
+  });
+  if (error) throw error;
+}
+
+export async function updatePassword(password: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.auth.updateUser({
+    password
+  });
+  if (error) throw error;
+}
+
+export async function verifyPasswordResetOtp(email: string, token: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.auth.verifyOtp({
+    email,
+    token,
+    type: "recovery",
+  });
+  if (error) throw error;
+}
+
+export async function resetPasswordWithOtp(
+  email: string,
+  token: string,
+  newPassword: string
+) {
+  const supabase = await createClient();
+
+  // 1. Verify the OTP (this authenticates the user context)
+  const { error: verifyError } = await supabase.auth.verifyOtp({
+    email,
+    token,
+    type: "recovery",
+  });
+  if (verifyError) throw new Error(verifyError.message || "Invalid or expired reset code");
+
+  // 2. Immediately update the password for the newly authenticated context
+  const { error: updateError } = await supabase.auth.updateUser({
+    password: newPassword,
+  });
+  if (updateError) {
+    // If update fails, make sure we sign out to clean up any session
+    await supabase.auth.signOut();
+    throw new Error(updateError.message || "Failed to update password");
+  }
+
+  // 3. Immediately sign out to clear all session cookies from the client
+  await supabase.auth.signOut();
+}
+

@@ -31,8 +31,8 @@ const Twitter = ({ className }: { className?: string }) => (
 /* ── Service Times data ─────────────────────────── */
 const serviceTimes = [
   { day: "Sunday Worship", time: "9:00 AM & 11:30 AM" },
-  { day: "Wednesday Bible Study", time: "6:00 PM – 7:30 PM" },
-  { day: "Friday Prayer Night", time: "6:00 PM – 7:00 PM" },
+  { day: "Tuesday Bible Study", time: "5:00 PM – 6:00 PM" },
+  { day: "Thursday Prayer", time: "5:00 PM – 6:00 PM" },
 ];
 
 const socialLinks = [
