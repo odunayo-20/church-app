@@ -92,12 +92,12 @@ export async function createPostAction(data: PostInput): Promise<Post> {
 
     if (error) throw error;
     
-    if (validatedData.published) {
-      // Broadcast new post notification (non-blocking)
-      import("@/app/action/message-actions")
-        .then(({ broadcastNewPostNotification }) => broadcastNewPostNotification(post))
-        .catch(console.error);
-    }
+    // if (validatedData.published) {
+    //   // Broadcast new post notification (non-blocking)
+    //   import("@/app/action/message-actions")
+    //     .then(({ broadcastNewPostNotification }) => broadcastNewPostNotification(post))
+    //     .catch(console.error);
+    // }
 
     revalidatePath("/admin/blog");
     revalidatePath("/blog");
@@ -147,15 +147,15 @@ export async function updatePostAction(id: string, data: Partial<PostInput>): Pr
 
     if (error) throw error;
     
-    // Check transition
-    const wasPublishedBefore = !!existingPost?.published;
-    const isPublishedNow = !!post.published;
-    if (isPublishedNow && !wasPublishedBefore) {
-      // Broadcast new post notification (non-blocking)
-      import("@/app/action/message-actions")
-        .then(({ broadcastNewPostNotification }) => broadcastNewPostNotification(post))
-        .catch(console.error);
-    }
+    // // Check transition
+    // const wasPublishedBefore = !!existingPost?.published;
+    // const isPublishedNow = !!post.published;
+    // if (isPublishedNow && !wasPublishedBefore) {
+    //   // Broadcast new post notification (non-blocking)
+    //   import("@/app/action/message-actions")
+    //     .then(({ broadcastNewPostNotification }) => broadcastNewPostNotification(post))
+    //     .catch(console.error);
+    // }
 
     revalidatePath("/admin/blog");
     // revalidatePath(`/blog/${post.slug}`);

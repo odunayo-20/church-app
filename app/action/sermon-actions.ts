@@ -89,12 +89,12 @@ export async function createSermonAction(data: SermonInput): Promise<Sermon> {
 
     if (error) throw error;
     
-    if (validatedData.published) {
-      // Broadcast new sermon notification (non-blocking)
-      import("@/app/action/message-actions")
-        .then(({ broadcastNewSermonNotification }) => broadcastNewSermonNotification(sermon))
-        .catch(console.error);
-    }
+    // if (validatedData.published) {
+    //   // Broadcast new sermon notification (non-blocking)
+    //   import("@/app/action/message-actions")
+    //     .then(({ broadcastNewSermonNotification }) => broadcastNewSermonNotification(sermon))
+    //     .catch(console.error);
+    // }
 
     revalidatePath("/admin/sermons");
     revalidatePath("/sermons");
@@ -147,18 +147,18 @@ export async function updateSermonAction(id: string, data: Partial<SermonInput>)
     if (error) throw error;
     
     // Check transition
-    const wasPublishedBefore = !!existingSermon?.publishedAt;
-    const isPublishedNow = !!sermon.publishedAt;
-    if (isPublishedNow && !wasPublishedBefore) {
-      // Broadcast new sermon notification (non-blocking)
-      import("@/app/action/message-actions")
-        .then(({ broadcastNewSermonNotification }) => broadcastNewSermonNotification(sermon))
-        .catch(console.error);
-    }
+    // const wasPublishedBefore = !!existingSermon?.publishedAt;
+    // const isPublishedNow = !!sermon.publishedAt;
+    // if (isPublishedNow && !wasPublishedBefore) {
+    //   // Broadcast new sermon notification (non-blocking)
+    //   import("@/app/action/message-actions")
+    //     .then(({ broadcastNewSermonNotification }) => broadcastNewSermonNotification(sermon))
+    //     .catch(console.error);
+    // }
 
     revalidatePath("/admin/sermons");
-    revalidatePath(`/sermons/${sermon.slug}`);
-    revalidatePath("/sermons");
+    // revalidatePath(`/sermons/${sermon.slug}`);
+    // revalidatePath("/sermons");
     return sermon;
   } catch (error) {
     console.error("Error updating sermon:", error);
