@@ -115,8 +115,8 @@ export async function createMemberAction(data: MemberInput): Promise<Member> {
       phone: validatedData.phone || null,
       birthday: validatedData.birthday || null,
       anniversary: validatedData.anniversary || null,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
 
     const { data: member, error } = await supabase
@@ -146,6 +146,8 @@ export async function updateMemberAction(id: string, data: Partial<MemberInput>)
     if (validatedData.phone !== undefined) updateData.phone = validatedData.phone || null;
     if (validatedData.birthday !== undefined) updateData.birthday = validatedData.birthday || null;
     if (validatedData.anniversary !== undefined) updateData.anniversary = validatedData.anniversary || null;
+
+    updateData.updatedAt = new Date().toISOString();
 
     const { data: member, error } = await supabase
       .from("members")
@@ -239,6 +241,7 @@ export async function updateMemberProfileAction(
     if (validatedData.phone !== undefined) updateData.phone = validatedData.phone || null;
     if (validatedData.birthday !== undefined) updateData.birthday = validatedData.birthday || null;
     if (validatedData.anniversary !== undefined) updateData.anniversary = validatedData.anniversary || null;
+    updateData.updatedAt = new Date().toISOString();
 
     const { data: member, error } = await adminClient
       .from("members")

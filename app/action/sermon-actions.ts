@@ -157,8 +157,8 @@ export async function updateSermonAction(id: string, data: Partial<SermonInput>)
     // }
 
     revalidatePath("/admin/sermons");
-    // revalidatePath(`/sermons/${sermon.slug}`);
-    // revalidatePath("/sermons");
+    revalidatePath(`/sermons/${sermon.slug}`);
+    revalidatePath("/sermons");
     return sermon;
   } catch (error) {
     console.error("Error updating sermon:", error);
