@@ -46,7 +46,7 @@ export default function EventDetailPage() {
     <div className="flex flex-col">
 
       {/* ── Event Hero ── */}
-      <section className="relative overflow-hidden bg-slate-950 py-20 sm:py-28">
+      <section className="relative overflow-hidden bg-slate-950 py-16 sm:py-20 lg:py-28">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(38,100%,50%,0.10),transparent_55%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,hsl(355,100%,65%,0.08),transparent_55%)]" />
 
@@ -67,7 +67,7 @@ export default function EventDetailPage() {
             </Link>
           </motion.div>
 
-          <div className="mt-8 grid gap-10 lg:grid-cols-5 lg:items-end">
+          <div className="mt-8 grid gap-8 lg:grid-cols-5 lg:items-end">
             <div className="lg:col-span-3">
               {/* Meta row */}
               <motion.div
@@ -95,7 +95,7 @@ export default function EventDetailPage() {
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.65, delay: 0.15, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
-                className="mt-5 text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl"
+                className="mt-5 text-3xl font-extrabold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl"
               >
                 {event.title}
               </motion.h1>
@@ -103,8 +103,8 @@ export default function EventDetailPage() {
 
             {/* Quick Info Sidebar inside hero */}
             <motion.div
-              initial={{ opacity: 0, x: 24 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
               className="lg:col-span-2 space-y-3 rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-md"
             >
@@ -143,7 +143,7 @@ export default function EventDetailPage() {
       </section>
 
       {/* ── Main Content ── */}
-      <section className="bg-background py-14 sm:py-20">
+      <section className="bg-background py-10 sm:py-14 lg:py-20">
         <div className="container mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
           
           {/* Cover Image */}
@@ -164,9 +164,9 @@ export default function EventDetailPage() {
             </motion.div>
           )}
 
-          <div className="grid gap-12 lg:grid-cols-3">
-            {/* Left Col: Description */}
-            <div className="lg:col-span-2 space-y-8">
+          <div className="grid gap-8 lg:gap-12 lg:grid-cols-3">
+            {/* Left Col: Description — renders second on mobile, first on desktop */}
+            <div className="order-2 lg:order-1 lg:col-span-2 space-y-8">
               <motion.div
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -183,13 +183,13 @@ export default function EventDetailPage() {
               </motion.div>
             </div>
 
-            {/* Right Col: RSVP Form */}
-            <div>
+            {/* Right Col: RSVP Form — renders first on mobile (most actionable) */}
+            <div className="order-1 lg:order-2">
               <motion.div
-                initial={{ opacity: 0, x: 24 }}
-                animate={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.35 }}
-                className="sticky top-24"
+                className="lg:sticky lg:top-24"
               >
                 {isPast ? (
                   <div className="overflow-hidden rounded-3xl border border-border/40 bg-card shadow-lg text-center p-8">

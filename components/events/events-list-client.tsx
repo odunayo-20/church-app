@@ -19,7 +19,7 @@ export function EventsListClient({
   return (
     <div className="flex flex-col">
       {/* ── Hero ── */}
-      <section className="relative overflow-hidden bg-slate-950 py-28 sm:py-36">
+      <section className="relative overflow-hidden bg-slate-950 py-20 sm:py-28 lg:py-36">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,hsl(38,100%,50%,0.12),transparent_55%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,hsl(355,100%,65%,0.10),transparent_55%)]" />
         <div className="pointer-events-none absolute inset-0 [background-image:linear-gradient(rgba(255,255,255,0.025)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.025)_1px,transparent_1px)] [background-size:64px_64px]" />
@@ -36,7 +36,7 @@ export function EventsListClient({
 
             <motion.h1
               variants={fade(0.1)}
-              className="mt-6 text-5xl font-extrabold tracking-tight text-white sm:text-6xl lg:text-7xl"
+              className="mt-6 text-4xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl"
             >
               Church{" "}
               <span className="bg-gradient-to-r from-amber-300 via-orange-300 to-rose-400 bg-clip-text text-transparent">
@@ -46,20 +46,20 @@ export function EventsListClient({
 
             <motion.p
               variants={fade(0.2)}
-              className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/60"
+              className="mx-auto mt-6 max-w-2xl text-base sm:text-lg leading-relaxed text-white/60 px-2 sm:px-0"
             >
               Join us for worship, community gatherings, and special celebrations. There&apos;s always a place for you here.
             </motion.p>
 
             {/* Quick info pills */}
-            <motion.div variants={fade(0.3)} className="mt-8 flex flex-wrap justify-center gap-3">
+            <motion.div variants={fade(0.3)} className="mt-8 flex flex-wrap justify-center gap-2 sm:gap-3 px-2 sm:px-0">
               {[
                 { icon: Clock, text: "Sundays 9 AM & 11:30 AM" },
                 { icon: MapPin, text: "123 Grace Avenue, Lagos" },
                 { icon: Calendar, text: "50+ events per year" },
               ].map(({ icon: Icon, text }) => (
-                <span key={text} className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-medium text-white/70 backdrop-blur-sm">
-                  <Icon className="h-3.5 w-3.5 text-amber-400" />
+                <span key={text} className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 sm:px-4 py-2 text-xs font-medium text-white/70 backdrop-blur-sm">
+                  <Icon className="h-3.5 w-3.5 shrink-0 text-amber-400" />
                   {text}
                 </span>
               ))}
@@ -69,7 +69,7 @@ export function EventsListClient({
       </section>
 
       {/* ── Upcoming Events ── */}
-      <section className="bg-background py-16 sm:py-24">
+      <section className="bg-background py-12 sm:py-16 lg:py-24">
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {/* Section label */}
           <motion.div
@@ -79,7 +79,7 @@ export function EventsListClient({
             className="mb-12"
           >
             <p className="text-xs font-bold uppercase tracking-widest text-amber-500">What&apos;s On</p>
-            <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">Upcoming Events</h2>
+            <h2 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">Upcoming Events</h2>
             <div className="mt-4 h-1 w-16 rounded-full bg-gradient-to-r from-amber-500 to-rose-500" />
           </motion.div>
 
@@ -98,7 +98,7 @@ export function EventsListClient({
               </p>
             </motion.div>
           ) : (
-            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {upcomingEvents.map((event: any, i: number) => (
                 <motion.div
                   key={event.id}
@@ -117,7 +117,7 @@ export function EventsListClient({
 
       {/* ── Past Events ── */}
       {pastEvents.length > 0 && (
-        <section className="bg-muted/30 py-16 sm:py-24">
+        <section className="bg-muted/30 py-12 sm:py-16 lg:py-24">
           <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -127,11 +127,11 @@ export function EventsListClient({
               className="mb-12"
             >
               <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Archive</p>
-              <h2 className="mt-2 text-3xl font-bold tracking-tight text-muted-foreground sm:text-4xl">Past Events</h2>
+              <h2 className="mt-2 text-2xl font-bold tracking-tight text-muted-foreground sm:text-3xl lg:text-4xl">Past Events</h2>
               <div className="mt-4 h-1 w-16 rounded-full bg-border" />
             </motion.div>
 
-            <div className="grid gap-8 opacity-70 grayscale-[0.4] sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {pastEvents.map((event: any, i: number) => (
                 <motion.div
                   key={event.id}
@@ -139,6 +139,7 @@ export function EventsListClient({
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.55, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
                   viewport={{ once: true }}
+                  className="opacity-70 grayscale-[0.4]"
                 >
                   <EventCard event={event} />
                 </motion.div>

@@ -77,9 +77,10 @@ export function EventCard({ event, variant = "default" }: EventCardProps) {
       </Link>
 
       {/* Body */}
-      <div className="flex flex-1 flex-col p-5">
-        <Link href={`/events/${event.id}`}>
-          <h3 className="font-bold leading-snug transition-colors group-hover:text-amber-500">
+      <div className="flex flex-1 flex-col p-4 sm:p-5">
+        {/* Title — min-w-0 on the link ensures the flex child can shrink and clamp */}
+        <Link href={`/events/${event.id}`} className="min-w-0">
+          <h3 className="line-clamp-2 font-bold leading-snug transition-colors group-hover:text-amber-500">
             {event.title}
           </h3>
         </Link>
@@ -90,11 +91,13 @@ export function EventCard({ event, variant = "default" }: EventCardProps) {
 
         {/* Meta */}
         <div className="mt-4 space-y-1.5 border-t border-border/40 pt-4 text-xs text-muted-foreground">
-          <div className="flex items-center gap-2">
+          {/* Clock row — min-w-0 + truncate prevents overflow */}
+          <div className="flex min-w-0 items-center gap-2">
             <Clock className="h-3.5 w-3.5 shrink-0 text-amber-500" />
-            <span>{timeStr} · {weekday}, {month} {day}</span>
+            <span className="truncate">{timeStr} · {weekday}, {month} {day}</span>
           </div>
-          <div className="flex items-center gap-2">
+          {/* Location row */}
+          <div className="flex min-w-0 items-center gap-2">
             <MapPin className="h-3.5 w-3.5 shrink-0 text-amber-500" />
             <span className="truncate">{event.location}</span>
           </div>
@@ -102,13 +105,13 @@ export function EventCard({ event, variant = "default" }: EventCardProps) {
 
         {/* RSVP badge */}
         {event.rsvpEnabled && !isPast && (
-          <div className="mt-4 flex items-center justify-between">
+          <div className="mt-4 flex flex-wrap items-center gap-2">
             <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
               RSVP Open
             </span>
             {event._count?.rsvps !== undefined && (
               <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Users className="h-3.5 w-3.5" />
+                <Users className="h-3.5 w-3.5 shrink-0" />
                 {event._count.rsvps} attending
               </span>
             )}
