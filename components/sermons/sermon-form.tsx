@@ -7,6 +7,15 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useCreateSermon, useUpdateSermon } from "@/hooks/use-sermons";
 import { sermonSchema, type SermonInput } from "@/lib/validations";
+import { z } from "zod";
+
+// Form-level schema: sermonDate is a string (HTML date inputs always return strings).
+// The original sermonSchema (with z.preprocess) is used on the server; using it here
+// gives _input: unknown for the date field which breaks zodResolver's types.
+const sermonFormSchema = sermonSchema.extend({
+  sermonDate: z.string().min(1, "Date is required"),
+});
+type SermonFormInput = z.infer<typeof sermonFormSchema>;
 import { Button } from "@/components/ui/button";
 import { Loader2, Link as LinkIcon, RefreshCcw } from "lucide-react";
 import { slugify } from "@/lib/utils";
@@ -40,8 +49,8 @@ export default function SermonForm({ sermon, isEditing }: SermonFormProps) {
     setValue,
     watch,
     formState: { errors, dirtyFields },
-  } = useForm<SermonInput>({
-    resolver: zodResolver(sermonSchema),
+  } = useForm<SermonFormInput>({
+    resolver: zodResolver(sermonFormSchema),
     defaultValues: {
       title: sermon?.title || "",
       slug: sermon?.slug || "",
@@ -69,16 +78,18 @@ export default function SermonForm({ sermon, isEditing }: SermonFormProps) {
     }
   }, [title, setValue, isEditing, dirtyFields.title]);
 
-  const onSubmit = async (data: SermonInput) => {
+  const onSubmit = async (data: SermonFormInput) => {
+    // Convert the string date from the HTML input back to a Date for the server action
+    const payload: SermonInput = { ...data, sermonDate: new Date(data.sermonDate) };
     try {
       if (isEditing && sermon?.id) {
         await updateMutation.mutateAsync({
           id: sermon.id,
-          ...data,
+          ...payload,
         });
         toast.success("Sermon updated successfully");
       } else {
-        await createMutation.mutateAsync(data);
+        await createMutation.mutateAsync(payload);
         toast.success("Sermon created successfully");
       }
       router.push("/admin/sermons");

@@ -49,12 +49,12 @@ export function TinyMCEEditor({
         }}
         value={content}
         onEditorChange={(newContent) => onChange(newContent)}
+        licenseKey="gpl"
         init={{
           height: minHeight,
           menubar: true,
           branding: false,
           promotion: false,
-          license_key: "gpl",
           placeholder,
           skin: "oxide",
           content_css: "default",

@@ -97,7 +97,7 @@ export default function SermonPage() {
           <motion.h1
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.65, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.65, delay: 0.15, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
             className="mt-5 text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl"
           >
             {sermon.title}

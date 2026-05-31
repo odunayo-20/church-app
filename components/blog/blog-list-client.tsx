@@ -95,7 +95,7 @@ export function BlogListClient({ posts }: { posts: Post[] }) {
                 <motion.div
                   initial={{ opacity: 0, y: 32 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+                  transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
                   className="group relative overflow-hidden rounded-3xl border border-border/40 bg-card shadow-md transition-all duration-300 hover:shadow-xl hover:border-amber-500/35 hover:shadow-amber-500/5"
                 >
                   <div className="grid gap-0 lg:grid-cols-2">
@@ -173,7 +173,7 @@ export function BlogListClient({ posts }: { posts: Post[] }) {
                         key={post.id}
                         initial={{ opacity: 0, y: 32 }}
                         whileInView={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.55, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] }}
+                        transition={{ duration: 0.55, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
                         viewport={{ once: true }}
                         className="group flex flex-col overflow-hidden rounded-2xl border border-border/40 bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-amber-500/35 hover:shadow-amber-500/5"
                       >

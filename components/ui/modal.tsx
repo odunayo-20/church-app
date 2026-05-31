@@ -64,7 +64,7 @@ export function Modal({
             className={`relative w-full ${maxWidth} overflow-hidden rounded-3xl border border-white/20 bg-white/80 p-0 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/80`}
           >
             {/* Header */}
-            {(title || onClose) && (
+            {title && (
               <div className="flex items-center justify-between border-b border-slate-200/50 px-6 py-4 dark:border-slate-800/50">
                 {title && (
                   <h3 className="text-lg font-semibold text-slate-900 dark:text-white">

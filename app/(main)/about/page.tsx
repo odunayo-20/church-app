@@ -150,7 +150,7 @@ export default function AboutPage() {
                 key={item.label}
                 initial={{ opacity: 0, y: 32 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: i * 0.12, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 0.6, delay: i * 0.12, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
                 viewport={{ once: true }}
                 className="relative overflow-hidden rounded-3xl border border-border/40 bg-card p-8 shadow-sm lg:p-10"
               >
@@ -188,7 +188,7 @@ export default function AboutPage() {
                 key={v.title}
                 initial={{ opacity: 0, y: 32 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.55, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 0.55, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
                 viewport={{ once: true }}
                 className="group relative overflow-hidden rounded-2xl border border-border/40 bg-card p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
               >
@@ -211,7 +211,7 @@ export default function AboutPage() {
             <motion.div
               initial={{ opacity: 0, x: -32 }}
               whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
               viewport={{ once: true }}
             >
               <p className="text-xs font-bold uppercase tracking-widest text-amber-500">Our Faith</p>
@@ -300,7 +300,7 @@ export default function AboutPage() {
                 key={l.name}
                 initial={{ opacity: 0, y: 32 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.55, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 0.55, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
                 viewport={{ once: true }}
                 className="group relative overflow-hidden rounded-3xl border border-border/40 bg-card p-8 shadow-sm text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
               >

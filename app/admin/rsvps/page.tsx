@@ -27,7 +27,13 @@ import { useEvents, useCreateRsvp } from "@/hooks";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { rsvpSchema, type RsvpInput } from "@/lib/validations";
+import { rsvpSchema } from "@/lib/validations";
+
+// Defined outside the component to keep a stable reference.
+const rsvpFormSchema = rsvpSchema
+  .extend({ eventId: z.string().min(1, "Event is required") })
+  .extend({ guests: z.number({ error: "Must be a number" }).int().min(1).max(10) }); // z.number() (not coerce) keeps _input as `number`, not `unknown`
+type RsvpFormInput = z.infer<typeof rsvpFormSchema>;
 
 export default function AdminRsvpsPage() {
   const searchParams = useSearchParams();
@@ -36,24 +42,25 @@ export default function AdminRsvpsPage() {
   const [selectedRsvp, setSelectedRsvp] = useState<(Rsvp & { event: { title: string } }) | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
-  
+
   const { data, isLoading, error } = useRsvps({ page: 1, limit: 100, eventId });
   const { data: eventsData } = useEvents({ page: 1, limit: 50, upcoming: true });
   const { loading: authLoading } = useAuth();
-  
+
   const deleteMutation = useDeleteRsvp();
   const updateMutation = useUpdateRsvpStatus();
   const createMutation = useCreateRsvp();
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<RsvpInput & { eventId: string }>({
-    resolver: zodResolver(rsvpSchema.extend({ eventId: z.string().min(1, "Event is required") })),
+
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<RsvpFormInput>({
+    resolver: zodResolver(rsvpFormSchema),
     defaultValues: {
       guests: 1,
       eventId: eventId || "",
     }
   });
 
-  const onSubmit = async (formData: RsvpInput & { eventId: string }) => {
+  const onSubmit = async (formData: RsvpFormInput) => {
     try {
       const { eventId: targetEventId, ...rsvpData } = formData;
       await createMutation.mutateAsync({ eventId: targetEventId, data: rsvpData });
@@ -237,75 +244,74 @@ export default function AdminRsvpsPage() {
                       </td>
                       <td className={`sticky right-0 px-6 py-4 text-right transition-colors bg-card/95 backdrop-blur-sm group-hover:bg-muted/50 ${activeMenuId === rsvp.id ? 'z-30' : 'z-10'}`}>
                         <div className="flex items-center justify-end gap-2">
-                           <div className="relative">
-                              <button 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setActiveMenuId(activeMenuId === rsvp.id ? null : rsvp.id);
-                                }}
-                                className={`p-2 rounded-lg transition-colors ${activeMenuId === rsvp.id ? 'bg-muted text-foreground' : 'hover:bg-muted text-muted-foreground hover:text-foreground'}`}
-                              >
-                                <MoreVertical className="h-4 w-4" />
-                              </button>
-                              
-                              {activeMenuId === rsvp.id && (
-                                <>
-                                  <div 
-                                    className="fixed inset-0 z-10" 
-                                    onClick={() => setActiveMenuId(null)}
-                                  />
-                                  <div className={`absolute right-0 z-20 w-44 overflow-hidden rounded-xl border border-border bg-card shadow-lg ring-1 ring-black/5 animate-in fade-in zoom-in-95 duration-100 ${
-                                    index > filteredRsvps.length - 4 && filteredRsvps.length > 4 ? 'bottom-full mb-1' : 'top-full mt-1'
-                                  }`}>
-                                    <button 
-                                      onClick={() => {
-                                        setSelectedRsvp(rsvp);
-                                        setActiveMenuId(null);
-                                      }}
-                                      className="flex w-full items-center gap-2 px-4 py-2.5 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-                                    >
-                                      <Eye className="h-3.5 w-3.5" /> View Details
-                                    </button>
-                                    <div className="h-px bg-border my-1" />
-                                    <button 
-                                      onClick={() => {
-                                        handleStatusUpdate(rsvp.id, 'confirmed');
-                                        setActiveMenuId(null);
-                                      }}
-                                      className="flex w-full items-center gap-2 px-4 py-2.5 text-xs font-medium text-emerald-600 hover:bg-emerald-50 transition-colors hover:text-white"
-                                    >
-                                      <CheckCircle2 className="h-3.5 w-3.5" /> Confirm RSVP
-                                    </button>
-                                    <button 
-                                      onClick={() => {
-                                        handleStatusUpdate(rsvp.id, 'pending');
-                                        setActiveMenuId(null);
-                                      }}
-                                      className="flex w-full items-center gap-2 px-4 py-2.5 text-xs font-medium text-amber-600 hover:bg-amber-50 transition-colors hover:text-white"
-                                    >
-                                      <Clock className="h-3.5 w-3.5" /> Set Pending
-                                    </button>
-                                    <button 
-                                      onClick={() => {
-                                        handleStatusUpdate(rsvp.id, 'cancelled');
-                                        setActiveMenuId(null);
-                                      }}
-                                      className="flex w-full items-center gap-2 px-4 py-2.5 text-xs font-medium text-rose-600 hover:bg-rose-50 transition-colors hover:text-white"
-                                    >
-                                      <XCircle className="h-3.5 w-3.5" /> Cancel RSVP
-                                    </button>
-                                  </div>
-                                </>
-                              )}
-                            </div>
+                          <div className="relative">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActiveMenuId(activeMenuId === rsvp.id ? null : rsvp.id);
+                              }}
+                              className={`p-2 rounded-lg transition-colors ${activeMenuId === rsvp.id ? 'bg-muted text-foreground' : 'hover:bg-muted text-muted-foreground hover:text-foreground'}`}
+                            >
+                              <MoreVertical className="h-4 w-4" />
+                            </button>
 
-                           <button 
-                             onClick={() => setSelectedRsvp(rsvp)}
-                             className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors hidden md:flex"
-                             title="Quick View"
-                           >
-                             <Eye className="h-4 w-4" />
-                           </button>
+                            {activeMenuId === rsvp.id && (
+                              <>
+                                <div
+                                  className="fixed inset-0 z-10"
+                                  onClick={() => setActiveMenuId(null)}
+                                />
+                                <div className={`absolute right-0 z-20 w-44 overflow-hidden rounded-xl border border-border bg-card shadow-lg ring-1 ring-black/5 animate-in fade-in zoom-in-95 duration-100 ${index > filteredRsvps.length - 4 && filteredRsvps.length > 4 ? 'bottom-full mb-1' : 'top-full mt-1'
+                                  }`}>
+                                  <button
+                                    onClick={() => {
+                                      setSelectedRsvp(rsvp);
+                                      setActiveMenuId(null);
+                                    }}
+                                    className="flex w-full items-center gap-2 px-4 py-2.5 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                                  >
+                                    <Eye className="h-3.5 w-3.5" /> View Details
+                                  </button>
+                                  <div className="h-px bg-border my-1" />
+                                  <button
+                                    onClick={() => {
+                                      handleStatusUpdate(rsvp.id, 'confirmed');
+                                      setActiveMenuId(null);
+                                    }}
+                                    className="flex w-full items-center gap-2 px-4 py-2.5 text-xs font-medium text-emerald-600 hover:bg-emerald-50 transition-colors hover:text-white"
+                                  >
+                                    <CheckCircle2 className="h-3.5 w-3.5" /> Confirm RSVP
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      handleStatusUpdate(rsvp.id, 'pending');
+                                      setActiveMenuId(null);
+                                    }}
+                                    className="flex w-full items-center gap-2 px-4 py-2.5 text-xs font-medium text-amber-600 hover:bg-amber-50 transition-colors hover:text-white"
+                                  >
+                                    <Clock className="h-3.5 w-3.5" /> Set Pending
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      handleStatusUpdate(rsvp.id, 'cancelled');
+                                      setActiveMenuId(null);
+                                    }}
+                                    className="flex w-full items-center gap-2 px-4 py-2.5 text-xs font-medium text-rose-600 hover:bg-rose-50 transition-colors hover:text-white"
+                                  >
+                                    <XCircle className="h-3.5 w-3.5" /> Cancel RSVP
+                                  </button>
+                                </div>
+                              </>
+                            )}
+                          </div>
+
+                          <button
+                            onClick={() => setSelectedRsvp(rsvp)}
+                            className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors hidden md:flex"
+                            title="Quick View"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </button>
 
                           <div className="hidden sm:flex">
                             <DeleteButton
@@ -375,19 +381,19 @@ export default function AdminRsvpsPage() {
               <div className="flex items-center justify-between">
                 <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Update Status</p>
                 <div className="flex gap-2">
-                  <button 
+                  <button
                     onClick={() => handleStatusUpdate(selectedRsvp.id, 'pending')}
                     className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all border ${selectedRsvp.status === 'pending' ? 'bg-amber-600 border-amber-600 text-white' : 'bg-amber-500/10 border-amber-500/20 text-amber-600 hover:bg-amber-600 hover:text-white'}`}
                   >
                     Pending
                   </button>
-                  <button 
+                  <button
                     onClick={() => handleStatusUpdate(selectedRsvp.id, 'confirmed')}
                     className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all border ${selectedRsvp.status === 'confirmed' ? 'bg-emerald-600 border-emerald-600 text-white' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 hover:bg-emerald-600 hover:text-white'}`}
                   >
                     Confirm
                   </button>
-                  <button 
+                  <button
                     onClick={() => handleStatusUpdate(selectedRsvp.id, 'cancelled')}
                     className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all border ${selectedRsvp.status === 'cancelled' ? 'bg-rose-600 border-rose-600 text-white' : 'bg-rose-500/10 border-rose-500/20 text-rose-600 hover:bg-rose-600 hover:text-white'}`}
                   >
@@ -395,7 +401,7 @@ export default function AdminRsvpsPage() {
                   </button>
                 </div>
               </div>
-              
+
               <div className="flex justify-end">
                 <DeleteButton
                   message="Permanently delete this RSVP record?"
@@ -459,7 +465,7 @@ export default function AdminRsvpsPage() {
           <div className="space-y-2">
             <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Number of Guests</label>
             <input
-              {...register("guests")}
+              {...register("guests", { valueAsNumber: true })}
               type="number"
               min="1"
               max="10"
@@ -492,18 +498,18 @@ export default function AdminRsvpsPage() {
 
 function StatusBadge({ status }: { status: string }) {
   const configs: Record<string, { label: string; class: string; icon: any }> = {
-    pending: { 
-      label: "Pending", 
+    pending: {
+      label: "Pending",
       class: "bg-amber-500/10 text-amber-500 border-amber-500/20",
       icon: Clock
     },
-    confirmed: { 
-      label: "Confirmed", 
+    confirmed: {
+      label: "Confirmed",
       class: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
       icon: CheckCircle2
     },
-    cancelled: { 
-      label: "Cancelled", 
+    cancelled: {
+      label: "Cancelled",
       class: "bg-rose-500/10 text-rose-400 border-rose-500/20",
       icon: XCircle
     },

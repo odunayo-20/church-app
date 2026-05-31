@@ -157,6 +157,10 @@ export function MediaItem({ item, type, viewMode, onClick, onRefresh, currentFol
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           whileHover={{ y: -4 }}
+          className="w-full"
+        >
+          {/* Inner div carries native HTML drag events — motion.div overrides them with its own gesture types */}
+          <div
           draggable
           onDragStart={handleDragStart}
           onDragOver={handleDragOver}
@@ -197,11 +201,11 @@ export function MediaItem({ item, type, viewMode, onClick, onRefresh, currentFol
           <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
             <DropdownMenu>
               <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm shadow-sm hover:bg-white dark:hover:bg-slate-700">
+                <Button variant="ghost" className="h-7 w-7 rounded-full bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm shadow-sm hover:bg-white dark:hover:bg-slate-700">
                   <MoreVertical className="w-4 h-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuContent align="right" className="w-48">
                 <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setIsRenaming(true); }}>
                   <Pencil className="w-4 h-4 mr-2" /> Rename
                 </DropdownMenuItem>
@@ -222,6 +226,7 @@ export function MediaItem({ item, type, viewMode, onClick, onRefresh, currentFol
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+          </div>
           </div>
         </motion.div>
       ) : (
@@ -254,10 +259,10 @@ export function MediaItem({ item, type, viewMode, onClick, onRefresh, currentFol
           </div>
 
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); setIsRenaming(true); }}>
+            <Button variant="ghost" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); setIsRenaming(true); }}>
               <Pencil className="w-4 h-4" />
             </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600" onClick={(e) => { e.stopPropagation(); setIsDeleting(true); }}>
+            <Button variant="ghost" className="h-8 w-8 text-red-500 hover:text-red-600" onClick={(e) => { e.stopPropagation(); setIsDeleting(true); }}>
               <Trash2 className="w-4 h-4" />
             </Button>
           </div>
@@ -295,7 +300,7 @@ export function MediaItem({ item, type, viewMode, onClick, onRefresh, currentFol
           </div>
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => setIsDeleting(false)}>Cancel</Button>
-            <Button variant="destructive" onClick={handleDelete}>Delete</Button>
+            <Button variant="default" className="bg-red-600 hover:bg-red-700 text-white" onClick={handleDelete}>Delete</Button>
           </div>
         </div>
       </Modal>

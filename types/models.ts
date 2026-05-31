@@ -95,6 +95,7 @@ export interface Sermon {
   imageUrl: string | null;
   audioUrl: string | null;
   videoUrl: string | null;
+  duration?: number | null;
   publishedAt: string | null;
   createdAt: string;
   updatedAt: string;

@@ -33,7 +33,7 @@ export function SermonsSection({ sermons }: SermonsSectionProps) {
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
           className="mb-14 flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center"
         >
           <div>
@@ -68,7 +68,7 @@ export function SermonsSection({ sermons }: SermonsSectionProps) {
                 key={sermon.id}
                 initial={{ opacity: 0, y: 32 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.6, delay: index * 0.12, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 0.6, delay: index * 0.12, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
                 className="h-full"
               >
                 <Link

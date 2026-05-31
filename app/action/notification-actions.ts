@@ -89,7 +89,7 @@ async function processBirthdayNotifications() {
   });
 
   if (birthdayMembers.length === 0) {
-    return { processed: 0, success: 0, failed: 0 };
+    return { processed: 0, success: 0, failed: 0, rows: [] };
   }
 
   return sendNotificationBatch(birthdayMembers, (member) => ({
@@ -119,7 +119,7 @@ async function processAnniversaryNotifications() {
   });
 
   if (anniversaryMembers.length === 0) {
-    return { processed: 0, success: 0, failed: 0 };
+    return { processed: 0, success: 0, failed: 0, rows: [] };
   }
 
   return sendNotificationBatch(anniversaryMembers, (member) => ({
@@ -135,8 +135,8 @@ async function processAnniversaryNotifications() {
 }
 
 async function sendNotificationBatch(
-  members: { id: string; name: string; email: string }[],
-  createNotification: (member: { id: string; name: string; email: string }) => {
+  members: { id: string; name: string; email: string,  anniversary: string}[],
+  createNotification: (member: { id: string; name: string; email: string, anniversary: string }) => {
     type: string;
     template: { subject: string; html: string };
     message: string;

@@ -9,7 +9,7 @@ import Link from "next/link";
 
 const fade = (delay = 0) => ({
   hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] } },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] } },
 });
 
 const benefits = [
@@ -101,7 +101,7 @@ export default function DonatePage() {
               <motion.div
                 initial={{ opacity: 0, x: -24 }}
                 whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
                 viewport={{ once: true }}
               >
                 <p className="text-xs font-bold uppercase tracking-widest text-emerald-500">Your Impact</p>
@@ -117,7 +117,7 @@ export default function DonatePage() {
                     key={b.title}
                     initial={{ opacity: 0, y: 24 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: i * 0.09, ease: [0.22, 1, 0.36, 1] }}
+                    transition={{ duration: 0.5, delay: i * 0.09, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
                     viewport={{ once: true }}
                     className="group flex gap-4"
                   >
@@ -172,7 +172,7 @@ export default function DonatePage() {
             <motion.div
               initial={{ opacity: 0, x: 24 }}
               whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
               viewport={{ once: true }}
               className="lg:sticky lg:top-24"
             >

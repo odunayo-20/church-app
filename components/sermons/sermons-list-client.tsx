@@ -43,7 +43,7 @@ export function SermonsListClient({
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
             className="flex flex-col items-center"
           >
             <span className="inline-flex items-center gap-2 rounded-full border border-violet-400/30 bg-violet-400/10 px-5 py-1.5 text-xs font-semibold uppercase tracking-widest text-violet-300">
@@ -54,7 +54,7 @@ export function SermonsListClient({
             <motion.h1
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.65, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.65, delay: 0.1, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
               className="mt-6 text-5xl font-extrabold tracking-tight text-white sm:text-6xl lg:text-7xl"
             >
               Sermon{" "}
@@ -174,7 +174,7 @@ export function SermonsListClient({
                     key={sermon.id}
                     initial={{ opacity: 0, y: 32 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.55, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
+                    transition={{ duration: 0.55, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
                     viewport={{ once: true }}
                   >
                     <SermonCard sermon={sermon} />

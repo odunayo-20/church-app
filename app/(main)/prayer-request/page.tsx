@@ -128,7 +128,7 @@ export default function PrayerRequestPage() {
           <motion.div
             initial={{ opacity: 0, y: 32 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
             className="overflow-hidden rounded-3xl border border-border/40 bg-card shadow-xl"
           >
             {/* Top bar */}
