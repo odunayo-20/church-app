@@ -9,10 +9,12 @@ async function getDynamicRoutes() {
 
     const [
       { data: posts },
-      { data: events }
+      { data: events },
+      { data: sermons }
     ] = await Promise.all([
       supabase.from("posts").select("slug, updatedAt").eq("published", true),
       supabase.from("events").select("id, updatedAt").gte("date", new Date().toISOString()),
+      supabase.from("sermons").select("slug, updatedAt").eq("published", true),
     ]);
 
     const postRoutes = (posts || []).map((post) => ({
@@ -24,10 +26,16 @@ async function getDynamicRoutes() {
     const eventRoutes = (events || []).map((event) => ({
       url: `${baseUrl}/events/${event.id}`,
       lastModified: new Date(event.updatedAt),
-      priority: 0.5,
+      priority: 0.7,
     }));
 
-    return [...postRoutes, ...eventRoutes];
+    const sermonRoutes = (sermons || []).map((sermon) => ({
+      url: `${baseUrl}/sermons/${sermon.slug}`,
+      lastModified: new Date(sermon.updatedAt),
+      priority: 0.7,
+    }));
+
+    return [...postRoutes, ...eventRoutes, ...sermonRoutes];
   } catch (error) {
     console.error("Sitemap dynamic routes error:", error);
     return [];
@@ -53,6 +61,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/sermons`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/testimonies`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/about`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/contact`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.7,
     },
     {
       url: `${baseUrl}/donate`,

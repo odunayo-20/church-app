@@ -136,22 +136,22 @@ export default function RolesManagementPage() {
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-muted/30 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+            <div className="overflow-x-auto rounded-2xl">
+              <table className="w-full text-left text-sm block sm:table">
+                <thead className="bg-muted/30 text-xs font-semibold uppercase tracking-widest text-muted-foreground hidden sm:table-header-group">
                   <tr>
-                    <th className="px-6 py-4">User</th>
-                    <th className="hidden px-6 py-4 sm:table-cell">Joined</th>
-                    <th className="px-6 py-4">Role</th>
+                    <th className="px-4 py-4 sm:px-6">User</th>
+                    <th className="hidden px-4 py-4 sm:px-6 sm:table-cell">Joined</th>
+                    <th className="px-4 py-4 sm:px-6">Role</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border/40">
+                <tbody className="divide-y divide-border/40 block sm:table-row-group">
                   {filteredProfiles.map((profile: Profile) => (
                     <tr
                       key={profile.id}
-                      className="group transition-colors hover:bg-muted/20"
+                      className="group transition-colors hover:bg-muted/20 flex flex-col sm:table-row p-4 sm:p-0 gap-3 sm:gap-0"
                     >
-                      <td className="px-6 py-4">
+                      <td className="sm:px-6 sm:py-4">
                         <div className="flex items-center gap-3">
                           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-500/10 text-sm font-bold text-indigo-500">
                             {profile.name ? profile.name.charAt(0).toUpperCase() : <User className="h-5 w-5" />}
@@ -166,12 +166,13 @@ export default function RolesManagementPage() {
                           </div>
                         </div>
                       </td>
-                      <td className="hidden px-6 py-4 sm:table-cell">
+                      <td className="hidden sm:px-6 sm:py-4 sm:table-cell">
                         <span className="text-muted-foreground">
                           {formatDate(profile.createdAt)}
                         </span>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="sm:px-6 sm:py-4 flex justify-between items-center sm:table-cell">
+                        <span className="sm:hidden text-[11px] font-bold uppercase text-muted-foreground">Role:</span>
                         <div className="relative">
                           <select
                             disabled={updateRoleMutation.isPending}

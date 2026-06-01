@@ -157,9 +157,9 @@ export default function AdminSubscribersPage() {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
+          <div className="overflow-x-auto rounded-2xl">
+            <table className="w-full text-sm block md:table">
+              <thead className="hidden md:table-header-group">
                 <tr className="border-b border-border/40 bg-muted/30">
                   <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground sm:px-5">Email</th>
                   <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground sm:px-5">Status</th>
@@ -167,29 +167,31 @@ export default function AdminSubscribersPage() {
                   <th className="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-wider text-muted-foreground sm:px-5">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border/30">
+              <tbody className="block md:table-row-group divide-y divide-border/30">
                 {filteredSubscribers.map((sub: NewsletterSubscriber) => (
-                  <tr key={sub.id} className="group transition-colors hover:bg-muted/20">
-                    <td className="px-4 py-3 sm:px-5">
+                  <tr key={sub.id} className="group transition-colors hover:bg-muted/20 flex flex-col md:table-row p-4 md:p-0 gap-3 md:gap-0 relative">
+                    <td className="md:px-4 md:py-3 sm:px-5">
                       <div className="flex items-center gap-2.5">
                         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-amber-200 bg-amber-50 text-xs font-bold text-amber-700">
                           {sub.email.charAt(0).toUpperCase()}
                         </div>
-                        <span className="truncate text-[13px] font-semibold text-foreground transition-colors group-hover:text-amber-600 max-w-[160px] sm:max-w-xs">
+                        <span className="truncate text-[13px] font-semibold text-foreground transition-colors group-hover:text-amber-600 max-w-[200px] sm:max-w-xs">
                           {sub.email}
                         </span>
                       </div>
                     </td>
-                    <td className="px-4 py-3 sm:px-5">
+                    <td className="md:px-4 md:py-3 sm:px-5 flex justify-between items-center md:table-cell">
+                      <span className="md:hidden text-[11px] font-bold uppercase text-muted-foreground">Status:</span>
                       <StatusBadge status={sub.status} />
                     </td>
-                    <td className="hidden px-4 py-3 lg:table-cell">
+                    <td className="md:hidden lg:table-cell px-4 py-3 flex justify-between items-center">
+                      <span className="md:hidden text-[11px] font-bold uppercase text-muted-foreground">Joined:</span>
                       <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
                         <Calendar className="h-3.5 w-3.5 shrink-0" />
                         {formatDate(sub.createdAt)}
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-right sm:px-5">
+                    <td className="md:px-4 md:py-3 text-right sm:px-5 absolute top-4 right-4 md:static">
                       <SubscriberActionsMenu
                         email={sub.email}
                         onDelete={() => setDeleteTargetId(sub.id)}

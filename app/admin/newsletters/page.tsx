@@ -235,23 +235,23 @@ export default function AdminNewslettersPage() {
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto pb-32">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-muted/50 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+            <div className="overflow-x-auto pb-32 rounded-2xl">
+              <table className="w-full text-left text-sm block sm:table">
+                <thead className="bg-muted/50 text-xs font-semibold uppercase tracking-widest text-muted-foreground hidden sm:table-header-group">
                   <tr>
-                    <th className="px-6 py-4 font-bold">Subject</th>
-                    <th className="px-6 py-4 font-bold">Status</th>
-                    <th className="hidden px-6 py-4 lg:table-cell font-bold">Date Created</th>
-                    <th className="sticky right-0 z-10 bg-muted/50 px-6 py-4 text-right font-bold">Actions</th>
+                    <th className="px-4 sm:px-6 py-4 font-bold">Subject</th>
+                    <th className="px-4 sm:px-6 py-4 font-bold">Status</th>
+                    <th className="hidden px-4 sm:px-6 py-4 lg:table-cell font-bold">Date Created</th>
+                    <th className="sm:sticky right-0 z-10 bg-muted/50 px-4 sm:px-6 py-4 text-right font-bold">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border">
+                <tbody className="divide-y divide-border block sm:table-row-group">
                   {filteredNewsletters.map((nl: Newsletter, index: number) => (
                     <tr
                       key={nl.id}
-                      className="group transition-colors hover:bg-muted/30"
+                      className="group transition-colors hover:bg-muted/30 flex flex-col sm:table-row p-4 sm:p-0 gap-3 sm:gap-0 relative"
                     >
-                      <td className="px-6 py-4">
+                      <td className="sm:px-6 sm:py-4 pr-12 sm:pr-6">
                         <div className="flex items-center gap-3">
                           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold border bg-amber-50 border-amber-100 text-amber-700">
                             <FileText className="h-5 w-5" />
@@ -261,21 +261,22 @@ export default function AdminNewslettersPage() {
                               {nl.subject}
                             </p>
                             <p className="text-xs text-muted-foreground line-clamp-1 max-w-md">
-                              {nl.content.substring(0, 60)}...
+                              {nl.content.replace(/<[^>]*>?/gm, '').substring(0, 60)}...
                             </p>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="sm:px-6 sm:py-4 flex justify-between items-center sm:table-cell">
+                         <span className="sm:hidden text-[11px] font-bold uppercase text-muted-foreground">Status:</span>
                          <StatusBadge status={nl.status} />
                       </td>
-                      <td className="hidden px-6 py-4 lg:table-cell">
+                      <td className="hidden sm:px-6 sm:py-4 lg:table-cell">
                         <div className="flex items-center gap-2 text-muted-foreground">
                           <Calendar className="h-4 w-4" />
                           <span>{formatDate(nl.createdAt)}</span>
                         </div>
                       </td>
-                      <td className={`sticky right-0 px-6 py-4 text-right transition-colors bg-card group-hover:bg-muted/30 ${activeMenuId === nl.id ? 'z-30' : 'z-10'}`}>
+                      <td className={`sm:sticky right-0 sm:px-6 sm:py-4 text-right transition-colors sm:bg-card group-hover:bg-muted/30 absolute top-4 right-4 sm:static ${activeMenuId === nl.id ? 'z-30' : 'z-10'}`}>
                         <div className="flex items-center justify-end gap-2">
                            <div className="relative">
                               <button 

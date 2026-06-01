@@ -115,7 +115,7 @@ export default function AdminDonationsPage() {
       {/* ── Stats ── */}
       <motion.div
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}
-        className="grid gap-4 grid-cols-2 lg:grid-cols-4"
+        className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
       >
         <StatBox icon={<DollarSign className="h-5 w-5 text-emerald-500" />} label="Total Received" value={`₦${Number(statsData?.totalAmount || 0).toLocaleString()}`} bgColor="bg-emerald-500/10" />
         <StatBox icon={<Heart className="h-5 w-5 text-blue-500" />} label="Completed" value={statsData?.counts?.completed || 0} bgColor="bg-blue-500/10" />
@@ -171,12 +171,12 @@ export default function AdminDonationsPage() {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
+          <div className="overflow-x-auto rounded-2xl">
+            <table className="w-full text-sm block md:table">
+              <thead className="hidden md:table-header-group">
                 <tr className="border-b border-border/40 bg-muted/30">
                   <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground sm:px-5">Donor</th>
-                  <th className="hidden px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground md:table-cell">Reference</th>
+                  <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Reference</th>
                   <th className="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-wider text-muted-foreground sm:px-5">Amount</th>
                   <th className="px-4 py-3 text-center text-[11px] font-semibold uppercase tracking-wider text-muted-foreground sm:px-5">Status</th>
                   <th className="hidden px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground lg:table-cell">Method</th>
@@ -184,47 +184,54 @@ export default function AdminDonationsPage() {
                   <th className="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-wider text-muted-foreground sm:px-5">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border/30">
+              <tbody className="block md:table-row-group divide-y divide-border/30">
                 {filteredDonations.map((donation: Donation) => (
-                  <tr key={donation.id} className="group transition-colors hover:bg-muted/20">
-                    <td className="px-4 py-3 sm:px-5">
+                  <tr key={donation.id} className="group transition-colors hover:bg-muted/20 flex flex-col md:table-row p-4 md:p-0 gap-3 md:gap-0 relative">
+                    <td className="md:px-4 md:py-3 sm:px-5 flex justify-between items-center md:table-cell">
                       <div className="flex items-center gap-2.5">
                         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-xs font-bold text-emerald-600">
                           {(donation.member?.name || donation.donorName || "A")[0].toUpperCase()}
                         </div>
                         <div className="min-w-0">
-                          <p className="truncate text-[13px] font-semibold text-foreground max-w-[120px] sm:max-w-[180px]">
+                          <p className="truncate text-[13px] font-semibold text-foreground max-w-[160px] sm:max-w-[180px]">
                             {donation.member?.name || donation.donorName || "Anonymous"}
                           </p>
-                          <p className="truncate text-[11px] text-muted-foreground max-w-[120px] sm:max-w-[180px]">
+                          <p className="truncate text-[11px] text-muted-foreground max-w-[160px] sm:max-w-[180px]">
                             {donation.donorEmail || donation.member?.email || "No email"}
                           </p>
                         </div>
                       </div>
+                      <div className="md:hidden">
+                        <span className="text-[13px] font-bold text-foreground">₦{Number(donation.amount).toLocaleString()}</span>
+                      </div>
                     </td>
-                    <td className="hidden px-4 py-3 md:table-cell">
+                    <td className="md:px-4 md:py-3 flex justify-between items-center md:table-cell">
+                      <span className="md:hidden text-[11px] font-bold uppercase text-muted-foreground">Ref:</span>
                       <span className="font-mono text-[11px] font-semibold text-muted-foreground group-hover:text-emerald-600 transition-colors">
                         {donation.reference}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-right sm:px-5">
+                    <td className="hidden md:table-cell px-4 py-3 text-right sm:px-5">
                       <span className="text-[13px] font-bold text-foreground">₦{Number(donation.amount).toLocaleString()}</span>
                     </td>
-                    <td className="px-4 py-3 text-center sm:px-5">
+                    <td className="md:px-4 md:py-3 md:text-center sm:px-5 flex justify-between items-center md:table-cell">
+                      <span className="md:hidden text-[11px] font-bold uppercase text-muted-foreground">Status:</span>
                       <StatusBadge status={donation.status} />
                     </td>
-                    <td className="hidden px-4 py-3 lg:table-cell">
+                    <td className="md:hidden lg:table-cell px-4 py-3 flex justify-between items-center">
+                      <span className="md:hidden text-[11px] font-bold uppercase text-muted-foreground">Method:</span>
                       <span className="inline-flex items-center gap-1 rounded-md border border-border/50 bg-muted/40 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
                         {donation.channel || donation.paymentMethod || "—"}
                       </span>
                     </td>
-                    <td className="hidden px-4 py-3 lg:table-cell">
+                    <td className="md:hidden lg:table-cell px-4 py-3 flex justify-between items-center">
+                      <span className="md:hidden text-[11px] font-bold uppercase text-muted-foreground">Date:</span>
                       <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
                         <Calendar className="h-3.5 w-3.5 shrink-0" />
                         {formatDate(donation.paidAt || donation.createdAt)}
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-right sm:px-5">
+                    <td className="md:px-4 md:py-3 text-right sm:px-5 absolute top-4 right-4 md:static">
                       <ActionsMenu
                         donation={donation}
                         onView={() => setSelectedDonation(donation)}
