@@ -14,13 +14,34 @@ import {
   Save,
   Loader2,
   Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  ShieldCheck,
 } from "lucide-react";
 import {
   getMemberProfileAction,
   updateMemberProfileAction,
 } from "@/app/action/member-actions";
+import { updatePasswordAction } from "@/app/action/auth-actions";
 import type { Member } from "@/types/models";
 import { useAuth } from "@/hooks";
+
+// Password strength helpers
+function getStrength(pw: string): { score: number; label: string; color: string } {
+  if (!pw) return { score: 0, label: "", color: "" };
+  let score = 0;
+  if (pw.length >= 8) score++;
+  if (pw.length >= 12) score++;
+  if (/[A-Z]/.test(pw)) score++;
+  if (/[0-9]/.test(pw)) score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+  if (score <= 1) return { score, label: "Very Weak", color: "bg-red-500" };
+  if (score === 2) return { score, label: "Weak", color: "bg-orange-500" };
+  if (score === 3) return { score, label: "Fair", color: "bg-yellow-500" };
+  if (score === 4) return { score, label: "Strong", color: "bg-emerald-500" };
+  return { score, label: "Very Strong", color: "bg-emerald-600" };
+}
 
 export default function AdminProfilePage() {
   const router = useRouter();
@@ -28,13 +49,24 @@ export default function AdminProfilePage() {
   const [member, setMember] = useState<Member | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [savingPw, setSavingPw] = useState(false);
 
-  // Form state
+  // Profile form state
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [birthday, setBirthday] = useState("");
   const [anniversary, setAnniversary] = useState("");
   const [error, setError] = useState("");
+
+  // Password form state
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const strength = getStrength(newPassword);
+  const passwordsMatch = !!(newPassword && confirmPassword && newPassword === confirmPassword);
+  const passwordMismatch = !!(confirmPassword && newPassword !== confirmPassword);
 
   useEffect(() => {
     getMemberProfileAction().then((m) => {
@@ -75,6 +107,29 @@ export default function AdminProfilePage() {
       toast.error(msg);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPassword !== confirmPassword) {
+      toast.error("Passwords do not match.");
+      return;
+    }
+    if (newPassword.length < 6) {
+      toast.error("Password must be at least 6 characters.");
+      return;
+    }
+    setSavingPw(true);
+    try {
+      await updatePasswordAction(newPassword);
+      toast.success("Password updated successfully!");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to update password.");
+    } finally {
+      setSavingPw(false);
     }
   };
 
@@ -124,7 +179,7 @@ export default function AdminProfilePage() {
         </div>
       </motion.div>
 
-      {/* Form Card */}
+      {/* Profile Form Card */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -259,6 +314,143 @@ export default function AdminProfilePage() {
               ) : (
                 <>
                   <Save className="h-4 w-4" /> Save Changes
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+      </motion.div>
+
+      {/* Change Password Card */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        className="rounded-2xl border border-border/40 bg-card shadow-sm p-6 sm:p-8"
+      >
+        <div className="flex items-center gap-3 mb-6">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10">
+            <Lock className="h-5 w-5 text-amber-500" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold tracking-tight">Change Password</h2>
+            <p className="text-sm text-muted-foreground">
+              Keep your account secure with a strong password
+            </p>
+          </div>
+        </div>
+
+        <form onSubmit={handlePasswordSubmit} className="space-y-5">
+          {/* New Password */}
+          <div>
+            <label htmlFor="newPassword" className="flex items-center gap-2 text-sm font-semibold text-foreground">
+              New Password <span className="text-amber-500">*</span>
+            </label>
+            <div className="relative mt-1.5">
+              <input
+                id="newPassword"
+                name="newPassword"
+                type={showNew ? "text" : "password"}
+                required
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="w-full rounded-xl border border-border/50 bg-muted/30 px-4 py-3 pr-11 text-sm outline-none transition-all focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20 placeholder:text-muted-foreground/50"
+                placeholder="Enter new password"
+                minLength={6}
+              />
+              <button
+                type="button"
+                onClick={() => setShowNew(!showNew)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                tabIndex={-1}
+              >
+                {showNew ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+
+            {/* Password Strength Meter */}
+            {newPassword && (
+              <div className="mt-2 space-y-1.5">
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <div
+                      key={i}
+                      className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
+                        i <= strength.score ? strength.color : "bg-muted"
+                      }`}
+                    />
+                  ))}
+                </div>
+                <p className={`text-xs font-medium ${
+                  strength.score <= 1 ? "text-red-500" :
+                  strength.score === 2 ? "text-orange-500" :
+                  strength.score === 3 ? "text-yellow-500" : "text-emerald-500"
+                }`}>
+                  {strength.label}
+                  <span className="text-muted-foreground font-normal ml-1.5">
+                    — use 12+ chars, uppercase, numbers &amp; symbols
+                  </span>
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Confirm Password */}
+          <div>
+            <label htmlFor="confirmPassword" className="flex items-center gap-2 text-sm font-semibold text-foreground">
+              Confirm New Password <span className="text-amber-500">*</span>
+            </label>
+            <div className="relative mt-1.5">
+              <input
+                id="confirmPassword"
+                name="confirmPassword"
+                type={showConfirm ? "text" : "password"}
+                required
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className={`w-full rounded-xl border bg-muted/30 px-4 py-3 pr-11 text-sm outline-none transition-all placeholder:text-muted-foreground/50 ${
+                  passwordMismatch
+                    ? "border-red-500/50 focus:border-red-500/60 focus:ring-2 focus:ring-red-500/20"
+                    : passwordsMatch
+                    ? "border-emerald-500/50 focus:border-emerald-500/60 focus:ring-2 focus:ring-emerald-500/20"
+                    : "border-border/50 focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20"
+                }`}
+                placeholder="Confirm new password"
+                minLength={6}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirm(!showConfirm)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                tabIndex={-1}
+              >
+                {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+            {passwordMismatch && (
+              <p className="mt-1.5 text-xs text-red-500">Passwords do not match.</p>
+            )}
+            {passwordsMatch && (
+              <p className="mt-1.5 flex items-center gap-1 text-xs text-emerald-500">
+                <ShieldCheck className="h-3.5 w-3.5" /> Passwords match
+              </p>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
+            <button
+              id="admin-change-password-btn"
+              type="submit"
+              disabled={savingPw || passwordMismatch}
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-rose-500 px-8 text-sm font-semibold text-white shadow-lg shadow-amber-500/25 transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {savingPw ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" /> Updating…
+                </>
+              ) : (
+                <>
+                  <Lock className="h-4 w-4" /> Update Password
                 </>
               )}
             </button>

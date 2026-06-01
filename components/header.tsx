@@ -15,6 +15,7 @@ import {
 import { NAV_ITEMS } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/client";
 import { type User } from "@supabase/supabase-js";
+import { useSiteSettings } from "@/components/providers/settings-provider";
 
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -55,8 +56,9 @@ export function Header() {
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
-  const siteName = process.env.NEXT_PUBLIC_APP_NAME || "Grace Community";
-  const [nameFirst, nameLast] = siteName.split(" ");
+  const { churchName } = useSiteSettings();
+  const [nameFirst, ...rest] = churchName.split(" ");
+  const nameLast = rest.join(" ");
 
   return (
     <>
@@ -223,7 +225,7 @@ export function Header() {
                     <Church className="h-4 w-4 text-white" />
                   </div>
                   <span className="text-sm font-bold text-white">
-                    {siteName}
+                    {churchName}
                   </span>
                 </Link>
                 <button

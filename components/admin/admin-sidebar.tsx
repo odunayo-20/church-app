@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import { 
   LayoutDashboard, Users, CreditCard, Calendar, 
-  FileText, Bell, Globe, Menu, X, Church, Video, Heart, Images, Mail, Send, MessageSquare
+  FileText, Bell, Globe, Menu, X, Church, Video, Heart, Images, Mail, Send, MessageSquare, Settings
 } from "lucide-react";
 import { useSidebar } from "@/hooks/use-sidebar";
 
@@ -25,6 +25,7 @@ const NAV_ITEMS = [
   { label: "Newsletters", href: "/admin/newsletters", roles: ["admin"], icon: Send },
   { label: "Notifications", href: "/admin/notifications", roles: ["admin", "media"], icon: Bell },
   { label: "Roles", href: "/admin/settings/roles", roles: ["admin"], icon: Users },
+  { label: "Settings", href: "/admin/settings", roles: ["admin"], icon: Settings },
 ];
 
 export function AdminSidebar() {
@@ -76,6 +77,8 @@ export function AdminSidebar() {
               const isActive =
                 item.href === "/admin"
                   ? pathname === "/admin"
+                  : item.href === "/admin/settings"
+                  ? pathname === "/admin/settings"
                   : pathname.startsWith(item.href);
 
               return (

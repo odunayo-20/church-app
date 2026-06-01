@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import "./../globals.css";
 import { QueryProvider } from "@/components/providers/query-provider";
+import { SiteSettingsProvider } from "@/components/providers/settings-provider";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { CookieConsent } from "@/components/cookie-consent";
-
-
+import { getSiteSettings } from "@/lib/settings-server";
 
 const siteName = process.env.NEXT_PUBLIC_APP_NAME || "Church App";
 const siteUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
@@ -80,11 +80,14 @@ export const viewport = {
   ],
 };
 
-export default function MainLayout({
+export default async function MainLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Fetch once server-side — no client waterfalls
+  const settings = await getSiteSettings();
+
   return (
     <html
       lang="en"
@@ -93,10 +96,12 @@ export default function MainLayout({
     >
       <body className="flex min-h-full flex-col">
         <QueryProvider>
-          <Header />
-          <main className="flex-1">{children}</main>
-          <Footer />
-          <CookieConsent />
+          <SiteSettingsProvider settings={settings}>
+            <Header />
+            <main className="flex-1">{children}</main>
+            <Footer />
+            <CookieConsent />
+          </SiteSettingsProvider>
         </QueryProvider>
       </body>
     </html>

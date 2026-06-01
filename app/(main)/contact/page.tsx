@@ -4,6 +4,7 @@ import { ContactForm } from "@/components/contact/contact-form";
 import { motion } from "framer-motion";
 import { MapPin, Phone, Mail, Clock, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { useSiteSettings } from "@/components/providers/settings-provider";
 
 const fade = (delay = 0) => ({
   hidden: { opacity: 0, y: 24 },
@@ -16,31 +17,39 @@ const serviceTimes = [
   { day: "Friday Prayer Meeting", time: "6:00 PM – 7:00 PM" },
 ];
 
-const contactItems = [
-  {
-    icon: MapPin,
-    label: "Address",
-    value: "123 Grace Avenue, Central District, Lagos, Nigeria",
-    href: "https://maps.google.com",
-    gradient: "from-amber-500 to-orange-400",
-  },
-  {
-    icon: Phone,
-    label: "Phone",
-    value: "+234 800 123 4567",
-    href: "tel:+2348001234567",
-    gradient: "from-rose-500 to-pink-400",
-  },
-  {
-    icon: Mail,
-    label: "Email",
-    value: "hello@gracecommunity.org",
-    href: "mailto:hello@gracecommunity.org",
-    gradient: "from-orange-500 to-amber-400",
-  },
-];
+
 
 export default function ContactPage() {
+  const settings = useSiteSettings();
+
+  const mapsHref = settings.address
+    ? `https://maps.google.com/?q=${encodeURIComponent(settings.address)}`
+    : "https://maps.google.com";
+
+  const contactItems = [
+    {
+      icon: MapPin,
+      label: "Address",
+      value: settings.address || "Address not set",
+      href: mapsHref,
+      gradient: "from-amber-500 to-orange-400",
+    },
+    {
+      icon: Phone,
+      label: "Phone",
+      value: settings.contactPhone || "Phone not set",
+      href: settings.contactPhone ? `tel:${settings.contactPhone.replace(/\s/g, "")}` : "#",
+      gradient: "from-rose-500 to-pink-400",
+    },
+    {
+      icon: Mail,
+      label: "Email",
+      value: settings.contactEmail || "Email not set",
+      href: settings.contactEmail ? `mailto:${settings.contactEmail}` : "#",
+      gradient: "from-orange-500 to-amber-400",
+    },
+  ];
+
   return (
     <div className="flex flex-col">
 
@@ -147,10 +156,13 @@ export default function ContactPage() {
                   <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-rose-500 shadow-lg">
                     <MapPin className="h-6 w-6 text-white" />
                   </div>
-                  <p className="text-sm font-medium">123 Grace Avenue</p>
-                  <p className="text-xs text-muted-foreground">Lagos, Nigeria</p>
+                  {settings.address ? (
+                    <p className="max-w-[200px] text-center text-sm font-medium">{settings.address}</p>
+                  ) : (
+                    <p className="text-sm font-medium text-muted-foreground">Address not configured</p>
+                  )}
                   <a
-                    href="https://maps.google.com"
+                    href={mapsHref}
                     target="_blank"
                     rel="noopener noreferrer"
                     id="contact-map-link"

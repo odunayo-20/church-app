@@ -1,7 +1,10 @@
+"use client";
+
 import Link from "next/link";
 import { Church, Mail, Phone, MapPin, ArrowRight, Heart } from "lucide-react";
 import { NAV_ITEMS } from "@/lib/constants";
 import { NewsletterForm } from "@/components/newsletter-form";
+import { useSiteSettings } from "@/components/providers/settings-provider";
 
 /* ── Social Icon SVGs ───────────────────────────── */
 const Facebook = ({ className }: { className?: string }) => (
@@ -28,25 +31,40 @@ const Twitter = ({ className }: { className?: string }) => (
   </svg>
 );
 
-/* ── Service Times data ─────────────────────────── */
+/* ── Service Times (static — could be moved to settings later) ─── */
 const serviceTimes = [
   { day: "Sunday Worship", time: "9:00 AM & 11:30 AM" },
   { day: "Tuesday Bible Study", time: "5:00 PM – 6:00 PM" },
   { day: "Thursday Prayer", time: "5:00 PM – 6:00 PM" },
 ];
 
-const socialLinks = [
-  { Icon: Facebook, label: "Facebook", href: "#" },
-  { Icon: Instagram, label: "Instagram", href: "#" },
-  { Icon: Twitter, label: "Twitter / X", href: "#" },
-  { Icon: Youtube, label: "YouTube", href: "#" },
-];
-
 /* ── Component ──────────────────────────────────── */
 export function Footer() {
+  const settings = useSiteSettings();
   const currentYear = new Date().getFullYear();
-    const siteName = process.env.NEXT_PUBLIC_APP_NAME || "Grace Community";
-    const [nameFirst, nameLast] = siteName.split(" ");
+  const siteName = settings.churchName;
+  const [nameFirst, ...rest] = siteName.split(" ");
+  const nameLast = rest.join(" ");
+
+  // Build dynamic social links — only show if URL is set
+  const socialLinks = [
+    settings.facebookUrl  && { Icon: Facebook,  label: "Facebook",    href: settings.facebookUrl },
+    settings.instagramUrl && { Icon: Instagram, label: "Instagram",   href: settings.instagramUrl },
+    settings.twitterUrl   && { Icon: Twitter,   label: "Twitter / X", href: settings.twitterUrl },
+    settings.youtubeUrl   && { Icon: Youtube,   label: "YouTube",     href: settings.youtubeUrl },
+  ].filter(Boolean) as { Icon: React.FC<{ className?: string }>; label: string; href: string }[];
+
+  // Fallback social links when none configured
+  const displaySocials = socialLinks.length > 0 ? socialLinks : [
+    { Icon: Facebook,  label: "Facebook",    href: "#" },
+    { Icon: Instagram, label: "Instagram",   href: "#" },
+    { Icon: Twitter,   label: "Twitter / X", href: "#" },
+    { Icon: Youtube,   label: "YouTube",     href: "#" },
+  ];
+
+  const mapsHref = settings.address
+    ? `https://maps.google.com/?q=${encodeURIComponent(settings.address)}`
+    : "https://maps.google.com";
 
   return (
     <footer className="relative w-full overflow-hidden bg-slate-950 text-white">
@@ -66,7 +84,7 @@ export function Footer() {
                 Get our weekly newsletter
               </h2>
               <p className="mt-1 text-sm text-white/50">
-                Sermons, events & community news delivered to your inbox.
+                Sermons, events &amp; community news delivered to your inbox.
               </p>
             </div>
             <NewsletterForm />
@@ -88,7 +106,7 @@ export function Footer() {
                 <span className="text-lg font-bold text-white">
                   {nameFirst}{" "}
                   <span className="bg-gradient-to-r from-amber-400 to-rose-400 bg-clip-text text-transparent">
-                    {nameLast || ""}
+                    {nameLast}
                   </span>
                 </span>
                 <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-white/35">
@@ -105,11 +123,13 @@ export function Footer() {
 
             {/* Social Links */}
             <div className="flex gap-2">
-              {socialLinks.map(({ Icon, label, href }) => (
+              {displaySocials.map(({ Icon, label, href }) => (
                 <a
                   key={label}
                   href={href}
                   aria-label={label}
+                  target={href !== "#" ? "_blank" : undefined}
+                  rel={href !== "#" ? "noopener noreferrer" : undefined}
                   className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-white/50 transition-all duration-200 hover:border-amber-400/30 hover:bg-amber-400/10 hover:text-amber-400"
                 >
                   <Icon className="h-4 w-4" />
@@ -158,32 +178,38 @@ export function Footer() {
               Get In Touch
             </h3>
             <div className="space-y-4">
-              <a
-                href="https://maps.google.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                id="footer-map-link"
-                className="flex gap-3 text-sm text-white/55 transition-colors hover:text-white"
-              >
-                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
-                <span>123 Grace Avenue, Lagos, Nigeria</span>
-              </a>
-              <a
-                href="tel:+2348001234567"
-                id="footer-phone-link"
-                className="flex gap-3 text-sm text-white/55 transition-colors hover:text-white"
-              >
-                <Phone className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
-                <span>+234 800 123 4567</span>
-              </a>
-              <a
-                href="mailto:hello@gracecommunity.org"
-                id="footer-email-link"
-                className="flex gap-3 text-sm text-white/55 transition-colors hover:text-white"
-              >
-                <Mail className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
-                <span>hello@gracecommunity.org</span>
-              </a>
+              {settings.address && (
+                <a
+                  href={mapsHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  id="footer-map-link"
+                  className="flex gap-3 text-sm text-white/55 transition-colors hover:text-white"
+                >
+                  <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
+                  <span>{settings.address}</span>
+                </a>
+              )}
+              {settings.contactPhone && (
+                <a
+                  href={`tel:${settings.contactPhone.replace(/\s/g, "")}`}
+                  id="footer-phone-link"
+                  className="flex gap-3 text-sm text-white/55 transition-colors hover:text-white"
+                >
+                  <Phone className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
+                  <span>{settings.contactPhone}</span>
+                </a>
+              )}
+              {settings.contactEmail && (
+                <a
+                  href={`mailto:${settings.contactEmail}`}
+                  id="footer-email-link"
+                  className="flex gap-3 text-sm text-white/55 transition-colors hover:text-white"
+                >
+                  <Mail className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
+                  <span>{settings.contactEmail}</span>
+                </a>
+              )}
             </div>
 
             {/* CTA Block */}
