@@ -189,14 +189,59 @@ export async function getMemberProfileAction(): Promise<Member | null> {
     if (!user) return null;
 
     const adminClient = await createAdminClient();
-    const { data, error } = await adminClient
+    let { data, error } = await adminClient
       .from("members")
       .select("*")
       .eq("user_id", user.id)
       .maybeSingle();
 
     if (error) throw error;
-    if (!data) return null;
+
+    // Fallback: If no member links by user_id, check if one matches by email and link it
+    if (!data && user.email) {
+      const { data: byEmail, error: emailError } = await adminClient
+        .from("members")
+        .select("*")
+        .eq("email", user.email)
+        .maybeSingle();
+
+      if (emailError) throw emailError;
+
+      if (byEmail) {
+        const { data: updatedMember, error: updateError } = await adminClient
+          .from("members")
+          .update({ user_id: user.id })
+          .eq("id", byEmail.id)
+          .select()
+          .single();
+
+        if (updateError) throw updateError;
+        data = updatedMember;
+      }
+    }
+
+    // Fallback: If still no member, check profiles to return a synthetic profile for staff
+    if (!data) {
+      const { data: profile } = await adminClient
+        .from("profiles")
+        .select("name, role")
+        .eq("userId", user.id)
+        .maybeSingle();
+
+      if (profile && (profile.role === "admin" || profile.role === "media")) {
+        return {
+          id: "", // Synthetic ID
+          name: profile.name || user.email?.split("@")[0] || "Staff",
+          email: user.email || "",
+          phone: "",
+          birthday: null,
+          anniversary: null,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+      }
+      return null;
+    }
 
     return {
       id: data.id,
@@ -227,14 +272,33 @@ export async function updateMemberProfileAction(
     const adminClient = await createAdminClient();
 
     // Locate the member row linked to this auth user
-    const { data: existing, error: findError } = await adminClient
+    let { data: existing, error: findError } = await adminClient
       .from("members")
       .select("id")
       .eq("user_id", user.id)
       .maybeSingle();
 
     if (findError) throw findError;
-    if (!existing) throw new Error("Member record not found");
+
+    // Fallback: Check if there's a member with the same email
+    if (!existing && user.email) {
+      const { data: byEmail, error: emailError } = await adminClient
+        .from("members")
+        .select("id")
+        .eq("email", user.email)
+        .maybeSingle();
+
+      if (emailError) throw emailError;
+
+      if (byEmail) {
+        // Link it!
+        await adminClient
+          .from("members")
+          .update({ user_id: user.id })
+          .eq("id", byEmail.id);
+        existing = byEmail;
+      }
+    }
 
     const updateData: Record<string, any> = {};
     if (validatedData.name !== undefined) updateData.name = validatedData.name;
@@ -243,18 +307,75 @@ export async function updateMemberProfileAction(
     if (validatedData.anniversary !== undefined) updateData.anniversary = validatedData.anniversary || null;
     updateData.updatedAt = new Date().toISOString();
 
-    const { data: member, error } = await adminClient
-      .from("members")
-      .update(updateData)
-      .eq("id", existing.id)
-      .select()
-      .single();
+    let member;
 
-    if (error) throw error;
+    if (existing) {
+      // Ensure it is linked
+      updateData.user_id = user.id;
+
+      const { data: updatedMember, error } = await adminClient
+        .from("members")
+        .update(updateData)
+        .eq("id", existing.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      member = updatedMember;
+    } else {
+      // Create new member on the fly!
+      const insertData = {
+        id: generateId(),
+        name: validatedData.name || user.email?.split("@")[0] || "User",
+        email: user.email || "",
+        phone: validatedData.phone || null,
+        birthday: validatedData.birthday || null,
+        anniversary: validatedData.anniversary || null,
+        user_id: user.id,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      const { data: insertedMember, error } = await adminClient
+        .from("members")
+        .insert(insertData)
+        .select()
+        .single();
+
+      if (error) throw error;
+      member = insertedMember;
+    }
+
+    // Also update name in the profiles table if they have a profile record
+    if (validatedData.name !== undefined) {
+      const { data: profile } = await adminClient
+        .from("profiles")
+        .select("id")
+        .eq("userId", user.id)
+        .maybeSingle();
+
+      if (profile) {
+        await adminClient
+          .from("profiles")
+          .update({ name: validatedData.name, updated_at: new Date().toISOString() })
+          .eq("userId", user.id);
+      }
+    }
 
     revalidatePath("/dashboard");
     revalidatePath("/dashboard/profile");
-    return member;
+    revalidatePath("/admin/profile");
+    
+    return {
+      id: member.id,
+      name: member.name,
+      email: member.email,
+      phone: member.phone,
+      birthday: member.birthday,
+      anniversary: member.anniversary,
+      createdAt: member.createdAt || member.created_at,
+      updatedAt: member.updatedAt || member.updated_at,
+    };
   } catch (error) {
     console.error("Error updating member profile:", error);
     throw error;

@@ -2,10 +2,10 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
 import type { AuthUser } from "@/lib/auth";
-import { LogOut, Home, ChevronRight, ShieldCheck, User, ChevronDown, Settings, Menu } from "lucide-react";
+import { LogOut, Home, ChevronRight, ShieldCheck, User, ChevronDown, Settings, Menu, Loader2 } from "lucide-react";
 import { useSidebar } from "@/hooks/use-sidebar";
+import { signOutAction } from "@/app/action/auth-actions";
 
 interface AdminHeaderProps {
   user: AuthUser;
@@ -26,10 +26,18 @@ export function AdminHeader({ user }: AdminHeaderProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const [isSigningOut, setIsSigningOut] = useState(false);
+
   const handleSignOut = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    window.location.href = "/auth/login";
+    if (isSigningOut) return;
+    setIsSigningOut(true);
+    try {
+      await signOutAction();
+      window.location.href = "/auth/login";
+    } catch (error) {
+      console.error("Failed to sign out:", error);
+      setIsSigningOut(false);
+    }
   };
 
   const initials = user.email
@@ -110,10 +118,20 @@ export function AdminHeader({ user }: AdminHeaderProps) {
             <div className="border-t border-border/40 p-2">
               <button
                 onClick={handleSignOut}
-                className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold text-red-500 transition-colors hover:bg-red-500/10"
+                disabled={isSigningOut}
+                className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold text-red-500 transition-colors hover:bg-red-500/10 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <LogOut className="h-4 w-4" />
-                Sign Out
+                {isSigningOut ? (
+                  <>
+                    <Loader2 className="h-4.5 w-4.5 animate-spin" />
+                    Signing Out...
+                  </>
+                ) : (
+                  <>
+                    <LogOut className="h-4 w-4" />
+                    Sign Out
+                  </>
+                )}
               </button>
             </div>
           </div>

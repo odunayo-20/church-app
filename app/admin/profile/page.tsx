@@ -192,13 +192,7 @@ export default function AdminProfilePage() {
           </div>
         )}
 
-        {!member && !loading && (
-          <div className="mb-5 rounded-xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-600">
-            <strong>Note:</strong> Your admin account is not yet linked to a
-            member record. Name changes here will be applied once the link is
-            established. Contact your database administrator if this persists.
-          </div>
-        )}
+        {/* Note removed because admin/media can edit their profile without a member record */}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Email (read-only from auth) */}
@@ -304,7 +298,7 @@ export default function AdminProfilePage() {
             <button
               id="admin-profile-save"
               type="submit"
-              disabled={saving || !member}
+              disabled={saving}
               className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-rose-500 px-8 text-sm font-semibold text-white shadow-lg shadow-amber-500/25 transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {saving ? (
