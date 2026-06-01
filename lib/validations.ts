@@ -129,3 +129,16 @@ export type SermonInput = z.infer<typeof sermonSchema>;
 export type RsvpInput = z.infer<typeof rsvpSchema>;
 export type PrayerRequestInput = z.infer<typeof prayerRequestSchema>;
 export type ContactMessageInput = z.infer<typeof contactMessageSchema>;
+
+export const testimonySchema = z.object({
+  name: z.string().min(1, "Name is required").max(100),
+  email: z.string().email("Invalid email address").optional().nullable().or(z.literal("")),
+  title: z.string().min(1, "Title is required").max(200),
+  content: z.string().min(1, "Testimony content is required").max(5000),
+  status: z.enum(["pending", "approved", "rejected"]).default("pending"),
+  isFeatured: z.boolean().default(false),
+});
+
+export const testimonyUpdateSchema = testimonySchema.partial();
+export type TestimonyInput = z.infer<typeof testimonySchema>;
+

@@ -159,3 +159,16 @@ export interface Newsletter {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface Testimony {
+  id: string;
+  name: string;
+  email: string | null;
+  title: string;
+  content: string;
+  status: "pending" | "approved" | "rejected";
+  isFeatured: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+

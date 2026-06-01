@@ -12,12 +12,14 @@ import {
   ArrowRight,
   User,
   ShieldCheck,
+  MessageSquare,
 } from "lucide-react";
 
 const quickLinks = [
   { label: "Upcoming Events", href: "/events", icon: Calendar, gradient: "from-amber-500 to-orange-400", description: "View and RSVP to church events" },
   { label: "Sermon Library", href: "/sermons", icon: BookOpen, gradient: "from-rose-500 to-pink-400", description: "Watch and listen to messages" },
   { label: "Prayer Requests", href: "/prayer-request", icon: Heart, gradient: "from-red-500 to-rose-400", description: "Share a prayer request with us" },
+  { label: "Victory Testimonies", href: "/testimonies", icon: MessageSquare, gradient: "from-amber-500 to-rose-400", description: "Share and read testimonies of praise" },
   { label: "Give Online", href: "/donate", icon: HandCoins, gradient: "from-emerald-500 to-teal-400", description: "Support the church mission" },
 ];
 

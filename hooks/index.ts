@@ -96,3 +96,13 @@ export {
   useSendNewsletter,
   newsletterKeys,
 } from "./use-newsletters";
+
+export {
+  useTestimonies,
+  useTestimony,
+  useCreateTestimony,
+  useUpdateTestimony,
+  useDeleteTestimony,
+  testimonyKeys,
+} from "./use-testimonies";
+
